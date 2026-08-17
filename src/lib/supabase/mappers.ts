@@ -67,7 +67,7 @@ export type LabMarkerRow = {
 
 /**
  * The DB stores one row per result per draw (never an embedded history
- * array — see docs/orvana-architecture "Data model"). This turns that
+ * array — see docs/raag-architecture "Data model"). This turns that
  * append-only log into the summarized-with-trend shape the UI renders:
  * latest value per marker, delta vs. the prior draw, and a month-bucketed
  * history series for the chart.

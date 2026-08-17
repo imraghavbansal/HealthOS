@@ -31,7 +31,7 @@ async function streamChat(client, accessToken, subjectId, content) {
 }
 
 async function main() {
-  const email = `orvana-verify-safety-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
+  const email = `raag-verify-safety-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
   const password = `Pw!${Math.random().toString(36).slice(2, 10)}`;
   const client = createClient(URL, ANON_KEY);
 

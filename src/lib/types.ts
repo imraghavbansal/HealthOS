@@ -1,5 +1,5 @@
 /**
- * Orvana — canonical domain models.
+ * Raag — canonical domain models.
  *
  * These are the ONLY shapes the UI knows about. The data source (mock today,
  * real API tomorrow) must return exactly these. See docs/HANDOFF.md.
@@ -84,7 +84,7 @@ export interface MedicalRecord {
   fileUrl?: string | null;
   sizeKb?: number;
   summary?: string;
-  /** Document-parsing progress — see docs/orvana-architecture "parse-record". */
+  /** Document-parsing progress — see docs/raag-architecture "parse-record". */
   parseStatus?: "pending" | "processing" | "done" | "failed" | "skipped";
 }
 

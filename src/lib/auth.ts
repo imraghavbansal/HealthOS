@@ -1,5 +1,5 @@
 /**
- * Auth is cross-cutting (who you are), not domain data (OrvanaApi is what
+ * Auth is cross-cutting (who you are), not domain data (RaagApi is what
  * you can see once authenticated) — kept separate from the api/ adapters
  * on purpose. In mock mode there's no real backend, so these no-op and let
  * the existing demo flow through unchanged.

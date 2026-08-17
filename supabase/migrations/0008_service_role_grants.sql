@@ -1,4 +1,4 @@
--- Orvana — service_role table grants
+-- Raag — service_role table grants
 --
 -- Same class of bug as 0002_grants.sql, discovered the same way (a real
 -- write silently failing with 42501 until tested end-to-end): RLS policies

@@ -27,9 +27,9 @@ export const Route = createFileRoute("/nutrition")({
   component: NutritionPage,
   head: () => ({
     meta: [
-      { title: "Nutrition & Hydration — Orvana" },
+      { title: "Nutrition & Hydration — Raag" },
       { name: "description", content: "Track meals, macros and hydration in one place." },
-      { property: "og:title", content: "Nutrition & Hydration — Orvana" },
+      { property: "og:title", content: "Nutrition & Hydration — Raag" },
       { property: "og:description", content: "Track meals, macros and hydration in one place." },
     ],
   }),

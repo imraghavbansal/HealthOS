@@ -251,6 +251,6 @@ function explainMarker(name: string) {
     case "Ferritin":
       return "Ferritin reflects iron stores. A normal but declining trend is worth keeping an eye on at your next panel.";
     default:
-      return "This marker is tracked from your uploaded lab reports. Ask Orvana Assistant for a deeper, personalized explanation.";
+      return "This marker is tracked from your uploaded lab reports. Ask Raag Assistant for a deeper, personalized explanation.";
   }
 }

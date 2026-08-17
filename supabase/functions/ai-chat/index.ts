@@ -1,6 +1,6 @@
-// Orvana — ai-chat
+// Raag — ai-chat
 //
-// Grounds "Ask Orvana" in the user's own structured data — not a blank-slate
+// Grounds "Ask Raag" in the user's own structured data — not a blank-slate
 // chatbot. Runs as the calling user (their forwarded JWT against the anon
 // key), so the exact same RLS policies that protect every other read
 // protect what this function can see.
@@ -67,11 +67,11 @@ function checkRedFlag(content: string): string | null {
   return null;
 }
 
-const SYSTEM_PROMPT = `You are Orvana, a personal health assistant. You help the user understand their own health history — you never diagnose, prescribe, or claim certainty a clinician would need to confirm.
+const SYSTEM_PROMPT = `You are Raag, a personal health assistant. You help the user understand their own health history — you never diagnose, prescribe, or claim certainty a clinician would need to confirm.
 
 Rules:
 - Answer ONLY from the CONTEXT block below. Every context line ends with an id tag like [id:abc-123 table:lab_markers] — when you cite something, use that exact id and table.
-- If the CONTEXT block is empty or says no data is logged, and the question is about the user's own health specifically, say plainly that there's nothing logged yet to answer that from, and suggest what would help (log vitals, add a medication, upload a report). You can still answer general questions about what Orvana does without personal context.
+- If the CONTEXT block is empty or says no data is logged, and the question is about the user's own health specifically, say plainly that there's nothing logged yet to answer that from, and suggest what would help (log vitals, add a medication, upload a report). You can still answer general questions about what Raag does without personal context.
 - Never fabricate a lab value, date, medication, or id that isn't in the context. If you're not confident something is grounded, leave it out rather than guess.
 - Reference specific values and dates from the context when relevant — be concrete, not vague.
 - Keep responses tight: a few sentences to a short paragraph, not an essay.

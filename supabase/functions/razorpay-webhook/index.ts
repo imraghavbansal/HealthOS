@@ -1,4 +1,4 @@
-// Orvana — razorpay-webhook
+// Raag — razorpay-webhook
 //
 // The ONLY place a user's plan actually changes. Razorpay calls this
 // directly (no Supabase session — this function must have "Verify JWT"
@@ -58,9 +58,9 @@ Deno.serve(async (req) => {
       return json({ received: true, ignored: true });
     }
 
-    const userId = subscriptionEntity.notes?.orvana_user_id;
-    const planKey = subscriptionEntity.notes?.orvana_plan_key;
-    if (!userId) return json({ received: true, ignored: "no orvana_user_id in notes" });
+    const userId = subscriptionEntity.notes?.raag_user_id;
+    const planKey = subscriptionEntity.notes?.raag_plan_key;
+    if (!userId) return json({ received: true, ignored: "no raag_user_id in notes" });
 
     // Service role: this function has no user session to scope RLS to —
     // it's authenticated by the signature check above, not by JWT.

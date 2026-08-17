@@ -57,7 +57,7 @@ export async function startCheckout(planKey: PlanKey, cycle: BillingCycle, onSuc
   const rzp = new window.Razorpay({
     key: keyId,
     subscription_id: subscriptionId,
-    name: "Orvana",
+    name: "Raag",
     description: `${planKey === "pro" ? "Pro" : "Family"} plan · ${cycle}`,
     prefill,
     theme: { color: "#0e8a7a" },

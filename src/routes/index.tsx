@@ -17,7 +17,7 @@ function Landing() {
             <div className="grid h-9 w-9 place-items-center rounded-xl gradient-primary shadow-soft">
               <Heart className="h-4.5 w-4.5 text-white" fill="white" />
             </div>
-            <span className="font-semibold tracking-tight">Orvana</span>
+            <span className="font-semibold tracking-tight">Raag</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
@@ -41,13 +41,13 @@ function Landing() {
       <section className="relative">
         <div className="max-w-7xl mx-auto px-6 pt-16 md:pt-28 pb-20 md:pb-32 text-center">
           <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium text-primary mb-8">
-            <Sparkles className="h-3.5 w-3.5" /> Introducing Orvana Copilot · Grounded in your records
+            <Sparkles className="h-3.5 w-3.5" /> Introducing Raag Copilot · Grounded in your records
           </div>
           <h1 className="font-display text-5xl md:text-7xl lg:text-8xl leading-[0.95] max-w-5xl mx-auto">
             Your entire health, <span className="text-gradient italic">understood.</span>
           </h1>
           <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Orvana unifies your labs, wearables, records, and family history into one calm,
+            Raag unifies your labs, wearables, records, and family history into one calm,
             AI-guided view — so you understand what's changing, and what to do about it.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
@@ -79,7 +79,7 @@ function Landing() {
                 <MockCard tone="mint" label="Recovery" value="Excellent" trend="HRV 68ms · +12%" icon={TrendingUp} />
                 <div className="md:col-span-2 rounded-2xl bg-card/80 border border-border/60 p-5 text-left">
                   <div className="flex items-center gap-2 text-xs font-medium text-primary mb-2">
-                    <Sparkles className="h-3.5 w-3.5" /> Orvana · Today's insight
+                    <Sparkles className="h-3.5 w-3.5" /> Raag · Today's insight
                   </div>
                   <p className="text-sm leading-relaxed">
                     Your LDL nudged up 4 points since August. That aligns with a lighter cardio week and higher
@@ -137,12 +137,12 @@ function Landing() {
           </div>
           <div className="rounded-3xl glass p-6 md:p-8">
             <div className="rounded-2xl gradient-hero p-6">
-              <div className="text-xs font-medium text-primary flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Ask Orvana</div>
+              <div className="text-xs font-medium text-primary flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Ask Raag</div>
               <div className="mt-4 text-sm bg-card/80 rounded-2xl p-4 border border-border/60">
                 <span className="font-medium">You:</span> Why did my LDL go up this year?
               </div>
               <div className="mt-3 text-sm bg-card rounded-2xl p-4 border border-border/60 shadow-soft">
-                <span className="font-medium text-primary">Orvana:</span> Your LDL rose from 108 → 118 mg/dL since Jan. Two signals from your data align: cardio dropped 32% in Q3, and saturated fat climbed during your July travel. Genetics likely contribute — noted from your paternal CAD history.
+                <span className="font-medium text-primary">Raag:</span> Your LDL rose from 108 → 118 mg/dL since Jan. Two signals from your data align: cardio dropped 32% in Q3, and saturated fat climbed during your July travel. Genetics likely contribute — noted from your paternal CAD history.
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/60 border border-border">Lipid Panel · Aug 15</span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/60 border border-border">CBC · Nov 12</span>
@@ -205,7 +205,7 @@ function Landing() {
             </div>
             <p className="text-[11px] text-muted-foreground mt-3">
               These links go to the official regulator/government source for each framework. We're not yet formally
-              certified under any of them — that's a milestone we're building toward as Orvana grows — but the
+              certified under any of them — that's a milestone we're building toward as Raag grows — but the
               engineering practices above (encryption, per-user isolation, consent controls, deletion rights) are
               the same ones those frameworks require, applied from day one rather than bolted on later.
             </p>
@@ -218,11 +218,11 @@ function Landing() {
         <h2 className="font-display text-4xl md:text-6xl">Start understanding your health, today.</h2>
         <p className="mt-4 text-muted-foreground">Free forever for personal use. Premium for advanced AI and family plans.</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/signup"><Button size="lg" className="rounded-full gradient-primary text-white h-12 px-8 border-0 shadow-soft">Create your Orvana</Button></Link>
+          <Link to="/signup"><Button size="lg" className="rounded-full gradient-primary text-white h-12 px-8 border-0 shadow-soft">Create your Raag</Button></Link>
           <Link to="/login"><Button size="lg" variant="outline" className="rounded-full h-12 px-8">Sign in</Button></Link>
         </div>
         <p className="mt-8 text-xs text-muted-foreground max-w-xl mx-auto">
-          Orvana provides informational wellness insights. It is not a substitute for professional medical
+          Raag provides informational wellness insights. It is not a substitute for professional medical
           advice, diagnosis, or treatment. Always consult a qualified healthcare provider.
         </p>
       </section>
@@ -231,13 +231,13 @@ function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-10 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="grid h-7 w-7 place-items-center rounded-lg gradient-primary"><Heart className="h-3.5 w-3.5 text-white" fill="white" /></div>
-            © 2026 Orvana, Inc.
+            © 2026 Raag, Inc.
           </div>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
             <Link to="/terms" className="hover:text-foreground">Terms</Link>
             <a href="#privacy" className="hover:text-foreground">Security & compliance</a>
-            <a href="mailto:support@orvana.app" className="hover:text-foreground">Contact</a>
+            <a href="mailto:support@raag.app" className="hover:text-foreground">Contact</a>
           </div>
         </div>
       </footer>
@@ -246,7 +246,7 @@ function Landing() {
 }
 
 const FEATURES = [
-  { icon: Brain, title: "AI Health Assistant", desc: "Ask anything about your records. Orvana cites the exact reports and dates behind every answer." },
+  { icon: Brain, title: "AI Health Assistant", desc: "Ask anything about your records. Raag cites the exact reports and dates behind every answer." },
   { icon: FileText, title: "Unified medical records", desc: "Upload PDFs, scans, prescriptions. Auto-parsed, tagged, and made searchable in seconds." },
   { icon: Activity, title: "Lab results, translated", desc: "Interactive trend charts with plain-language explanations you can actually understand." },
   { icon: Watch, title: "Every wearable, one view", desc: "Apple Health, Google Health Connect, Garmin, Fitbit, WHOOP, Oura — all synced." },
@@ -256,7 +256,7 @@ const FEATURES = [
 
 const STEPS = [
   { title: "Connect once", desc: "Link your wearables, upload past records, and share your family history in a guided onboarding." },
-  { title: "Orvana reads everything", desc: "Your labs, notes, and trends are parsed and unified into a single, private timeline." },
+  { title: "Raag reads everything", desc: "Your labs, notes, and trends are parsed and unified into a single, private timeline." },
   { title: "Get calm, useful insight", desc: "A daily brief tells you what changed, what it likely means, and what to consider — with citations." },
 ];
 

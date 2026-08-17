@@ -2,7 +2,7 @@
  * Supabase adapter — real, persisted data. Schema + RLS: see
  * supabase/migrations/0001_init.sql. Product context: docs/PRODUCT-VISION.md.
  *
- * Scope note: a handful of OrvanaApi surfaces don't have a real data source
+ * Scope note: a handful of RaagApi surfaces don't have a real data source
  * yet and are called out inline — they return honest empty/queued results
  * rather than fabricated demo data:
  *   - getSleep / getActivity: wait on wearable ingestion (roadmap V2)
@@ -15,7 +15,7 @@
 import { getSupabaseBrowserClient } from "../supabase/client";
 import { getMySubjectId, getCurrentUserId } from "../supabase/subject";
 import { ageFromDob, initialsFromName, summarizeLabMarkers, computeAdherence, resolveContentType } from "../supabase/mappers";
-import type { OrvanaApi } from "./contract";
+import type { RaagApi } from "./contract";
 import type {
   Appointment,
   AppNotification,
@@ -37,7 +37,7 @@ function unwrap<T>({ data, error }: { data: T | null; error: { message: string }
   return data as T;
 }
 
-export const supabaseApi: OrvanaApi = {
+export const supabaseApi: RaagApi = {
   async getProfile() {
     const sb = getSupabaseBrowserClient();
     const userId = await getCurrentUserId();
@@ -699,7 +699,7 @@ export const supabaseApi: OrvanaApi = {
   },
 
   // The actual grounding (structured-data queries + document retrieval +
-  // Claude) lives in the `ai-chat` Edge Function — see docs/orvana-architecture
+  // Claude) lives in the `ai-chat` Edge Function — see docs/raag-architecture
   // for the two-path retrieval design. This just persists + invokes it.
   async sendChatMessage(content, onDelta) {
     const sb = getSupabaseBrowserClient();

@@ -1,4 +1,4 @@
-// Orvana — delete-account
+// Raag — delete-account
 //
 // A user can't delete their own auth.users row via the client SDK — that
 // needs admin rights. This function is the one narrow, server-only place

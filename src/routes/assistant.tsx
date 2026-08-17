@@ -89,7 +89,7 @@ function Assistant() {
   const hasUserMessages = history.some((m) => m.role === "user") || !!optimisticUser;
 
   return (
-    <AppShell title="Orvana Assistant" subtitle="Ask anything about your health. I'll cite the reports I use.">
+    <AppShell title="Raag Assistant" subtitle="Ask anything about your health. I'll cite the reports I use.">
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
         <Card className="rounded-3xl border-border/60 flex flex-col h-[calc(100vh-14rem)]">
           <CardContent className="p-0 flex flex-col flex-1 min-h-0">
@@ -154,7 +154,7 @@ function Assistant() {
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground mt-2 text-center">
-                Orvana provides informational insights and can make mistakes. Not a substitute for medical advice.
+                Raag provides informational insights and can make mistakes. Not a substitute for medical advice.
               </p>
             </div>
           </CardContent>
@@ -188,7 +188,7 @@ function Assistant() {
                 <div className="text-xs font-medium text-primary flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5" /> Model
                 </div>
-                <div className="text-sm font-semibold mt-1">Orvana Copilot v4</div>
+                <div className="text-sm font-semibold mt-1">Raag Copilot v4</div>
                 <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
                   Reasoning tuned for personal health data. Nothing is shared with third parties.
                 </p>
@@ -260,7 +260,7 @@ function CitationChip({ c }: { c: Citation }) {
         <div className="text-sm font-medium">{c.title}</div>
         <div className="text-xs text-muted-foreground mt-0.5">{c.date}</div>
         <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-          This answer is grounded in your own uploaded records — Orvana doesn't invent sources.
+          This answer is grounded in your own uploaded records — Raag doesn't invent sources.
         </p>
       </PopoverContent>
     </Popover>

@@ -36,7 +36,7 @@ function ForgotPassword() {
           <div className="grid h-9 w-9 place-items-center rounded-xl gradient-primary shadow-soft">
             <Heart className="h-4.5 w-4.5 text-white" fill="white" />
           </div>
-          <span className="font-semibold">Orvana</span>
+          <span className="font-semibold">Raag</span>
         </Link>
 
         <div className="rounded-3xl glass p-8 md:p-10">

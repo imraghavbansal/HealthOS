@@ -1,4 +1,4 @@
--- Orvana — billing (Razorpay)
+-- Raag — billing (Razorpay)
 --
 -- profiles.plan (already existed) stays the single field the rest of the
 -- app reads — no client code changes needed. This table holds the

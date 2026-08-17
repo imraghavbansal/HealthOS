@@ -1,5 +1,5 @@
 /**
- * Mock adapter — implements OrvanaApi entirely in memory with realistic latency
+ * Mock adapter — implements RaagApi entirely in memory with realistic latency
  * so every loading/empty/error state in the UI is exercised for real.
  *
  * REPLACE-ME: delete this file once http.ts is wired to your backend.
@@ -31,7 +31,7 @@ import {
   nutritionTargets,
   scorePillars,
 } from "../mock-db";
-import type { OrvanaApi } from "./contract";
+import type { RaagApi } from "./contract";
 import type {
   Appointment,
   AppNotification,
@@ -157,12 +157,12 @@ function groundedReply(question: string): ChatMessage {
     ...(match ?? {
       content:
         "I pulled from your 6 most recent records and 18 months of wearable history. Nothing in your data directly answers that yet — try asking about your LDL trend, vitamin D, sleep debt, medication adherence, or inherited risk and I'll cite the exact reports.\n\nInformational only, not medical advice.",
-      citations: [{ title: "Orvana record index", date: "6 documents" }],
+      citations: [{ title: "Raag record index", date: "6 documents" }],
     }),
   };
 }
 
-export const mockApi: OrvanaApi = {
+export const mockApi: RaagApi = {
   getProfile: () => wait(state.profile),
   updateProfile: (patch) => {
     state.profile = { ...state.profile, ...patch };

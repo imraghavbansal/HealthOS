@@ -34,9 +34,9 @@ const PARSING_STATUSES = new Set(["pending", "processing"]);
 export const Route = createFileRoute("/records")({
   head: () => ({
     meta: [
-      { title: "Medical Records — Orvana" },
+      { title: "Medical Records — Raag" },
       { name: "description", content: "Every PDF, scan, and prescription — searchable and yours." },
-      { property: "og:title", content: "Medical Records — Orvana" },
+      { property: "og:title", content: "Medical Records — Raag" },
       { property: "og:description", content: "Every PDF, scan, and prescription — searchable and yours." },
     ],
   }),

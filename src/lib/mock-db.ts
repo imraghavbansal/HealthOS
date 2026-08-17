@@ -142,7 +142,7 @@ export const mockNotifications: AppNotification[] = [
 export const mockCareTeam: CareTeamMember[] = [
   { id: "ct1", name: "Dr. Nadia Patel", role: "Primary care physician", org: "One Medical", phone: "+1 (415) 555-0142", sharing: true },
   { id: "ct2", name: "Dr. Ellis Chen", role: "Endocrinologist", org: "UCSF Health", phone: "+1 (415) 555-0198", sharing: true },
-  { id: "ct3", name: "Jordan Reyes, RD", role: "Registered dietitian", org: "Orvana Care Network", phone: "+1 (415) 555-0175", sharing: false },
+  { id: "ct3", name: "Jordan Reyes, RD", role: "Registered dietitian", org: "Raag Care Network", phone: "+1 (415) 555-0175", sharing: false },
   { id: "ct4", name: "Sam Morgan", role: "Emergency contact (spouse)", org: "—", phone: "+1 (415) 555-0110", sharing: true },
 ];
 

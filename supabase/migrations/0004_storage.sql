@@ -1,4 +1,4 @@
--- Orvana — medical record file storage
+-- Raag — medical record file storage
 --
 -- Original documents are stored as real files here, separate from the
 -- structured facts parsed out of them (source_documents row + downstream

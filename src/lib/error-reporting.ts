@@ -12,5 +12,5 @@ export function reportError(
   options: ErrorReportOptions = {},
 ) {
   if (typeof window === "undefined") return;
-  console.error("[orvana:error]", error, { ...context, ...options });
+  console.error("[raag:error]", error, { ...context, ...options });
 }

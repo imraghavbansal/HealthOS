@@ -32,7 +32,7 @@ async function streamChat(accessToken, subjectId, content) {
 }
 
 async function main() {
-  const email = `orvana-verify-meter-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
+  const email = `raag-verify-meter-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
   const password = `Pw!${Math.random().toString(36).slice(2, 10)}`;
   const client = createClient(URL, ANON_KEY);
 
@@ -74,7 +74,7 @@ async function main() {
   check("quota-blocked call did not log an ai_context_read (never reached context assembly)", (aiReadLogs?.length ?? 0) === 0);
 
   console.log("── positive case: a fresh, within-quota account SHOULD log ai_context_read ──");
-  const email2 = `orvana-verify-meter2-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
+  const email2 = `raag-verify-meter2-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
   const { data: signUp2 } = await client.auth.signUp({ email: email2, password });
   const client2 = createClient(URL, ANON_KEY);
   await client2.auth.setSession({ access_token: signUp2.session.access_token, refresh_token: signUp2.session.refresh_token });

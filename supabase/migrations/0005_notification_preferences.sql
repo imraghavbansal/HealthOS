@@ -1,4 +1,4 @@
--- Orvana — notification preferences
+-- Raag — notification preferences
 --
 -- Real persistence for the Settings → Notifications toggles. Actual
 -- delivery (push notifications) doesn't exist yet — that's the Capacitor +

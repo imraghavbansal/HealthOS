@@ -1,4 +1,4 @@
--- Orvana — profile fields the UI contract already expected but the
+-- Raag — profile fields the UI contract already expected but the
 -- schema never persisted (height/weight/blood type), plus a flag to route
 -- a newly-confirmed user into onboarding exactly once.
 

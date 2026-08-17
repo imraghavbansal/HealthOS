@@ -45,7 +45,7 @@ function Signup() {
       if (needsEmailConfirmation) {
         setAwaitingConfirmation(true);
       } else {
-        toast.success(`Welcome to Orvana, ${form.name.trim().split(" ")[0]} 👋`);
+        toast.success(`Welcome to Raag, ${form.name.trim().split(" ")[0]} 👋`);
         nav({ to: "/onboarding" });
       }
     } catch (err) {
@@ -63,7 +63,7 @@ function Signup() {
           <div className="grid h-9 w-9 place-items-center rounded-xl gradient-primary shadow-soft">
             <Heart className="h-4.5 w-4.5 text-white" fill="white" />
           </div>
-          <span className="font-semibold">Orvana</span>
+          <span className="font-semibold">Raag</span>
         </Link>
 
         <div className="rounded-3xl glass p-8 md:p-10">
@@ -83,7 +83,7 @@ function Signup() {
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-6">
-              <h2 className="font-display text-3xl">Create your Orvana.</h2>
+              <h2 className="font-display text-3xl">Create your Raag.</h2>
               <div className="grid gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-sm" htmlFor="name">Full name</Label>
@@ -108,7 +108,7 @@ function Signup() {
               </div>
 
               <Button type="submit" disabled={submitting} className="w-full rounded-full gradient-primary text-white border-0 shadow-soft">
-                {submitting ? "Creating your Orvana…" : "Continue"} <ArrowRight className="ml-1 h-4 w-4" />
+                {submitting ? "Creating your Raag…" : "Continue"} <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
@@ -119,7 +119,7 @@ function Signup() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          By continuing you accept the informational nature of Orvana — not medical advice.
+          By continuing you accept the informational nature of Raag — not medical advice.
         </p>
       </div>
     </div>

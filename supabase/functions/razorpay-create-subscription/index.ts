@@ -1,4 +1,4 @@
-// Orvana — razorpay-create-subscription
+// Raag — razorpay-create-subscription
 //
 // Runs as the calling user (RLS-scoped). Creates (or reuses) a Razorpay
 // customer for them, creates a Subscription against a pre-created Razorpay
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       try {
         const customer = await razorpayFetch("/customers", {
           method: "POST",
-          body: JSON.stringify({ name: user.user_metadata?.name ?? user.email, email: user.email, notes: { orvana_user_id: user.id } }),
+          body: JSON.stringify({ name: user.user_metadata?.name ?? user.email, email: user.email, notes: { raag_user_id: user.id } }),
         });
         customerId = customer.id;
       } catch (err) {
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
         plan_id: planId,
         customer_notify: 1,
         total_count: TOTAL_COUNT[cycle],
-        notes: { orvana_user_id: user.id, orvana_plan_key: planKey, orvana_cycle: cycle },
+        notes: { raag_user_id: user.id, raag_plan_key: planKey, raag_cycle: cycle },
       }),
     });
 

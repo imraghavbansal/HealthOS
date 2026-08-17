@@ -117,7 +117,7 @@ function Onboarding() {
             <div className="grid h-9 w-9 place-items-center rounded-xl gradient-primary shadow-soft">
               <Heart className="h-4.5 w-4.5 text-white" fill="white" />
             </div>
-            <span className="font-semibold">Orvana</span>
+            <span className="font-semibold">Raag</span>
           </Link>
           <div className="flex items-center gap-4">
             <div className="text-xs text-muted-foreground">Step {step + 1} of {STEPS.length}</div>
@@ -171,7 +171,7 @@ function Onboarding() {
           {step === 1 && (
             <div className="space-y-6">
               <h2 className="font-display text-3xl">What matters to you right now?</h2>
-              <p className="text-sm text-muted-foreground">Pick as many as you like. Orvana tailors your dashboard around them.</p>
+              <p className="text-sm text-muted-foreground">Pick as many as you like. Raag tailors your dashboard around them.</p>
               <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-2">
                 {GOAL_OPTIONS.map((g) => {
                   const selected = selectedGoals.has(g);
@@ -200,7 +200,7 @@ function Onboarding() {
           {step === 2 && (
             <div className="space-y-6">
               <h2 className="font-display text-3xl">Family history.</h2>
-              <p className="text-sm text-muted-foreground">Optional but powerful — helps Orvana surface inherited risk factors. Comma-separate multiple conditions.</p>
+              <p className="text-sm text-muted-foreground">Optional but powerful — helps Raag surface inherited risk factors. Comma-separate multiple conditions.</p>
               {family.map((f, i) => (
                 <div key={f.relation} className="grid md:grid-cols-3 gap-3 items-center">
                   <div className="text-sm font-medium">{f.relation}</div>
@@ -282,7 +282,7 @@ function Onboarding() {
               <ArrowLeft className="mr-1 h-4 w-4" /> Back
             </Button>
             <Button onClick={finishStepAndAdvance} disabled={saving} className="rounded-full gradient-primary text-white border-0 shadow-soft">
-              {saving ? "Saving…" : step === STEPS.length - 1 ? "Finish & enter Orvana" : "Continue"} <ArrowRight className="ml-1 h-4 w-4" />
+              {saving ? "Saving…" : step === STEPS.length - 1 ? "Finish & enter Raag" : "Continue"} <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
         </div>

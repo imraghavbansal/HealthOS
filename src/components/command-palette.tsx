@@ -29,7 +29,7 @@ import {
 
 const ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/assistant", label: "Ask Orvana AI", icon: MessageSquare },
+  { to: "/assistant", label: "Ask Raag AI", icon: MessageSquare },
   { to: "/timeline", label: "Health Timeline", icon: History },
   { to: "/records", label: "Medical Records", icon: HeartPulse },
   { to: "/labs", label: "Lab Results", icon: Activity },
@@ -75,7 +75,7 @@ export function CommandPalette() {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Search or ask Orvana anything…" />
+      <CommandInput placeholder="Search or ask Raag anything…" />
       <CommandList>
         <CommandEmpty>No results.</CommandEmpty>
         <CommandGroup heading="Navigate">
@@ -87,7 +87,7 @@ export function CommandPalette() {
           ))}
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Ask Orvana">
+        <CommandGroup heading="Ask Raag">
           {AI_PROMPTS.map((p) => (
             <CommandItem key={p} value={p} onSelect={() => go("/assistant")}>
               <Sparkles className="mr-2 h-4 w-4 text-primary" />

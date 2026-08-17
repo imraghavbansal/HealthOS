@@ -17,8 +17,8 @@ if (!URL || !ANON_KEY) {
 }
 
 const rand = () => Math.random().toString(36).slice(2, 10);
-const userA = { email: `orvana-test-a-${rand()}@mailinator.com`, password: `Pw!${rand()}${rand()}` };
-const userB = { email: `orvana-test-b-${rand()}@mailinator.com`, password: `Pw!${rand()}${rand()}` };
+const userA = { email: `raag-test-a-${rand()}@mailinator.com`, password: `Pw!${rand()}${rand()}` };
+const userB = { email: `raag-test-b-${rand()}@mailinator.com`, password: `Pw!${rand()}${rand()}` };
 
 let pass = 0;
 let fail = 0;

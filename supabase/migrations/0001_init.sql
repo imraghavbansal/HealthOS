@@ -1,4 +1,4 @@
--- Orvana — core schema
+-- Raag — core schema
 -- Design doc: docs/PRODUCT-VISION.md, docs/HANDOFF.md
 --
 -- Key structural decision: clinical data hangs off a `health_subjects` row,
@@ -320,7 +320,7 @@ create table water_logs (
   logged_at timestamptz not null default now()
 );
 
--- ancestry/genetic risk info about relatives who are NOT Orvana subjects —
+-- ancestry/genetic risk info about relatives who are NOT Raag subjects —
 -- distinct from health_subjects/access_grants (see docs/PRODUCT-VISION.md)
 create table family_history_entries (
   id uuid primary key default gen_random_uuid(),
