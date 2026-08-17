@@ -1,7 +1,7 @@
 /**
  * The single service contract the whole UI depends on.
  *
- * To make Atlas Health functional, implement this interface against a real
+ * To make Orvana functional, implement this interface against a real
  * backend (see src/lib/api/http.ts) and flip the adapter in ./index.ts.
  * No component imports mock data directly.
  */
@@ -35,7 +35,7 @@ import type {
   WearableConnection,
 } from "../types";
 
-export interface AtlasApi {
+export interface OrvanaApi {
   /* profile + overview */
   getProfile(): Promise<UserProfile>;
   updateProfile(patch: Partial<UserProfile>): Promise<UserProfile>;
@@ -106,7 +106,7 @@ export interface AtlasApi {
   updateConsentSettings(patch: Partial<ConsentSettings>): Promise<ConsentSettings>;
   getNotificationPreferences(): Promise<NotificationPreferences>;
   updateNotificationPreferences(patch: Partial<NotificationPreferences>): Promise<NotificationPreferences>;
-  /** Everything Atlas has stored about the account, as one JSON-serializable object. */
+  /** Everything Orvana has stored about the account, as one JSON-serializable object. */
   exportAllData(): Promise<Record<string, unknown>>;
   /** Permanently deletes the account and everything under it. Irreversible. */
   deleteAccount(): Promise<void>;

@@ -1,4 +1,4 @@
-# Atlas Health — business & monetization model
+# Orvana — business & monetization model
 
 Use this as the source of truth when wiring real billing. The pricing page
 (`src/routes/pricing.tsx`) already renders these tiers; only the payment
@@ -15,7 +15,7 @@ provider needs connecting.
 
 Why it wins: trackers (Oura, WHOOP) show data but can't reason; ChatGPT reasons
 but has no longitudinal record; patient portals (MyChart) hold records but are
-per-provider and inert. Atlas owns the seam.
+per-provider and inert. Orvana owns the seam.
 
 ## Tiers (real, defensible)
 

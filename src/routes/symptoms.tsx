@@ -26,9 +26,9 @@ import type { SymptomEntry } from "@/lib/types";
 export const Route = createFileRoute("/symptoms")({
   head: () => ({
     meta: [
-      { title: "Symptom Journal · Atlas Health" },
+      { title: "Symptom Journal · Orvana" },
       { name: "description", content: "Log symptoms, track severity over time, and spot patterns." },
-      { property: "og:title", content: "Symptom Journal · Atlas Health" },
+      { property: "og:title", content: "Symptom Journal · Orvana" },
       { property: "og:description", content: "Log symptoms, track severity over time, and spot patterns." },
     ],
   }),

@@ -1,4 +1,4 @@
--- Atlas Health — baseline role privileges
+-- Orvana — baseline role privileges
 --
 -- 0001_init.sql enabled RLS on every table but never granted table-level
 -- privileges to the `anon` / `authenticated` roles the Supabase API runs

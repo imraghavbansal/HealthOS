@@ -1,4 +1,4 @@
-# Atlas Health — Handoff
+# Orvana — Handoff
 
 ## Run it
 
@@ -10,7 +10,7 @@ bun install && bun run dev     # demo mode, no backend needed
 
 ```
 src/lib/types.ts          canonical domain models (source of truth)
-src/lib/api/contract.ts   the AtlasApi interface — one service surface
+src/lib/api/contract.ts   the OrvanaApi interface — one service surface
 src/lib/api/mock.ts       in-memory implementation (VITE_API_MODE=mock)
 src/lib/api/http.ts       REST implementation (VITE_API_MODE=http)
 src/lib/api/index.ts      adapter switch + IS_DEMO flag
@@ -26,7 +26,7 @@ rewrite.
 
 ## Going live
 
-1. Implement the `AtlasApi` methods in `contract.ts` as REST endpoints
+1. Implement the `OrvanaApi` methods in `contract.ts` as REST endpoints
    (`GET /profile`, `GET /labs`, `POST /medications/:id/dose`, …).
 2. Set `VITE_API_MODE=http` and `VITE_API_BASE_URL` (see `.env.example`).
 3. Call `setAccessToken(token)` after sign-in; `http.ts` attaches the bearer.

@@ -40,7 +40,7 @@ async function postWebhook(eventBody, secret) {
 }
 
 async function main() {
-  const email = `atlas-verify-billing-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
+  const email = `orvana-verify-billing-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
   const password = `Pw!${Math.random().toString(36).slice(2, 10)}`;
   const client = createClient(URL, ANON_KEY);
 
@@ -69,7 +69,7 @@ async function main() {
   console.log("── 2a. webhook with WRONG signature should be rejected and change nothing ──");
   const fakeActivate = {
     event: "subscription.activated",
-    payload: { subscription: { entity: { id: "sub_fake", current_end: Math.floor(Date.now() / 1000) + 2592000, notes: { atlas_user_id: userId, atlas_plan_key: "pro" } } } },
+    payload: { subscription: { entity: { id: "sub_fake", current_end: Math.floor(Date.now() / 1000) + 2592000, notes: { orvana_user_id: userId, orvana_plan_key: "pro" } } } },
   };
   const badSig = await postWebhook(fakeActivate, "wrong-secret-entirely");
   check("wrong signature rejected with 401", badSig.status === 401, badSig);
@@ -87,7 +87,7 @@ async function main() {
   console.log("── 2c. correctly-signed subscription.cancelled revokes back to free ──");
   const fakeCancel = {
     event: "subscription.cancelled",
-    payload: { subscription: { entity: { id: "sub_fake", notes: { atlas_user_id: userId, atlas_plan_key: "pro" } } } },
+    payload: { subscription: { entity: { id: "sub_fake", notes: { orvana_user_id: userId, orvana_plan_key: "pro" } } } },
   };
   const cancelResult = await postWebhook(fakeCancel, WEBHOOK_SECRET);
   check("cancel webhook accepted", cancelResult.status === 200, cancelResult);

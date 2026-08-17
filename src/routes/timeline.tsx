@@ -23,9 +23,9 @@ export const Route = createFileRoute("/timeline")({
   component: TimelinePage,
   head: () => ({
     meta: [
-      { title: "Health Timeline · Atlas Health" },
+      { title: "Health Timeline · Orvana" },
       { name: "description", content: "Every lab, visit, medication change, vital, goal, and device event in one chronological view." },
-      { property: "og:title", content: "Health Timeline · Atlas Health" },
+      { property: "og:title", content: "Health Timeline · Orvana" },
       { property: "og:description", content: "A single unified timeline of your entire health history." },
     ],
   }),

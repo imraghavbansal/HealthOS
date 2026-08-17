@@ -19,7 +19,7 @@ function check(label, ok, detail) {
 }
 
 async function main() {
-  const email = `atlas-verify-fn-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
+  const email = `orvana-verify-fn-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
   const password = `Pw!${Math.random().toString(36).slice(2, 10)}`;
   const client = createClient(URL, ANON_KEY);
 

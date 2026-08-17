@@ -14,9 +14,9 @@ import { useState } from "react";
 export const Route = createFileRoute("/family")({
   head: () => ({
     meta: [
-      { title: "Family History & Risk — Atlas Health" },
+      { title: "Family History & Risk — Orvana" },
       { name: "description", content: "Understand inherited risk. Act early." },
-      { property: "og:title", content: "Family History & Risk — Atlas Health" },
+      { property: "og:title", content: "Family History & Risk — Orvana" },
       { property: "og:description", content: "Understand inherited risk. Act early." },
     ],
   }),

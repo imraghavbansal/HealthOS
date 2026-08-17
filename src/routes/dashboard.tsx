@@ -149,7 +149,7 @@ function Dashboard() {
                     <Sparkles className="h-4 w-4 text-primary" /> Today's AI insights
                   </div>
                   <Link to="/assistant" className="text-xs text-primary hover:underline flex items-center gap-1">
-                    Ask Atlas <ArrowUpRight className="h-3 w-3" />
+                    Ask Orvana <ArrowUpRight className="h-3 w-3" />
                   </Link>
                 </div>
                 <AsyncBoundary
@@ -332,7 +332,7 @@ function Dashboard() {
                   Today's focus
                   <Badge variant="secondary" className="rounded-full text-[10px]">{doneCount}/{tasks.length} done</Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">Personalized by Atlas from your goals & trends</span>
+                <span className="text-xs text-muted-foreground">Personalized by Orvana from your goals & trends</span>
               </div>
               <div className="grid md:grid-cols-2 gap-2">
                 {tasks.length === 0 && (

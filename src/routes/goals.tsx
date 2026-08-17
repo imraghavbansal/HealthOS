@@ -36,9 +36,9 @@ import { useMemo, useState } from "react";
 export const Route = createFileRoute("/goals")({
   head: () => ({
     meta: [
-      { title: "Health Goals — Atlas Health" },
+      { title: "Health Goals — Orvana" },
       { name: "description", content: "Outcomes worth tracking, not just steps." },
-      { property: "og:title", content: "Health Goals — Atlas Health" },
+      { property: "og:title", content: "Health Goals — Orvana" },
       { property: "og:description", content: "Outcomes worth tracking, not just steps." },
     ],
   }),

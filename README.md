@@ -1,7 +1,7 @@
-# Atlas Health
+# Orvana
 
 Your AI-powered personal health OS — labs, wearables, records, medications,
-and family history unified into one calm, AI-guided view. Atlas remembers
+and family history unified into one calm, AI-guided view. Orvana remembers
 your health over time and helps you understand the bigger picture, rather
 than treating every visit as a blank slate.
 
@@ -22,7 +22,7 @@ Functions) on the backend. Anthropic Claude for document parsing and the
 AI assistant. Razorpay for billing.
 
 Everything in the UI reads/writes through `@/lib/queries` →
-`src/lib/api/contract.ts` (the `AtlasApi` interface) → one of three
+`src/lib/api/contract.ts` (the `OrvanaApi` interface) → one of three
 adapters selected by `VITE_API_MODE`: `mock` (in-memory demo, no backend
 needed), `supabase` (real, persisted — what's actually deployed), `http`
 (unused stub for a hypothetical non-Supabase backend).

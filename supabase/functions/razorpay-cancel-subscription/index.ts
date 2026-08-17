@@ -1,4 +1,4 @@
-// Atlas Health — razorpay-cancel-subscription
+// Orvana — razorpay-cancel-subscription
 //
 // Runs as the calling user (RLS-scoped) — looks up THEIR OWN subscription
 // id from `billing` (never a client-supplied id) and asks Razorpay to

@@ -56,9 +56,9 @@ export const Route = createFileRoute("/appointments")({
   component: AppointmentsPage,
   head: () => ({
     meta: [
-      { title: "Appointments & Care — Atlas Health" },
+      { title: "Appointments & Care — Orvana" },
       { name: "description", content: "Manage upcoming visits, past care, and your care team." },
-      { property: "og:title", content: "Appointments & Care — Atlas Health" },
+      { property: "og:title", content: "Appointments & Care — Orvana" },
       { property: "og:description", content: "Manage upcoming visits, past care, and your care team." },
     ],
   }),
@@ -135,9 +135,9 @@ function buildIcs(a: Appointment) {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Atlas Health//Appointments//EN",
+    "PRODID:-//Orvana//Appointments//EN",
     "BEGIN:VEVENT",
-    `UID:${a.id}@atlas-health`,
+    `UID:${a.id}@orvana`,
     `DTSTAMP:${fmt(new Date())}`,
     `DTSTART:${fmt(start)}`,
     `DTEND:${fmt(end)}`,
@@ -343,7 +343,7 @@ function CareTeamCard({ member }: { member: CareTeamMember }) {
           </a>
           <div className="flex items-center justify-between pt-2 border-t border-border/60">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5" /> Share my Atlas summary
+              <ShieldCheck className="h-3.5 w-3.5" /> Share my Orvana summary
             </div>
             <Switch
               checked={member.sharing}
@@ -459,7 +459,7 @@ function ScheduleDialog() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="appt-location">Location</Label>
-            <Input id="appt-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Atlas Clinic, Suite 200" />
+            <Input id="appt-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Orvana Clinic, Suite 200" />
           </div>
         </div>
         <DialogFooter>

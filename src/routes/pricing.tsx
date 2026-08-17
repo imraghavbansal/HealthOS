@@ -28,10 +28,10 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
   head: () => ({
     meta: [
-      { title: "Pricing · Atlas Health" },
+      { title: "Pricing · Orvana" },
       { name: "description", content: "Simple, transparent pricing for individuals, families, and clinics." },
-      { property: "og:title", content: "Pricing · Atlas Health" },
-      { property: "og:description", content: "Choose the Atlas Health plan that fits you or your family." },
+      { property: "og:title", content: "Pricing · Orvana" },
+      { property: "og:description", content: "Choose the Orvana plan that fits you or your family." },
     ],
   }),
 });
@@ -134,11 +134,11 @@ const COMPARISON: { capability: string; free: boolean | string; pro: boolean | s
 const FAQS = [
   {
     q: "Who owns my health data?",
-    a: "You do — fully and always. Atlas Health never sells your data or uses it to train third-party models. You can export or permanently delete everything at any time from Settings.",
+    a: "You do — fully and always. Orvana never sells your data or uses it to train third-party models. You can export or permanently delete everything at any time from Settings.",
   },
   {
     q: "Are you HIPAA compliant? Will you sign a BAA?",
-    a: "Atlas Health is built on HIPAA-aligned infrastructure with end-to-end encryption. Clinic plans include a signed Business Associate Agreement (BAA) as part of onboarding.",
+    a: "Orvana is built on HIPAA-aligned infrastructure with end-to-end encryption. Clinic plans include a signed Business Associate Agreement (BAA) as part of onboarding.",
   },
   {
     q: "Can I cancel anytime?",
@@ -209,7 +209,7 @@ function PricingPage() {
             <div className="grid h-9 w-9 place-items-center rounded-xl gradient-primary shadow-soft">
               <Heart className="h-4.5 w-4.5 text-white" fill="white" />
             </div>
-            <span className="font-semibold tracking-tight">Atlas Health</span>
+            <span className="font-semibold tracking-tight">Orvana</span>
           </Link>
           <div className="flex items-center gap-2">
             <button onClick={toggle} className="text-xs px-3 py-1.5 rounded-full border border-border/60">
@@ -296,7 +296,7 @@ function PricingPage() {
                             : plan.cta}
                       </Button>
                     ) : plan.key === "clinic" ? (
-                      <a href="mailto:support@atlashealth.app?subject=Clinic%20plan" className="mt-6">
+                      <a href="mailto:support@orvana.app?subject=Clinic%20plan" className="mt-6">
                         <Button className="w-full rounded-full h-11" variant="outline">{plan.cta}</Button>
                       </a>
                     ) : (
@@ -362,7 +362,7 @@ function PricingPage() {
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to="/signup">
                 <Button size="lg" className="rounded-full gradient-primary text-white h-12 px-8 border-0 shadow-soft">
-                  Create your Atlas <ArrowRight className="ml-1.5 h-4 w-4" />
+                  Create your Orvana <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -376,7 +376,7 @@ function PricingPage() {
             <div className="grid h-7 w-7 place-items-center rounded-lg gradient-primary">
               <Heart className="h-3.5 w-3.5 text-white" fill="white" />
             </div>
-            © 2026 Atlas Health, Inc.
+            © 2026 Orvana, Inc.
           </div>
           <div className="flex gap-6">
             <a href="#" className="hover:text-foreground">Privacy</a>

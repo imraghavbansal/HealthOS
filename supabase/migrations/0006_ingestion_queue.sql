@@ -1,4 +1,4 @@
--- Atlas Health — background ingestion queue
+-- Orvana — background ingestion queue
 --
 -- Closes a real gap: parse-record was only ever invoked as a client-side
 -- fire-and-forget call right after upload. If that invoke silently failed

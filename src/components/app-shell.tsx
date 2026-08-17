@@ -153,7 +153,7 @@ export function AppShell({
               <Heart className="h-4.5 w-4.5 text-white" fill="white" />
             </div>
             <div>
-              <div className="text-sm font-semibold tracking-tight">Atlas Health</div>
+              <div className="text-sm font-semibold tracking-tight">Orvana</div>
               <div className="text-[10px] tracking-widest text-muted-foreground uppercase">Personal OS</div>
             </div>
           </Link>

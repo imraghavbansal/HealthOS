@@ -1,12 +1,12 @@
-# Atlas Health — Master Build Spec
+# Orvana — Master Build Spec
 
-This is the governing execution instruction for turning Atlas Health into a
+This is the governing execution instruction for turning Orvana into a
 real, secure, low-latency, revenue-generating, app-store-published product.
 It supersedes ad-hoc requests — if a future instruction conflicts with the
 guardrails here, this document wins. Read alongside `PRODUCT-VISION.md`,
 `HANDOFF.md`, `AGENT-BRIEF.md`, and `BUSINESS-MODEL.md`.
 
-> Note: this doc references `atlas-health-moats-and-usp.md`, which isn't in
+> Note: this doc references `orvana-moats-and-usp.md`, which isn't in
 > the repo. `PRODUCT-VISION.md`'s "moat" section covers the same ground
 > today — flag if there's separate content that should be merged in.
 

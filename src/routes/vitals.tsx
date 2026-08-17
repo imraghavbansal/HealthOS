@@ -57,9 +57,9 @@ import type { VitalEntry, VitalKind } from "@/lib/types";
 export const Route = createFileRoute("/vitals")({
   head: () => ({
     meta: [
-      { title: "Vitals & Biometrics · Atlas Health" },
+      { title: "Vitals & Biometrics · Orvana" },
       { name: "description", content: "Track weight, blood pressure, resting heart rate, SpO2 and more." },
-      { property: "og:title", content: "Vitals & Biometrics · Atlas Health" },
+      { property: "og:title", content: "Vitals & Biometrics · Orvana" },
       { property: "og:description", content: "Track weight, blood pressure, resting heart rate, SpO2 and more." },
     ],
   }),

@@ -1,11 +1,11 @@
-# Atlas Health — Product Vision (North Star)
+# Orvana — Product Vision (North Star)
 
-This is the standing product context for Atlas. Read this before making any
+This is the standing product context for Orvana. Read this before making any
 product or architecture decision. Do not redesign the product into a
 different concept — the existing UI, screens, and direction are the
 foundation. The job is to make them real, trustworthy, and worth paying for.
 
-## What Atlas is
+## What Orvana is
 
 A long-term personal and family **health operating system** — a secure place
 where a person's health information continuously accumulates, stays
@@ -18,10 +18,10 @@ understandable history.
 
 ## The core differentiator
 
-Atlas is not "an AI health chatbot," "a record locker," "a tracker," or "a
+Orvana is not "an AI health chatbot," "a record locker," "a tracker," or "a
 family app." Those are components. The product is:
 
-> **Atlas remembers your health over time and helps you understand the
+> **Orvana remembers your health over time and helps you understand the
 > bigger picture.**
 
 The AI reasons over the user's accumulated, authorized context — it does not
@@ -38,7 +38,7 @@ Not Claude, not GPT — models are replaceable and will change. The moat is:
 **longitudinal data + structured history + original documents + timeline +
 AI memory/context + family relationships + integrations + trust.**
 
-Flywheel: more data → better context → more useful Atlas → more usage → more
+Flywheel: more data → better context → more useful Orvana → more usage → more
 history → stronger personalization → higher retention. A new user has a few
 records; a multi-year user has an irreplaceable structured history no
 competitor can hand them on day one.
@@ -54,9 +54,9 @@ One family member never automatically sees another's private data. This
 means two genuinely different concepts must stay separate in the data model:
 
 - **Inherited family history** — ancestry/genetic risk info entered about
-  relatives who are not Atlas users themselves (mother's hypothyroidism,
+  relatives who are not Orvana users themselves (mother's hypothyroidism,
   paternal CAD). Free-text, informational, feeds the risk engine only.
-- **Family circle / household** — living people who *are* Atlas subjects
+- **Family circle / household** — living people who *are* Orvana subjects
   (either full account holders, or a dependent profile managed by an adult
   — e.g. a child or an aging parent without their own login), each with
   their own record set and their own access grants.
@@ -64,11 +64,11 @@ means two genuinely different concepts must stay separate in the data model:
 ## Data must be real and persistent
 
 No demo/mock data in the product a real user touches. Sign up, upload a PDF,
-log a med, record sleep, add an appointment, talk to Atlas, add a family
+log a med, record sleep, add an appointment, talk to Orvana, add a family
 member — it's stored for real and there when they come back, for years.
 
 **Source documents and extracted structure are stored separately.** The
-original PDF/scan is the source of truth; anything Atlas parses out of it
+original PDF/scan is the source of truth; anything Orvana parses out of it
 (a lab value, a medication, a diagnosed condition) is its own row with a
 link back to the document it came from, a confidence signal, and a way for
 the user to confirm or correct it. Never overwrite or discard the original.
@@ -96,7 +96,7 @@ Strong auth, strict authorization, row-level data isolation, private
 document storage, secure family permissions, secrets only ever touched
 server-side, clear data ownership, reliable persistence/backups, provenance
 on AI-touched information, and a clear line between *user data*,
-*extracted information*, and *AI interpretation*. Atlas never pretends to be
+*extracted information*, and *AI interpretation*. Orvana never pretends to be
 a doctor.
 
 ## Scale posture
@@ -112,7 +112,7 @@ without a rewrite.
 
 ## North star
 
-> Atlas becomes the place where a person and their family build a lifelong,
+> Orvana becomes the place where a person and their family build a lifelong,
 > continuously updated health history — with an intelligent system that
 > actually understands it.
 

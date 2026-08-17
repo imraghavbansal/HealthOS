@@ -34,10 +34,10 @@ export const Route = createFileRoute("/reports")({
   component: ReportsPage,
   head: () => ({
     meta: [
-      { title: "Reports & Data Export · Atlas Health" },
+      { title: "Reports & Data Export · Orvana" },
       { name: "description", content: "Build custom reports, preview a doctor visit summary, and manage data portability." },
-      { property: "og:title", content: "Reports & Data Export · Atlas Health" },
-      { property: "og:description", content: "Export, summarize, and control your Atlas Health data." },
+      { property: "og:title", content: "Reports & Data Export · Orvana" },
+      { property: "og:description", content: "Export, summarize, and control your Orvana data." },
     ],
   }),
 });
@@ -300,7 +300,7 @@ function buildSummaryText(recordCount: number, flagged: { name: string; value: n
 
 function PortabilitySection() {
   const cards = [
-    { icon: FileStack, title: "Full export", desc: "Download everything Atlas has stored about you.", cta: "Manage export" },
+    { icon: FileStack, title: "Full export", desc: "Download everything Orvana has stored about you.", cta: "Manage export" },
     { icon: ShieldOff, title: "Revoke sharing", desc: "Cut off access for care team members or apps.", cta: "Manage sharing" },
     { icon: Trash2, title: "Delete everything", desc: "Permanently remove your account and all data.", cta: "Manage deletion" },
   ];

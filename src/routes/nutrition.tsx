@@ -27,9 +27,9 @@ export const Route = createFileRoute("/nutrition")({
   component: NutritionPage,
   head: () => ({
     meta: [
-      { title: "Nutrition & Hydration — Atlas Health" },
+      { title: "Nutrition & Hydration — Orvana" },
       { name: "description", content: "Track meals, macros and hydration in one place." },
-      { property: "og:title", content: "Nutrition & Hydration — Atlas Health" },
+      { property: "og:title", content: "Nutrition & Hydration — Orvana" },
       { property: "og:description", content: "Track meals, macros and hydration in one place." },
     ],
   }),

@@ -1,15 +1,15 @@
-# Atlas Health — Project Context
+# Orvana — Project Context
 
 Read this first, every session. It's the current state of truth for what
-Atlas is, what's built, what's verified, what's still open, and what
+Orvana is, what's built, what's verified, what's still open, and what
 decisions are pending. Deeper docs live in `docs/` — this file is the map
 to them plus the up-to-date status, since the docs below don't self-update.
 
 ## What this project is
 
-Atlas Health — a long-term personal and family health OS. Not a chatbot
+Orvana — a long-term personal and family health OS. Not a chatbot
 with a health skin, not a record locker, not a tracker. The product:
-**Atlas remembers your health over time and helps you understand the
+**Orvana remembers your health over time and helps you understand the
 bigger picture.** Originally scaffolded by Lovable (now fully de-branded),
 being turned into a real production product with a real backend, real
 users, and a path to app-store distribution and revenue.
@@ -40,7 +40,7 @@ AI: Anthropic Claude (`claude-sonnet-5`), called only from Edge Functions,
 key never client-exposed.
 
 Everything in the UI reads/writes through `@/lib/queries` →
-`src/lib/api/contract.ts` (the `AtlasApi` interface) → one of three
+`src/lib/api/contract.ts` (the `OrvanaApi` interface) → one of three
 adapters selected by `VITE_API_MODE`: `mock` (in-memory demo),
 `supabase` (real, what's actually deployed), `http` (unused stub for a
 hypothetical non-Supabase backend). **Never bypass the contract from a
@@ -67,7 +67,7 @@ credentials never pass through Claude). Migrations so far:
   household/sharing model: `households`, `household_members`,
   `access_grants` (scoped, revocable, `can_view_subject`/`can_edit_subject`
   functions gate every table's RLS). Separate from that: `family_history_entries`
-  is free-text ancestry data about relatives who aren't Atlas users.
+  is free-text ancestry data about relatives who aren't Orvana users.
 - `0002_grants.sql` — **critical fix**: RLS policies alone aren't enough:
   Postgres checks table-level `GRANT`s before RLS. `0001` forgot these;
   every real query failed with `permission denied` until this ran. If a
@@ -119,7 +119,7 @@ auto-sync.**
   key internally, safe because it only ever touches the one already-existing
   documentId the queue selected). Secrets: `ANTHROPIC_API_KEY`,
   `INTERNAL_QUEUE_SECRET`.
-- **`ai-chat`** — "Ask Atlas". Deterministic red-flag symptom check runs
+- **`ai-chat`** — "Ask Orvana". Deterministic red-flag symptom check runs
   *before* any model call (chest pain, stroke signs, suicidal ideation,
   anaphylaxis, etc. — see the pattern list in the file) and returns
   emergency guidance without touching Claude at all — verified to work
@@ -148,7 +148,7 @@ status changes, don't let this drift from reality.)
   and blocked, not assumed. 2FA/session-management UI not built (stubbed
   "coming soon", honestly disabled).
 - **Stage 2 (Contract implementation): Done.** `src/lib/api/supabase.ts`
-  implements the full `AtlasApi` contract. A few surfaces are honest empty
+  implements the full `OrvanaApi` contract. A few surfaces are honest empty
   states pending later stages: `getSleep`/`getActivity` (wait on
   wearables), `getRisks`/`getInsights` (wait on an alerts/risk engine,
   not yet built), `requestReport` (edge function doesn't exist).

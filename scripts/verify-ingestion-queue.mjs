@@ -16,7 +16,7 @@ if (!URL || !ANON_KEY) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
-  const email = `atlas-verify-queue-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
+  const email = `orvana-verify-queue-${Math.random().toString(36).slice(2, 8)}@mailinator.com`;
   const password = `Pw!${Math.random().toString(36).slice(2, 10)}`;
   const client = createClient(URL, ANON_KEY);
 

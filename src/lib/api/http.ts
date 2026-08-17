@@ -10,7 +10,7 @@
  * Auth: attach your session token in `authHeaders()` below.
  * Every method must resolve to the shapes in src/lib/types.ts.
  */
-import type { AtlasApi } from "./contract";
+import type { OrvanaApi } from "./contract";
 import type { ChatMessage } from "../types";
 
 const BASE = import.meta.env['VITE_API_BASE_URL'] ?? "/api";
@@ -61,7 +61,7 @@ const patch = <T>(path: string, body?: unknown) =>
   req<T>(path, { method: "PATCH", body: JSON.stringify(body) });
 const del = (path: string) => req<void>(path, { method: "DELETE" });
 
-export const httpApi: AtlasApi = {
+export const httpApi: OrvanaApi = {
   getProfile: () => get("/me"),
   updateProfile: (p) => patch("/me", p),
   getHealthScore: () => get("/health-score"),

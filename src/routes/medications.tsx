@@ -25,9 +25,9 @@ import { useState } from "react";
 export const Route = createFileRoute("/medications")({
   head: () => ({
     meta: [
-      { title: "Medications & Supplements — Atlas Health" },
+      { title: "Medications & Supplements — Orvana" },
       { name: "description", content: "Reminders, adherence, and interaction awareness." },
-      { property: "og:title", content: "Medications & Supplements — Atlas Health" },
+      { property: "og:title", content: "Medications & Supplements — Orvana" },
       { property: "og:description", content: "Reminders, adherence, and interaction awareness." },
     ],
   }),
@@ -261,7 +261,7 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                 <>
                   <div className="text-sm font-semibold mb-2">No known interactions</div>
                   <p className="text-xs text-muted-foreground">
-                    Atlas checks your active meds against a curated interaction database on every update.
+                    Orvana checks your active meds against a curated interaction database on every update.
                   </p>
                 </>
               ) : (

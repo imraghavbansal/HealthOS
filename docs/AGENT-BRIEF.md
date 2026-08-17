@@ -1,4 +1,4 @@
-# Atlas Health — build brief (for contributors/agents)
+# Orvana — build brief (for contributors/agents)
 
 ## Stack facts (non-negotiable)
 - TanStack Start v1 + React 19 + Vite + Tailwind v4. **Not Next.js, not react-router.**

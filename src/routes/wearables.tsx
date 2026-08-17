@@ -13,9 +13,9 @@ import { useState } from "react";
 export const Route = createFileRoute("/wearables")({
   head: () => ({
     meta: [
-      { title: "Wearables & Devices — Atlas Health" },
+      { title: "Wearables & Devices — Orvana" },
       { name: "description", content: "One dashboard for every ecosystem." },
-      { property: "og:title", content: "Wearables & Devices — Atlas Health" },
+      { property: "og:title", content: "Wearables & Devices — Orvana" },
       { property: "og:description", content: "One dashboard for every ecosystem." },
     ],
   }),

@@ -57,7 +57,7 @@ function Settings() {
           <NotificationsSection />
 
           <p className="text-[11px] text-muted-foreground text-center">
-            Atlas Health is informational and not a substitute for professional medical advice, diagnosis, or treatment.
+            Orvana is informational and not a substitute for professional medical advice, diagnosis, or treatment.
           </p>
         </div>
       </div>
@@ -189,7 +189,7 @@ function PrivacySection() {
         {(consent) => (
           <>
             <Toggle
-              label="Use my de-identified data to improve Atlas"
+              label="Use my de-identified data to improve Orvana"
               desc="Never shared with third parties. Off by default."
               checked={consent.shareDeidentified}
               onChange={(v) => updateConsent.mutate({ shareDeidentified: v })}
@@ -243,7 +243,7 @@ function SecuritySection() {
   }
 
   return (
-    <Section id="Security" title="Security" desc="Keep your Atlas locked down." icon={Lock}>
+    <Section id="Security" title="Security" desc="Keep your Orvana locked down." icon={Lock}>
       <div className="grid md:grid-cols-3 gap-3">
         <Input type="password" placeholder="Current password" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" />
         <Input type="password" placeholder="New password" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" />
@@ -275,7 +275,7 @@ function DataSection() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `atlas-health-export-${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `orvana-export-${new Date().toISOString().slice(0, 10)}.json`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -301,7 +301,7 @@ function DataSection() {
       <div className="grid md:grid-cols-2 gap-3">
         <div className="rounded-2xl border border-border/60 p-4">
           <div className="font-medium text-sm">Export</div>
-          <p className="text-xs text-muted-foreground mt-1">Download everything Atlas has stored about you as JSON.</p>
+          <p className="text-xs text-muted-foreground mt-1">Download everything Orvana has stored about you as JSON.</p>
           <Button onClick={handleExport} disabled={exportData.isPending} className="mt-3 rounded-full gradient-primary text-white border-0">
             <Download className="mr-1.5 h-4 w-4" /> {exportData.isPending ? "Preparing…" : "Download export"}
           </Button>
@@ -317,7 +317,7 @@ function DataSection() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete your account?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This permanently deletes your profile, records, labs, medications, and every other piece of data Atlas
+                  This permanently deletes your profile, records, labs, medications, and every other piece of data Orvana
                   has for you. This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -347,7 +347,7 @@ function NotificationsSection() {
             <Toggle label="Medication reminders" checked={prefs.medicationReminders} onChange={(v) => updatePrefs.mutate({ medicationReminders: v })} />
             <Toggle label="Weekly health brief (email)" checked={prefs.weeklyBrief} onChange={(v) => updatePrefs.mutate({ weeklyBrief: v })} />
             <Toggle label="New lab results uploaded" checked={prefs.newLabResults} onChange={(v) => updatePrefs.mutate({ newLabResults: v })} />
-            <Toggle label="Big changes in trends" desc="Only when Atlas thinks it's worth a look." checked={prefs.trendAlerts} onChange={(v) => updatePrefs.mutate({ trendAlerts: v })} />
+            <Toggle label="Big changes in trends" desc="Only when Orvana thinks it's worth a look." checked={prefs.trendAlerts} onChange={(v) => updatePrefs.mutate({ trendAlerts: v })} />
             <p className="text-xs text-muted-foreground pt-1">
               Preferences are saved now; push delivery arrives with the mobile app.
             </p>
