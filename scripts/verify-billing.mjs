@@ -12,9 +12,9 @@ import crypto from "node:crypto";
 
 const URL = process.env["VITE_SUPABASE_URL"];
 const ANON_KEY = process.env["VITE_SUPABASE_ANON_KEY"];
-const WEBHOOK_SECRET = "REDACTED-RAZORPAY-WEBHOOK-SECRET";
-if (!URL || !ANON_KEY) {
-  console.error("Missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY.");
+const WEBHOOK_SECRET = process.env["RAZORPAY_WEBHOOK_SECRET"];
+if (!URL || !ANON_KEY || !WEBHOOK_SECRET) {
+  console.error("Missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY / RAZORPAY_WEBHOOK_SECRET.");
   process.exit(1);
 }
 

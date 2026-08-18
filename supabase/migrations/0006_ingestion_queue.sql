@@ -71,4 +71,4 @@ select cron.schedule('process-pending-documents', '* * * * *', 'select process_p
 
 -- Run this once, with the SAME value you set as INTERNAL_QUEUE_SECRET in
 -- the Edge Function secrets:
--- select vault.create_secret('REDACTED-INTERNAL-QUEUE-SECRET', 'internal_queue_secret');
+-- select vault.create_secret('<your-internal-queue-secret>', 'internal_queue_secret');
