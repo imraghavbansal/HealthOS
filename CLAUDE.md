@@ -428,6 +428,39 @@ status changes, don't let this drift from reality.)
   (needs a real browser-issued subscription) — **still needs one manual
   check**: Settings → enable push → "Send test notification" → confirm a
   real browser/OS notification appears.
+- **Capacitor mobile packaging (V2, deliberately the most partial item
+  here): Scaffolded only — genuinely can't go further from this
+  environment.** `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`,
+  `@capacitor/android`, `@capacitor/push-notifications`, `@capacitor/app`
+  installed. `capacitor.config.ts` created using the `server.url`
+  approach (native WebView points at `https://raag-health.vercel.app`
+  rather than bundling a static export) — deliberate: TanStack Start's
+  Nitro server does real SSR (auth cookies, meta tags, streaming) a
+  static-export pipeline would need to either replicate or drop, a
+  separate, bigger effort. Trade-off stated in the config's own comment:
+  needs network connectivity to load, same as the web version — no
+  offline mode, consistent with the service worker's own deliberate
+  no-caching decision. `npm run cap:sync` / `cap:open:ios` /
+  `cap:open:android` scripts added (the former creates a throwaway
+  `dist/index.html` placeholder first, since `webDir` must exist on disk
+  even though it's unused with `server.url`).
+  **What genuinely cannot be done from this environment**: `npx cap add
+  ios` requires Xcode, which only runs on macOS — this dev environment
+  is Windows, so this was never attempted, not attempted-and-failed.
+  `npx cap add android` needs the Android SDK, which may or may not be
+  installed on the user's own machine. **Native push notifications are
+  NOT wired up** — `send-push` only does Web Push (browser); real native
+  push (FCM for Android, APNs for iOS, usually unified via Firebase
+  Cloud Messaging) is separate infrastructure needing a Firebase project
+  decision from the user, same "ask when blocked on an external account"
+  pattern as wearables/embeddings below. **User's actual next steps**:
+  (1) on a Mac, run `npm run cap:open:ios` → Xcode opens → sign in with
+  an Apple ID, build to a simulator to confirm the shell loads the real
+  site; (2) with Android Studio or just the Android SDK installed, run
+  `npm run cap:open:android` similarly; (3) real store distribution
+  needs an Apple Developer Program membership ($99/yr) and a Google Play
+  Console account ($25 one-time) — business/account steps only the user
+  can do, not buildable by Claude.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

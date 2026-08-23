@@ -19,9 +19,16 @@
     "verify:medication-interactions": "node --env-file=.env scripts/verify-medication-interactions.mjs",
     "verify:household": "node --env-file=.env scripts/verify-household.mjs",
     "verify:conditions": "node --env-file=.env scripts/verify-conditions.mjs",
-    "verify:push-notifications": "node --env-file=.env scripts/verify-push-notifications.mjs"
+    "verify:push-notifications": "node --env-file=.env scripts/verify-push-notifications.mjs",
+    "cap:prepare": "node -e \"require('fs').mkdirSync('dist',{recursive:true});require('fs').writeFileSync('dist/index.html','<!doctype html><title>Raag</title>')\"",
+    "cap:sync": "npm run cap:prepare && npx cap sync",
+    "cap:open:ios": "npm run cap:sync && npx cap open ios",
+    "cap:open:android": "npm run cap:sync && npx cap open android"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/push-notifications": "^8.1.2",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -79,6 +86,9 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "@eslint/js": "^9.32.0",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
