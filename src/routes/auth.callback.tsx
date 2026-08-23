@@ -9,11 +9,17 @@ import { api } from "@/lib/api";
 export const Route = createFileRoute("/auth/callback")({ component: AuthCallback });
 
 /**
- * Landing point for the Google OAuth redirect. The browser client already
- * auto-exchanges the ?code= in the URL for a session on load (same
- * PKCE detection reset-password.tsx relies on for recovery links) — this
- * page just waits for that, then routes on based on onboarding status,
- * same as a normal email/password login.
+ * Landing point for the Google OAuth redirect. The browser client's own
+ * initialization already auto-detects and exchanges the ?code= in the URL
+ * for a session (GoTrueClient's default detectSessionInUrl behavior) —
+ * that exchange is single-use, since it deletes the PKCE code_verifier
+ * once consumed. An earlier version of this page also called
+ * exchangeCodeForSession(code) manually on top of that, which raced the
+ * automatic exchange: whichever ran second found the verifier already
+ * gone and failed with "PKCE code verifier not found in storage". Fix:
+ * never call it manually — just await getSession(), which itself awaits
+ * the client's internal init promise, so by the time it resolves the
+ * automatic exchange has already happened.
  */
 function AuthCallback() {
   const nav = useNavigate();
@@ -26,18 +32,13 @@ function AuthCallback() {
     (async () => {
       try {
         const supabase = getSupabaseBrowserClient();
-        // exchangeCodeForSession is idempotent-safe here even though
-        // detectSessionInUrl may already be racing it on client init —
-        // whichever finishes first wins, the other resolves against the
-        // now-established session.
-        const code = new URLSearchParams(window.location.search).get("code");
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (!sessionData.session) {
+          throw new Error(
+            "No session after Google sign-in — the link may have expired. Try signing in again.",
+          );
         }
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!sessionData.session)
-          throw new Error("No session after Google sign-in — the link may have expired.");
 
         const profile = await api.getProfile();
         toast.success(`Welcome, ${profile.name.split(" ")[0]}`);

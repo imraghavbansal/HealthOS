@@ -154,16 +154,28 @@ status changes, don't let this drift from reality.)
   "coming soon", honestly disabled). **Google sign-in added** —
   `signInWithGoogle()` in `src/lib/auth.ts`, wired into `/login` and
   `/signup` via the shared `GoogleButton` component, landing on
-  `/auth/callback` which exchanges the OAuth code for a session (same
-  PKCE auto-detection `reset-password.tsx` already relied on) then routes
-  to onboarding or dashboard. Built specifically to route around the
-  production email-confirmation problem below — Google's already-verified
-  email means no confirmation email is needed for that path at all. **Not
-  yet functional until the user creates a Google OAuth client and pastes
-  the client ID/secret into Supabase Auth → Providers → Google** — code
-  is real and typechecked, but untested end-to-end pending that dashboard
-  step (same "code is done, dashboard step is the user's job" pattern as
-  everything else in this project). Email/password confirmation was found
+  `/auth/callback` then routing to onboarding or dashboard. Built
+  specifically to route around the production email-confirmation problem
+  below — Google's already-verified email means no confirmation email is
+  needed for that path at all. Google provider is now enabled in Supabase
+  (OAuth client created, credentials pasted in) — **but the first live
+  attempt hit a real bug**: `/auth/callback` errored `"PKCE code verifier
+  not found in storage"`. Root cause, confirmed by reading
+  `@supabase/auth-js`'s `GoTrueClient` source directly
+  (`node_modules/@supabase/auth-js/dist/main/GoTrueClient.js`): the
+  browser client's own `_initialize()` already auto-detects and exchanges
+  a `?code=` in the URL when `detectSessionInUrl` is true (the default) —
+  that exchange is single-use, since it deletes the PKCE `code_verifier`
+  once consumed. The callback page was *also* calling
+  `exchangeCodeForSession(code)` manually right after, racing the
+  automatic exchange; whichever ran second found the verifier already
+  gone. Fixed by deleting the manual call entirely and just awaiting
+  `supabase.auth.getSession()` — confirmed via source that `getSession()`
+  itself `await`s the client's `initializePromise` before resolving, i.e.
+  the exact promise that performs the automatic exchange, so no race is
+  possible. Diagnosed and fixed from library source + build/typecheck,
+  not yet confirmed via an actual browser click-through — worth a real
+  test. Email/password confirmation was found
   broken in production (`raag-health.vercel.app`): the code was already
   correct (dynamic redirect, sends to whatever email the user enters) —
   root cause is Supabase's default built-in email service, which isn't
