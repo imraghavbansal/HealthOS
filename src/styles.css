@@ -212,3 +212,13 @@
 @utility animate-float {
   animation: float-slow 6s ease-in-out infinite;
 }
+
+/* Faint dot-grid texture for hero/section backgrounds — intensity is set
+   per-use via a Tailwind opacity class, not baked in here, so it reads as
+   a subtle surface texture rather than a visible pattern. Uses the
+   existing --foreground token so it's automatically theme-correct in
+   both light and dark, no new colors. */
+@utility texture-dots {
+  background-image: radial-gradient(circle, color-mix(in oklab, var(--color-foreground) 100%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
