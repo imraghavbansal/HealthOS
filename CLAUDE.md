@@ -358,6 +358,27 @@ status changes, don't let this drift from reality.)
   before granting → grant → grantee can view but not edit under
   `summary` scope → an unrelated third user sees nothing → revoke →
   access actually gone) before trusting this live.
+- **Conditions CRUD + doctor-visit prep pack (V2, not in the original
+  numbered stages): Done, verified live.** `conditions` was previously
+  write-only via AI document parsing (`parse-record`) — no way to view or
+  manually add one existed, discovered while building the prep pack
+  (which needs "active conditions" data that was otherwise always
+  empty). Added `getConditions`/`addCondition`/`deleteCondition` to the
+  contract — no new migration needed, `conditions` already had full RLS
+  from `0001_init.sql`'s `subject_tables` loop. **Verified via
+  `npm run verify:conditions`**: add → read back → cross-user isolation
+  (RLS) → delete → confirmed actually gone. All checks passed against
+  the live project. The prep pack itself (`/reports`, "Doctor visit prep
+  pack") was previously a thin record-count + flagged-labs preview;
+  rebuilt to assemble active conditions (now with inline add/delete),
+  current medications with adherence, latest vitals snapshot, flagged
+  labs, symptoms from the last 30 days, and an auto-generated "questions
+  worth asking" list from active warning/critical insights and
+  elevated/high risks — all deterministic, no AI call, so it works today
+  without Anthropic billing. Typechecked, linted, and production-built
+  clean; not covered by an automated script itself (pure client-side
+  aggregation of already-verified endpoints), so worth one manual look
+  once there's enough real data logged to populate every section.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

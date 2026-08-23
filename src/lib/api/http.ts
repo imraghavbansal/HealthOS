@@ -102,6 +102,10 @@ export const httpApi: RaagApi = {
   updateGoal: (id, p) => patch(`/goals/${id}`, p),
   deleteGoal: (id) => del(`/goals/${id}`),
 
+  getConditions: () => get("/conditions"),
+  addCondition: (input) => post("/conditions", input),
+  deleteCondition: (id) => post(`/conditions/${id}/delete`, {}),
+
   getFamilyHistory: () => get("/family-history"),
   addFamilyMember: (input) => post("/family-history", input),
   getRisks: () => get("/risks"),

@@ -8,11 +8,13 @@
 import type {
   AccessGrant,
   ActivityPoint,
+  AddConditionInput,
   AddDependentInput,
   Appointment,
   AppNotification,
   CareTeamMember,
   ChatMessage,
+  Condition,
   ConsentSettings,
   CreateShareLinkInput,
   FamilyMember,
@@ -71,6 +73,13 @@ export interface RaagApi {
   addGoal(input: Omit<Goal, "id" | "progress" | "streak">): Promise<Goal>;
   updateGoal(id: ID, patch: Partial<Goal>): Promise<Goal>;
   deleteGoal(id: ID): Promise<void>;
+
+  /* conditions — was previously write-only via AI document parsing, no
+     way to view or manually add one; needed both standalone and for the
+     doctor-visit prep pack's "active conditions" section */
+  getConditions(): Promise<Condition[]>;
+  addCondition(input: AddConditionInput): Promise<Condition>;
+  deleteCondition(id: ID): Promise<void>;
 
   /* family + risk */
   getFamilyHistory(): Promise<FamilyMember[]>;

@@ -363,3 +363,23 @@ export interface AccessGrant {
   grantedAt: ISODate;
   revokedAt?: ISODate;
 }
+
+/* ---------- conditions (V2) ---------- */
+
+export interface Condition {
+  id: ID;
+  name: string;
+  status: "active" | "resolved" | "chronic";
+  diagnosedAt?: string;
+  diagnosedBy?: string;
+  notes?: string;
+  verifiedByUser: boolean;
+}
+
+export interface AddConditionInput {
+  name: string;
+  status: "active" | "resolved" | "chronic";
+  diagnosedAt?: string;
+  diagnosedBy?: string;
+  notes?: string;
+}

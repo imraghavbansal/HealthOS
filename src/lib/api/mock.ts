@@ -38,6 +38,7 @@ import type {
   AppNotification,
   CareTeamMember,
   ChatMessage,
+  Condition,
   ConsentSettings,
   FamilyMember,
   Goal,
@@ -92,6 +93,9 @@ const state = {
     { id: "u1", name: seedUser.name, kind: "self", age: seedUser.age, riskLevel: "None" },
   ] as HouseholdMember[],
   accessGrants: [] as AccessGrant[],
+  conditions: [
+    { id: "cond-1", name: "Hypothyroidism", status: "chronic", verifiedByUser: true },
+  ] as Condition[],
   careTeam: [...mockCareTeam] as CareTeamMember[],
   chat: [...seedChat] as ChatMessage[],
   familyHistory: [...familyHistory] as FamilyMember[],
@@ -285,6 +289,17 @@ export const mockApi: RaagApi = {
   deleteGoal: (id) => {
     state.goals = state.goals.filter((g) => g.id !== id);
     return wait(undefined, 220);
+  },
+
+  getConditions: () => wait(state.conditions),
+  addCondition: (input) => {
+    const condition: Condition = { ...input, id: uid("cond"), verifiedByUser: true };
+    state.conditions = [condition, ...state.conditions];
+    return wait(condition, 300);
+  },
+  deleteCondition: (id) => {
+    state.conditions = state.conditions.filter((c) => c.id !== id);
+    return wait(undefined, 150);
   },
 
   getFamilyHistory: () => wait(state.familyHistory),

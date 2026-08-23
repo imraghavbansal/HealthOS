@@ -29,6 +29,7 @@ import type {
   AppNotification,
   CareTeamMember,
   ChatMessage,
+  Condition,
   FamilyMember,
   Goal,
   HouseholdMember,
@@ -624,6 +625,77 @@ export const supabaseApi: RaagApi = {
   async deleteGoal(id) {
     const sb = getSupabaseBrowserClient();
     unwrap(await sb.from("goals").delete().eq("id", id));
+  },
+
+  // Previously write-only via AI document parsing (parse-record) — no way
+  // to view or manually add a condition existed until now.
+  async getConditions() {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const rows = unwrap(
+      await sb
+        .from("conditions")
+        .select("id, name, status, diagnosed_at, diagnosed_by, notes, verified_by_user")
+        .eq("subject_id", subjectId)
+        .order("created_at", { ascending: false }),
+    ) as {
+      id: string;
+      name: string;
+      status: Condition["status"];
+      diagnosed_at: string | null;
+      diagnosed_by: string | null;
+      notes: string | null;
+      verified_by_user: boolean;
+    }[];
+    return rows.map((r): Condition => ({
+      id: r.id,
+      name: r.name,
+      status: r.status,
+      diagnosedAt: r.diagnosed_at ?? undefined,
+      diagnosedBy: r.diagnosed_by ?? undefined,
+      notes: r.notes ?? undefined,
+      verifiedByUser: r.verified_by_user,
+    }));
+  },
+  async addCondition(input) {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const row = unwrap(
+      await sb
+        .from("conditions")
+        .insert({
+          subject_id: subjectId,
+          name: input.name,
+          status: input.status,
+          diagnosed_at: input.diagnosedAt,
+          diagnosed_by: input.diagnosedBy,
+          notes: input.notes,
+          verified_by_user: true, // manually entered by the account holder, not AI-extracted
+        })
+        .select()
+        .single(),
+    ) as {
+      id: string;
+      name: string;
+      status: Condition["status"];
+      diagnosed_at: string | null;
+      diagnosed_by: string | null;
+      notes: string | null;
+      verified_by_user: boolean;
+    };
+    return {
+      id: row.id,
+      name: row.name,
+      status: row.status,
+      diagnosedAt: row.diagnosed_at ?? undefined,
+      diagnosedBy: row.diagnosed_by ?? undefined,
+      notes: row.notes ?? undefined,
+      verifiedByUser: row.verified_by_user,
+    };
+  },
+  async deleteCondition(id) {
+    const sb = getSupabaseBrowserClient();
+    unwrap(await sb.from("conditions").delete().eq("id", id));
   },
 
   async getFamilyHistory() {

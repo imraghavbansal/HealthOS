@@ -6,6 +6,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { toast } from "sonner";
 import { api } from "./api";
 import type {
+  AddConditionInput,
   AddDependentInput,
   Appointment,
   ConsentSettings,
@@ -37,6 +38,7 @@ export const qk = {
   medications: ["medications"] as const,
   goals: ["goals"] as const,
   family: ["family"] as const,
+  conditions: ["conditions"] as const,
   risks: ["risks"] as const,
   appointments: ["appointments"] as const,
   vitals: (k?: string) => ["vitals", k ?? "all"] as const,
@@ -106,6 +108,10 @@ export const familyQuery = queryOptions({
   queryKey: qk.family,
   queryFn: () => api.getFamilyHistory(),
 });
+export const conditionsQuery = queryOptions({
+  queryKey: qk.conditions,
+  queryFn: () => api.getConditions(),
+});
 export const risksQuery = queryOptions({ queryKey: qk.risks, queryFn: () => api.getRisks() });
 export const householdQuery = queryOptions({
   queryKey: qk.household,
@@ -156,6 +162,7 @@ export const useWearables = () => useQuery(wearablesQuery);
 export const useMedications = () => useQuery(medicationsQuery);
 export const useGoals = () => useQuery(goalsQuery);
 export const useFamilyHistory = () => useQuery(familyQuery);
+export const useConditions = () => useQuery(conditionsQuery);
 export const useRisks = () => useQuery(risksQuery);
 export const useHouseholdMembers = () => useQuery(householdQuery);
 export const useAccessGrants = (subjectId: string) =>
@@ -479,6 +486,30 @@ export function useRevokeShareLink() {
       toast.success("Link revoked");
     },
     onError: () => toast.error("Couldn't revoke the link"),
+  });
+}
+
+export function useAddCondition() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (input: AddConditionInput) => api.addCondition(input),
+    onSuccess: () => {
+      invalidate(qk.conditions);
+      invalidate(qk.risks); // active conditions feed the risk engine
+      toast.success("Condition added");
+    },
+    onError: () => toast.error("Couldn't add that condition"),
+  });
+}
+
+export function useDeleteCondition() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (id: ID) => api.deleteCondition(id),
+    onSuccess: () => {
+      invalidate(qk.conditions);
+      invalidate(qk.risks);
+    },
   });
 }
 
