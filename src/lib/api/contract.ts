@@ -6,7 +6,9 @@
  * No component imports mock data directly.
  */
 import type {
+  AccessGrant,
   ActivityPoint,
+  AddDependentInput,
   Appointment,
   AppNotification,
   CareTeamMember,
@@ -16,6 +18,7 @@ import type {
   FamilyMember,
   Goal,
   HealthScore,
+  HouseholdMember,
   ID,
   Insight,
   LabMarker,
@@ -73,6 +76,18 @@ export interface RaagApi {
   getFamilyHistory(): Promise<FamilyMember[]>;
   addFamilyMember(input: FamilyMember): Promise<FamilyMember>;
   getRisks(): Promise<RiskFactor[]>;
+
+  /* household / family risk graph — dependents you manage + who has
+     access to whom, built on the access_grants permission system */
+  getHouseholdMembers(): Promise<HouseholdMember[]>;
+  addDependent(input: AddDependentInput): Promise<HouseholdMember>;
+  getAccessGrants(subjectId: ID): Promise<AccessGrant[]>;
+  grantAccess(input: {
+    subjectId: ID;
+    granteeEmail: string;
+    scope: "summary" | "full";
+  }): Promise<AccessGrant>;
+  revokeAccessGrant(id: ID): Promise<void>;
 
   getLifestyleProfile(): Promise<LifestyleProfile>;
   updateLifestyleProfile(patch: LifestyleProfile): Promise<LifestyleProfile>;

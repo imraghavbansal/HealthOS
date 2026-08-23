@@ -24,12 +24,14 @@ import {
 } from "../supabase/mappers";
 import type { RaagApi } from "./contract";
 import type {
+  AccessGrant,
   Appointment,
   AppNotification,
   CareTeamMember,
   ChatMessage,
   FamilyMember,
   Goal,
+  HouseholdMember,
   LifestyleProfile,
   Medication,
   MedicalRecord,
@@ -43,6 +45,80 @@ import type {
 function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
   if (error) throw new Error(error.message);
   return data as T;
+}
+
+/**
+ * Extracted from getRisks() so the same rule-based scoring (see
+ * computeRiskFactors() in supabase/mappers.ts) works for any subject, not
+ * just "self" — needed by getHouseholdMembers() to show a risk badge per
+ * dependent in the family graph. RLS still governs what's actually
+ * readable: this throws if the caller can't view the given subjectId.
+ */
+async function computeRisksForSubject(subjectId: string) {
+  const sb = getSupabaseBrowserClient();
+  const [subjectRes, lifestyleRes, conditionsRes, familyRes, vitalsRes] = await Promise.all([
+    sb
+      .from("health_subjects")
+      .select("date_of_birth, height_cm, weight_kg")
+      .eq("id", subjectId)
+      .single(),
+    sb
+      .from("lifestyle_profile")
+      .select("alcohol, smoking, exercise")
+      .eq("subject_id", subjectId)
+      .maybeSingle(),
+    sb
+      .from("conditions")
+      .select("name")
+      .eq("subject_id", subjectId)
+      .in("status", ["active", "chronic"]),
+    sb.from("family_history_entries").select("conditions").eq("subject_id", subjectId),
+    sb
+      .from("vitals")
+      .select("kind, value, secondary, recorded_at")
+      .eq("subject_id", subjectId)
+      .in("kind", ["bloodPressure", "glucose", "spo2"])
+      .order("recorded_at", { ascending: false }),
+  ]);
+
+  const subject = unwrap(subjectRes) as {
+    date_of_birth: string | null;
+    height_cm: number | null;
+    weight_kg: number | null;
+  };
+  const lifestyle = unwrap(lifestyleRes) as {
+    alcohol: string | null;
+    smoking: string | null;
+    exercise: string | null;
+  } | null;
+  const conditions = unwrap(conditionsRes) as { name: string }[];
+  const family = unwrap(familyRes) as { conditions: string[] | null }[];
+  const vitals = unwrap(vitalsRes) as {
+    kind: string;
+    value: number;
+    secondary: number | null;
+    recorded_at: string;
+  }[];
+
+  const latestOf = (kind: string) => vitals.find((v) => v.kind === kind);
+  const bp = latestOf("bloodPressure");
+  const glucose = latestOf("glucose");
+  const spo2 = latestOf("spo2");
+
+  return computeRiskFactors({
+    age: ageFromDob(subject.date_of_birth),
+    heightCm: subject.height_cm,
+    weightKg: subject.weight_kg,
+    alcohol: lifestyle?.alcohol ?? undefined,
+    smoking: lifestyle?.smoking ?? undefined,
+    exercise: lifestyle?.exercise ?? undefined,
+    activeConditions: conditions.map((c) => c.name.toLowerCase()),
+    familyConditions: family.flatMap((f) => f.conditions ?? []).map((c) => c.toLowerCase()),
+    latestSystolicBp: bp?.value ?? null,
+    latestDiastolicBp: bp?.secondary ?? null,
+    latestGlucose: glucose?.value ?? null,
+    latestSpo2: spo2?.value ?? null,
+  });
 }
 
 export const supabaseApi: RaagApi = {
@@ -591,72 +667,174 @@ export const supabaseApi: RaagApi = {
   // supabase/mappers.ts for the scoring itself. Computed live on every
   // read, not stored, so it's always current with the latest data.
   async getRisks() {
-    const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
+    return computeRisksForSubject(subjectId);
+  },
 
-    const [subjectRes, lifestyleRes, conditionsRes, familyRes, vitalsRes] = await Promise.all([
-      sb
+  // "My household" = subjects I own (myself + any dependents I've added),
+  // not subjects shared with me by someone else — the schema's own
+  // comment on health_subjects.owner_user_id: "the adult account
+  // responsible for this subject". Risk is computed per member with the
+  // same rule engine as getRisks(), just scoped to each subject id.
+  async getHouseholdMembers() {
+    const sb = getSupabaseBrowserClient();
+    const userId = await getCurrentUserId();
+    const rows = unwrap(
+      await sb
         .from("health_subjects")
-        .select("date_of_birth, height_cm, weight_kg")
-        .eq("id", subjectId)
-        .single(),
-      sb
-        .from("lifestyle_profile")
-        .select("alcohol, smoking, exercise")
-        .eq("subject_id", subjectId)
-        .maybeSingle(),
-      sb
-        .from("conditions")
-        .select("name")
-        .eq("subject_id", subjectId)
-        .in("status", ["active", "chronic"]),
-      sb.from("family_history_entries").select("conditions").eq("subject_id", subjectId),
-      sb
-        .from("vitals")
-        .select("kind, value, secondary, recorded_at")
-        .eq("subject_id", subjectId)
-        .in("kind", ["bloodPressure", "glucose", "spo2"])
-        .order("recorded_at", { ascending: false }),
-    ]);
-
-    const subject = unwrap(subjectRes) as {
+        .select("id, name, kind, relation, date_of_birth")
+        .eq("owner_user_id", userId)
+        .order("kind", { ascending: true }),
+    ) as {
+      id: string;
+      name: string;
+      kind: "self" | "dependent";
+      relation: string | null;
       date_of_birth: string | null;
-      height_cm: number | null;
-      weight_kg: number | null;
-    };
-    const lifestyle = unwrap(lifestyleRes) as {
-      alcohol: string | null;
-      smoking: string | null;
-      exercise: string | null;
-    } | null;
-    const conditions = unwrap(conditionsRes) as { name: string }[];
-    const family = unwrap(familyRes) as { conditions: string[] | null }[];
-    const vitals = unwrap(vitalsRes) as {
-      kind: string;
-      value: number;
-      secondary: number | null;
-      recorded_at: string;
     }[];
 
-    const latestOf = (kind: string) => vitals.find((v) => v.kind === kind);
-    const bp = latestOf("bloodPressure");
-    const glucose = latestOf("glucose");
-    const spo2 = latestOf("spo2");
+    const withRisk = await Promise.all(
+      rows.map(async (r): Promise<HouseholdMember> => {
+        const risks = await computeRisksForSubject(r.id).catch(() => []);
+        const ranked = risks
+          .slice()
+          .sort((a, b) => b.pct - a.pct)
+          .find((rk) => rk.level !== "Low");
+        return {
+          id: r.id,
+          name: r.name,
+          kind: r.kind,
+          relation: r.relation ?? undefined,
+          age: r.date_of_birth ? ageFromDob(r.date_of_birth) : undefined,
+          riskLevel: (ranked?.level as HouseholdMember["riskLevel"]) ?? "None",
+          topRiskFactor: ranked?.name,
+        };
+      }),
+    );
+    return withRisk;
+  },
 
-    return computeRiskFactors({
-      age: ageFromDob(subject.date_of_birth),
-      heightCm: subject.height_cm,
-      weightKg: subject.weight_kg,
-      alcohol: lifestyle?.alcohol ?? undefined,
-      smoking: lifestyle?.smoking ?? undefined,
-      exercise: lifestyle?.exercise ?? undefined,
-      activeConditions: conditions.map((c) => c.name.toLowerCase()),
-      familyConditions: family.flatMap((f) => f.conditions ?? []).map((c) => c.toLowerCase()),
-      latestSystolicBp: bp?.value ?? null,
-      latestDiastolicBp: bp?.secondary ?? null,
-      latestGlucose: glucose?.value ?? null,
-      latestSpo2: spo2?.value ?? null,
+  async addDependent(input) {
+    const sb = getSupabaseBrowserClient();
+    const userId = await getCurrentUserId();
+    const { data: existingSelf } = await sb
+      .from("health_subjects")
+      .select("household_id")
+      .eq("id", userId)
+      .maybeSingle();
+    const row = unwrap(
+      await sb
+        .from("health_subjects")
+        .insert({
+          kind: "dependent",
+          owner_user_id: userId,
+          household_id: existingSelf?.household_id ?? null,
+          name: input.name,
+          date_of_birth: input.dateOfBirth,
+          sex: input.sex,
+          relation: input.relation,
+        })
+        .select()
+        .single(),
+    ) as {
+      id: string;
+      name: string;
+      kind: "self" | "dependent";
+      relation: string | null;
+      date_of_birth: string | null;
+    };
+    return {
+      id: row.id,
+      name: row.name,
+      kind: row.kind,
+      relation: row.relation ?? undefined,
+      age: row.date_of_birth ? ageFromDob(row.date_of_birth) : undefined,
+      riskLevel: "None",
+    };
+  },
+
+  // profiles RLS only allows self-reads, and access_grants.grantee_user_id
+  // references auth.users (not profiles), so there's no RLS-permitted way
+  // to join to the grantee's profile here — grantee_name/email are
+  // snapshotted onto the row at grant time instead (see grantAccess()
+  // below and 0012_access_grant_denorm.sql).
+  async getAccessGrants(subjectId) {
+    const sb = getSupabaseBrowserClient();
+    const rows = unwrap(
+      await sb
+        .from("access_grants")
+        .select(
+          "id, subject_id, grantee_user_id, grantee_name, grantee_email, scope, created_at, revoked_at",
+        )
+        .eq("subject_id", subjectId),
+    ) as {
+      id: string;
+      subject_id: string;
+      grantee_user_id: string;
+      grantee_name: string | null;
+      grantee_email: string | null;
+      scope: AccessGrant["scope"];
+      created_at: string;
+      revoked_at: string | null;
+    }[];
+    return rows.map((r): AccessGrant => ({
+      id: r.id,
+      subjectId: r.subject_id,
+      granteeUserId: r.grantee_user_id,
+      granteeName: r.grantee_name ?? "Unknown",
+      granteeEmail: r.grantee_email ?? "",
+      scope: r.scope,
+      grantedAt: r.created_at,
+      revokedAt: r.revoked_at ?? undefined,
+    }));
+  },
+
+  async grantAccess(input) {
+    const sb = getSupabaseBrowserClient();
+    const userId = await getCurrentUserId();
+    const { data: lookup, error: lookupErr } = await sb.functions.invoke("lookup-user-by-email", {
+      body: { email: input.granteeEmail },
     });
+    if (lookupErr) throw new Error(lookupErr.message);
+    if (!lookup?.found) {
+      throw new Error("No Raag account found for that email — they'll need to sign up first.");
+    }
+    const row = unwrap(
+      await sb
+        .from("access_grants")
+        .insert({
+          subject_id: input.subjectId,
+          grantee_user_id: lookup.userId,
+          grantee_name: lookup.name,
+          grantee_email: input.granteeEmail,
+          scope: input.scope,
+          granted_by: userId,
+        })
+        .select()
+        .single(),
+    ) as {
+      id: string;
+      subject_id: string;
+      grantee_user_id: string;
+      scope: AccessGrant["scope"];
+      created_at: string;
+    };
+    return {
+      id: row.id,
+      subjectId: row.subject_id,
+      granteeUserId: row.grantee_user_id,
+      granteeName: lookup.name,
+      granteeEmail: input.granteeEmail,
+      scope: row.scope,
+      grantedAt: row.created_at,
+    };
+  },
+
+  async revokeAccessGrant(id) {
+    const sb = getSupabaseBrowserClient();
+    unwrap(
+      await sb.from("access_grants").update({ revoked_at: new Date().toISOString() }).eq("id", id),
+    );
   },
 
   async getLifestyleProfile() {

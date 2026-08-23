@@ -139,7 +139,14 @@ auto-sync.**
   Takes a `token`, service-role throughout since the caller has no
   session at all. Validates expiry/revocation, logs the access, returns
   a scope-filtered read-only view. No secrets beyond the auto-injected
-  service-role key. Not yet deployed — see Stage 9 above.
+  service-role key. Deployed, verified live.
+- **`lookup-user-by-email`** — the one narrow exception to `profiles`
+  RLS's self-only read policy. Used by the household/access-grant feature
+  to resolve a family member's email to their user id when granting them
+  access to a subject. Requires the caller to already be signed in (blocks
+  anonymous enumeration), returns only `{ found, userId, name }` — never
+  anything else about the target account. Not yet deployed — see
+  "Household / family risk graph" below.
 
 ## Current status against `docs/MASTER-BUILD-SPEC.md` Section 2
 
@@ -318,6 +325,39 @@ status changes, don't let this drift from reality.)
   ibuprofen) is correctly detected as severity `major` against real
   inserted medications, with no false positive on an unrelated
   medication (Vitamin D3). All checks passed.
+- **Household / family risk graph (V2, not in the original numbered
+  stages): Built, not yet deployed/verified.** The privacy policy
+  (`/privacy` §7) already promised "an adult account holder managing
+  health records for a dependent... who doesn't have their own login" —
+  the schema (`health_subjects` kind=dependent, `households`,
+  `household_members`, `access_grants`) fully supported this already, but
+  **no UI existed to actually use it**, discovered while investigating why
+  most dashboard pages looked empty on a real account (they weren't
+  broken — a fresh signup just starts with zero data everywhere; this
+  gap was found alongside that, not caused by it). Built: `/family` page
+  now has a real household graph (pure-CSS org-chart, no graph library —
+  you as the root node, dependents as children, connected by real
+  `owner_user_id` ownership, each node showing a live risk badge from the
+  same `computeRiskFactors()` engine as `getRisks()`, generalized via a
+  new `computeRisksForSubject(subjectId)` helper in `supabase.ts` so it
+  works for any subject, not just self). "Add dependent" creates a real
+  `health_subjects` row. Clicking a node opens who has access to that
+  person's records (`access_grants`) with a real grant/revoke flow —
+  granting requires the grantee to already have a Raag account (resolved
+  by email via the new `lookup-user-by-email` Edge Function, since
+  `profiles` RLS blocks looking up other users directly); their
+  name/email are denormalized onto the grant row at creation time
+  (`0012_access_grant_denorm.sql`) since there's no RLS-permitted way to
+  read them back from `profiles` later. Deliberately doesn't support
+  inviting someone who doesn't have an account yet — that needs a real
+  invite-token flow (email delivery, pending-invite state), a bigger
+  feature than this pass scoped. Typechecked, linted, built clean.
+  **User still needs to**: run `0012_access_grant_denorm.sql`,
+  paste-and-deploy `lookup-user-by-email`, then run
+  `npm run verify:household` (add dependent → grantee has zero access
+  before granting → grant → grantee can view but not edit under
+  `summary` scope → an unrelated third user sees nothing → revoke →
+  access actually gone) before trusting this live.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

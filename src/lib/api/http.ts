@@ -106,6 +106,12 @@ export const httpApi: RaagApi = {
   addFamilyMember: (input) => post("/family-history", input),
   getRisks: () => get("/risks"),
 
+  getHouseholdMembers: () => get("/household"),
+  addDependent: (input) => post("/household/dependents", input),
+  getAccessGrants: (subjectId) => get(`/household/${subjectId}/access-grants`),
+  grantAccess: (input) => post("/household/access-grants", input),
+  revokeAccessGrant: (id) => post(`/household/access-grants/${id}/revoke`, {}),
+
   getLifestyleProfile: () => get("/lifestyle"),
   updateLifestyleProfile: (p) => patch("/lifestyle", p),
 

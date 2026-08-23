@@ -33,6 +33,7 @@ import {
 } from "../mock-db";
 import type { RaagApi } from "./contract";
 import type {
+  AccessGrant,
   Appointment,
   AppNotification,
   CareTeamMember,
@@ -40,6 +41,7 @@ import type {
   ConsentSettings,
   FamilyMember,
   Goal,
+  HouseholdMember,
   Insight,
   LifestyleProfile,
   MedicalRecord,
@@ -86,6 +88,10 @@ const state = {
   notifications: [...mockNotifications] as AppNotification[],
   insights: seedInsights.map((i) => ({ ...i, id: String(i.id) })) as Insight[],
   shareLinks: [] as ShareLink[],
+  household: [
+    { id: "u1", name: seedUser.name, kind: "self", age: seedUser.age, riskLevel: "None" },
+  ] as HouseholdMember[],
+  accessGrants: [] as AccessGrant[],
   careTeam: [...mockCareTeam] as CareTeamMember[],
   chat: [...seedChat] as ChatMessage[],
   familyHistory: [...familyHistory] as FamilyMember[],
@@ -288,6 +294,45 @@ export const mockApi: RaagApi = {
     return wait(member, 300);
   },
   getRisks: () => wait(risks),
+
+  getHouseholdMembers: () => wait(state.household),
+  addDependent: (input) => {
+    const member: HouseholdMember = {
+      id: uid("dep"),
+      name: input.name,
+      kind: "dependent",
+      relation: input.relation,
+      age: input.dateOfBirth
+        ? new Date().getFullYear() - new Date(input.dateOfBirth).getFullYear()
+        : undefined,
+      riskLevel: "None",
+    };
+    state.household = [...state.household, member];
+    return wait(member, 300);
+  },
+  getAccessGrants: (subjectId) => wait(state.accessGrants.filter((g) => g.subjectId === subjectId)),
+  grantAccess: (input) => {
+    if (input.granteeEmail.toLowerCase() === state.profile.email.toLowerCase()) {
+      return Promise.reject(new Error("You can't grant access to your own account."));
+    }
+    const grant: AccessGrant = {
+      id: uid("grant"),
+      subjectId: input.subjectId,
+      granteeUserId: uid("user"),
+      granteeName: input.granteeEmail.split("@")[0] ?? "Family member",
+      granteeEmail: input.granteeEmail,
+      scope: input.scope,
+      grantedAt: new Date().toISOString(),
+    };
+    state.accessGrants = [...state.accessGrants, grant];
+    return wait(grant, 300);
+  },
+  revokeAccessGrant: (id) => {
+    state.accessGrants = state.accessGrants.map((g) =>
+      g.id === id ? { ...g, revokedAt: new Date().toISOString() } : g,
+    );
+    return wait(undefined, 150);
+  },
 
   getLifestyleProfile: () => wait(state.lifestyle),
   updateLifestyleProfile: (patch) => {

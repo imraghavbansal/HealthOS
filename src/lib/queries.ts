@@ -6,6 +6,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { toast } from "sonner";
 import { api } from "./api";
 import type {
+  AddDependentInput,
   Appointment,
   ConsentSettings,
   CreateShareLinkInput,
@@ -49,6 +50,8 @@ export const qk = {
   consent: ["consent"] as const,
   notificationPrefs: ["notification-preferences"] as const,
   shareLinks: ["share-links"] as const,
+  household: ["household"] as const,
+  accessGrants: (subjectId: string) => ["access-grants", subjectId] as const,
 };
 
 /* ---------- queryOptions (usable in route loaders for prefetch) ---------- */
@@ -104,6 +107,10 @@ export const familyQuery = queryOptions({
   queryFn: () => api.getFamilyHistory(),
 });
 export const risksQuery = queryOptions({ queryKey: qk.risks, queryFn: () => api.getRisks() });
+export const householdQuery = queryOptions({
+  queryKey: qk.household,
+  queryFn: () => api.getHouseholdMembers(),
+});
 export const chatQuery = queryOptions({ queryKey: qk.chat, queryFn: () => api.getChatHistory() });
 export const lifestyleQuery = queryOptions({
   queryKey: qk.lifestyle,
@@ -150,6 +157,13 @@ export const useMedications = () => useQuery(medicationsQuery);
 export const useGoals = () => useQuery(goalsQuery);
 export const useFamilyHistory = () => useQuery(familyQuery);
 export const useRisks = () => useQuery(risksQuery);
+export const useHouseholdMembers = () => useQuery(householdQuery);
+export const useAccessGrants = (subjectId: string) =>
+  useQuery({
+    queryKey: qk.accessGrants(subjectId),
+    queryFn: () => api.getAccessGrants(subjectId),
+    enabled: !!subjectId,
+  });
 export const useAppointments = () => useQuery(appointmentsQuery);
 export const useVitals = (kind?: VitalKind) =>
   useQuery({ queryKey: qk.vitals(kind), queryFn: () => api.getVitals(kind) });
@@ -465,5 +479,43 @@ export function useRevokeShareLink() {
       toast.success("Link revoked");
     },
     onError: () => toast.error("Couldn't revoke the link"),
+  });
+}
+
+export function useAddDependent() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (input: AddDependentInput) => api.addDependent(input),
+    onSuccess: (m) => {
+      invalidate(qk.household);
+      toast.success(`${m.name} added to your household`);
+    },
+    onError: () => toast.error("Couldn't add that dependent"),
+  });
+}
+
+export function useGrantAccess() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { subjectId: ID; granteeEmail: string; scope: "summary" | "full" }) =>
+      api.grantAccess(input),
+    onSuccess: (g) => {
+      qc.invalidateQueries({ queryKey: qk.accessGrants(g.subjectId) });
+      toast.success(`Access granted to ${g.granteeEmail}`);
+    },
+    onError: (err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "Couldn't grant access"),
+  });
+}
+
+export function useRevokeAccessGrant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: ID; subjectId: ID }) => api.revokeAccessGrant(id),
+    onSuccess: (_, { subjectId }) => {
+      qc.invalidateQueries({ queryKey: qk.accessGrants(subjectId) });
+      toast.success("Access revoked");
+    },
+    onError: () => toast.error("Couldn't revoke access"),
   });
 }

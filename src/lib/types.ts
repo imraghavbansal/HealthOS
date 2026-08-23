@@ -330,3 +330,36 @@ export interface SharedRecordView {
   symptoms?: { label: string; severity: number; body_area: string | null; started_at: string }[];
   familyHistory?: { relation: string; age: number | null; conditions: string[] | null }[];
 }
+
+/* ---------- household / family risk graph (V2) ---------- */
+
+export interface HouseholdMember {
+  id: ID; // health_subjects.id — same as the user id for kind="self"
+  name: string;
+  kind: "self" | "dependent";
+  relation?: string;
+  age?: number;
+  /** Highest risk level across computeRiskFactors() for this subject —
+   * "None" means either no elevated factors or not enough data yet, not
+   * a diagnosis either way. */
+  riskLevel: "None" | "Low" | "Moderate" | "Elevated" | "High";
+  topRiskFactor?: string;
+}
+
+export interface AddDependentInput {
+  name: string;
+  dateOfBirth?: string;
+  sex?: string;
+  relation?: string;
+}
+
+export interface AccessGrant {
+  id: ID;
+  subjectId: ID;
+  granteeUserId: string;
+  granteeName: string;
+  granteeEmail: string;
+  scope: "full" | "summary" | "specific";
+  grantedAt: ISODate;
+  revokedAt?: ISODate;
+}

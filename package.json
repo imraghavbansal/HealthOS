@@ -16,7 +16,8 @@
     "verify:functions": "node --env-file=.env scripts/verify-new-functions.mjs",
     "verify:insights": "node --env-file=.env scripts/verify-insights-engine.mjs",
     "verify:share-links": "node --env-file=.env scripts/verify-share-links.mjs",
-    "verify:medication-interactions": "node --env-file=.env scripts/verify-medication-interactions.mjs"
+    "verify:medication-interactions": "node --env-file=.env scripts/verify-medication-interactions.mjs",
+    "verify:household": "node --env-file=.env scripts/verify-household.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
