@@ -147,6 +147,16 @@ auto-sync.**
   anonymous enumeration), returns only `{ found, userId, name }` — never
   anything else about the target account. Not yet deployed — see
   "Household / family risk graph" below.
+- **`send-push`** — delivers a real Web Push notification (VAPID + AES-
+  128-GCM via `npm:web-push`, RFC 8291) to every device a user has
+  subscribed from. Two auth paths, same shape as `parse-record`: a
+  shared secret (`PUSH_TRIGGER_SECRET`, compared against an env var —
+  Vault tables aren't exposed via PostgREST, so unlike other secrets
+  this one is NOT read from `vault.decrypted_secrets` inside the
+  function itself) for the automatic pg_net trigger, or the caller's own
+  JWT for a self-test push. Secrets: `VAPID_PUBLIC_KEY`,
+  `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `PUSH_TRIGGER_SECRET`. Not yet
+  deployed — see "Push notifications" below.
 
 ## Current status against `docs/MASTER-BUILD-SPEC.md` Section 2
 
@@ -379,6 +389,44 @@ status changes, don't let this drift from reality.)
   clean; not covered by an automated script itself (pure client-side
   aggregation of already-verified endpoints), so worth one manual look
   once there's enough real data logged to populate every section.
+- **Push notifications (V2, not in the original numbered stages): Built,
+  not yet deployed/verified.** Two gaps closed together, since push is
+  meaningless without something to notify about: (1) **nothing had ever
+  written to `notifications`** — the in-app bell was reading a table
+  nobody inserted into since `0001_init.sql`, discovered while scoping
+  this feature; (2) no push infrastructure existed. `0013_push_notifications.sql`:
+  `push_subscriptions` table (RLS self-only), `notify_subject_owner()`
+  helper (resolves a subject's responsible adult via `owner_user_id` and
+  writes a real `notifications` row), `generate_insights()` extended to
+  call it for each newly-created insight — gated per-insight-kind by the
+  matching `notification_preferences` toggle (trend alerts / new lab
+  results / medication reminders) so turning one off actually stops that
+  notification, not just hides a UI element. Every `notifications` insert
+  fires a fire-and-forget push via a `pg_net` trigger, same established
+  pattern as `0006_ingestion_queue.sql`. New Edge Function `send-push`
+  (VAPID + AES-128-GCM via `npm:web-push`). Client: `public/sw.js`
+  (push + notificationclick only, deliberately no offline caching — a
+  real decision for a health app, not an oversight), `src/lib/push.ts`
+  (subscribe/unsubscribe/test, kept separate from `lib/queries.ts`/
+  `lib/api/*` the same way `lib/auth.ts`/`lib/share.ts` are), a real
+  toggle + "Send test notification" button replacing Settings' old
+  "push delivery arrives with the mobile app" placeholder copy.
+  **Deliberately doesn't cover medication-reminder pushes at a specific
+  time** — `medications.schedule` is free text, not a structured time, so
+  there's nothing reliably schedulable yet; adherence-drop *insights*
+  still notify, actual scheduled reminders are a real gap, not silently
+  dropped. VAPID key pair already generated (public key committed to
+  `.env`/`.env.example` since it's genuinely public by design; private
+  key and a generated `PUSH_TRIGGER_SECRET` were handed to the user in
+  chat, never written to the repo). Typechecked, linted, and production-
+  built clean. **User still needs to**: run `0013_push_notifications.sql`,
+  create the `push_trigger_secret` Vault entry, paste-and-deploy
+  `send-push` with its four secrets, add `VITE_VAPID_PUBLIC_KEY` to
+  Vercel, then run `npm run verify:push-notifications` (push_subscriptions
+  CRUD + RLS, confirms `generate_insights()` now writes a real
+  notification) — that script can't verify actual delivery (needs a real
+  browser-issued subscription), so a manual check via Settings → "Send
+  test notification" is the real final step.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/
