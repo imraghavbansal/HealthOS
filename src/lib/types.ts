@@ -178,13 +178,7 @@ export interface Appointment {
 }
 
 export type VitalKind =
-  | "weight"
-  | "bloodPressure"
-  | "restingHr"
-  | "spo2"
-  | "temperature"
-  | "glucose"
-  | "mood";
+  "weight" | "bloodPressure" | "restingHr" | "spo2" | "temperature" | "glucose" | "mood";
 
 export interface VitalEntry {
   id: ID;
@@ -276,4 +270,63 @@ export interface ChatMessage {
   citations?: Citation[];
   createdAt?: ISODate;
   pending?: boolean;
+}
+
+export type ShareScope = "summary" | "labs" | "medications" | "full";
+
+export interface ShareLink {
+  id: ID;
+  token: string;
+  label?: string;
+  scope: ShareScope;
+  expiresAt: ISODate;
+  revokedAt?: ISODate;
+  lastAccessedAt?: ISODate;
+  accessCount: number;
+  createdAt: ISODate;
+}
+
+export interface CreateShareLinkInput {
+  label?: string;
+  scope: ShareScope;
+  expiresInDays: number;
+}
+
+/** The read-only view a share-link visitor sees — assembled server-side
+ * by the get-shared-record Edge Function, never fetched through RaagApi
+ * (the visitor has no session at all). See src/lib/share.ts. */
+export interface SharedRecordView {
+  subjectName: string;
+  age: number | null;
+  sex: string | null;
+  bloodType: string | null;
+  activeConditions: { name: string; status: string; diagnosed_at: string | null }[];
+  currentMedications: {
+    id: string;
+    name: string;
+    dose: string | null;
+    schedule: string | null;
+    type: string;
+    active: boolean;
+  }[];
+  latestVitals: {
+    kind: string;
+    value: number;
+    secondary: number | null;
+    unit: string;
+    recorded_at: string;
+  }[];
+  scope: ShareScope;
+  generatedAt: ISODate;
+  labMarkers?: {
+    name: string;
+    value: number;
+    unit: string;
+    range_low: number | null;
+    range_high: number | null;
+    collected_at: string;
+  }[];
+  doseLogs?: { medication_id: string; taken_at: string; skipped: boolean }[];
+  symptoms?: { label: string; severity: number; body_area: string | null; started_at: string }[];
+  familyHistory?: { relation: string; age: number | null; conditions: string[] | null }[];
 }

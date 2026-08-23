@@ -135,6 +135,10 @@ export const httpApi: RaagApi = {
 
   requestReport: (r) => post("/reports", r),
 
+  getShareLinks: () => get("/share-links"),
+  createShareLink: (input) => post("/share-links", input),
+  revokeShareLink: (id) => post(`/share-links/${id}/revoke`, {}),
+
   getConsentSettings: () => get("/account/consent"),
   updateConsentSettings: (p) => patch("/account/consent", p),
   getNotificationPreferences: () => get("/account/notification-preferences"),

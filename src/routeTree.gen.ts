@@ -27,6 +27,7 @@ import { Route as RecordsRouteImport } from './routes/records'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ShareRouteImport } from './routes/share'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SymptomsRouteImport } from './routes/symptoms'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -34,6 +35,7 @@ import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VitalsRouteImport } from './routes/vitals'
 import { Route as WearablesRouteImport } from './routes/wearables'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as SharedTokenRouteImport } from './routes/shared.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -125,6 +127,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareRoute = ShareRouteImport.update({
+  id: '/share',
+  path: '/share',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -160,6 +167,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SharedTokenRoute = SharedTokenRouteImport.update({
+  id: '/shared/$token',
+  path: '/shared/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -180,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/share': typeof ShareRoute
   '/signup': typeof SignupRoute
   '/symptoms': typeof SymptomsRoute
   '/terms': typeof TermsRoute
@@ -187,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/vitals': typeof VitalsRoute
   '/wearables': typeof WearablesRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/shared/$token': typeof SharedTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -207,6 +221,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/share': typeof ShareRoute
   '/signup': typeof SignupRoute
   '/symptoms': typeof SymptomsRoute
   '/terms': typeof TermsRoute
@@ -214,6 +229,7 @@ export interface FileRoutesByTo {
   '/vitals': typeof VitalsRoute
   '/wearables': typeof WearablesRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/shared/$token': typeof SharedTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -235,6 +251,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/share': typeof ShareRoute
   '/signup': typeof SignupRoute
   '/symptoms': typeof SymptomsRoute
   '/terms': typeof TermsRoute
@@ -242,6 +259,7 @@ export interface FileRoutesById {
   '/vitals': typeof VitalsRoute
   '/wearables': typeof WearablesRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/shared/$token': typeof SharedTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -264,6 +282,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/settings'
+    | '/share'
     | '/signup'
     | '/symptoms'
     | '/terms'
@@ -271,6 +290,7 @@ export interface FileRouteTypes {
     | '/vitals'
     | '/wearables'
     | '/auth/callback'
+    | '/shared/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -291,6 +311,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/settings'
+    | '/share'
     | '/signup'
     | '/symptoms'
     | '/terms'
@@ -298,6 +319,7 @@ export interface FileRouteTypes {
     | '/vitals'
     | '/wearables'
     | '/auth/callback'
+    | '/shared/$token'
   id:
     | '__root__'
     | '/'
@@ -318,6 +340,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/reset-password'
     | '/settings'
+    | '/share'
     | '/signup'
     | '/symptoms'
     | '/terms'
@@ -325,6 +348,7 @@ export interface FileRouteTypes {
     | '/vitals'
     | '/wearables'
     | '/auth/callback'
+    | '/shared/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -346,6 +370,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
+  ShareRoute: typeof ShareRoute
   SignupRoute: typeof SignupRoute
   SymptomsRoute: typeof SymptomsRoute
   TermsRoute: typeof TermsRoute
@@ -353,6 +378,7 @@ export interface RootRouteChildren {
   VitalsRoute: typeof VitalsRoute
   WearablesRoute: typeof WearablesRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  SharedTokenRoute: typeof SharedTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -483,6 +509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share': {
+      id: '/share'
+      path: '/share'
+      fullPath: '/share'
+      preLoaderRoute: typeof ShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -532,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shared/$token': {
+      id: '/shared/$token'
+      path: '/shared/$token'
+      fullPath: '/shared/$token'
+      preLoaderRoute: typeof SharedTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -554,6 +594,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
+  ShareRoute: ShareRoute,
   SignupRoute: SignupRoute,
   SymptomsRoute: SymptomsRoute,
   TermsRoute: TermsRoute,
@@ -561,6 +602,7 @@ const rootRouteChildren: RootRouteChildren = {
   VitalsRoute: VitalsRoute,
   WearablesRoute: WearablesRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  SharedTokenRoute: SharedTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

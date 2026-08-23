@@ -46,6 +46,7 @@ import type {
   Medication,
   NotificationPreferences,
   NutritionEntry,
+  ShareLink,
   SymptomEntry,
   UserProfile,
   VitalEntry,
@@ -84,6 +85,7 @@ const state = {
   waterMl: 1450,
   notifications: [...mockNotifications] as AppNotification[],
   insights: seedInsights.map((i) => ({ ...i, id: String(i.id) })) as Insight[],
+  shareLinks: [] as ShareLink[],
   careTeam: [...mockCareTeam] as CareTeamMember[],
   chat: [...seedChat] as ChatMessage[],
   familyHistory: [...familyHistory] as FamilyMember[],
@@ -358,6 +360,27 @@ export const mockApi: RaagApi = {
   },
 
   requestReport: () => wait({ id: uid("rep"), status: "queued" as const }, 800),
+
+  getShareLinks: () => wait(state.shareLinks),
+  createShareLink: (input) => {
+    const link: ShareLink = {
+      id: uid("share"),
+      token: Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+      label: input.label,
+      scope: input.scope,
+      expiresAt: new Date(Date.now() + input.expiresInDays * 24 * 60 * 60 * 1000).toISOString(),
+      accessCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    state.shareLinks = [link, ...state.shareLinks];
+    return wait(link, 300);
+  },
+  revokeShareLink: (id) => {
+    state.shareLinks = state.shareLinks.map((l) =>
+      l.id === id ? { ...l, revokedAt: new Date().toISOString() } : l,
+    );
+    return wait(undefined, 150);
+  },
 
   getConsentSettings: () => wait(state.consent),
   updateConsentSettings: (patch) => {

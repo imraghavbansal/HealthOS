@@ -135,6 +135,11 @@ auto-sync.**
   account can no longer sign in.
 - **`request-report`** — referenced by `requestReport()` in the contract,
   **not built yet**. Reports page will error/queue-forever if used for real.
+- **`get-shared-record`** — the public side of share links (Stage 9).
+  Takes a `token`, service-role throughout since the caller has no
+  session at all. Validates expiry/revocation, logs the access, returns
+  a scope-filtered read-only view. No secrets beyond the auto-injected
+  service-role key. Not yet deployed — see Stage 9 above.
 
 ## Current status against `docs/MASTER-BUILD-SPEC.md` Section 2
 
@@ -251,7 +256,27 @@ status changes, don't let this drift from reality.)
   trip — typechecked and built, not covered by that script; still needs
   a real manual check that a signed-in account with real data renders
   sane-looking risk cards, not just that the function doesn't throw.
-- **Stage 9 (share links): Not started.**
+- **Stage 9 (share links): Built, not yet deployed/verified.** Schema:
+  `share_links` (server-generated token via `pgcrypto`'s
+  `gen_random_bytes`, never client-chosen; `scope` one of
+  summary/labs/medications/full; `expires_at`/`revoked_at`/`access_count`/
+  `last_accessed_at`) + `share_link_access_log`, both in
+  `0010_share_links.sql` — **not yet run** by the user. Owner-side
+  management (create/list/revoke) is real RLS-scoped table access via
+  `getShareLinks`/`createShareLink`/`revokeShareLink` in the contract,
+  wired into a new `/share` page (nav entry added to `AppShell`). The
+  public viewer side (`/shared/$token`, no AppShell, no session) goes
+  through a **new Edge Function `get-shared-record`** — service-role,
+  since RLS has nothing to authorize an anonymous visitor against, checks
+  expiry/revocation itself, logs every access, and deliberately never
+  exposes uploaded documents/files at any scope level (only structured
+  data). `src/lib/share.ts` is the client-side fetch helper, kept
+  separate from `lib/queries.ts`/`lib/api/*` the same way `lib/auth.ts`
+  is — the viewer has no session for those to assume. **User still needs
+  to**: run `0010_share_links.sql`, paste-and-deploy `get-shared-record`,
+  then run `npm run verify:share-links` (create → anonymous fetch →
+  scope filtering → access logging → bogus/revoked/expired rejection →
+  cross-user isolation) before trusting this live.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

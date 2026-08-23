@@ -2,15 +2,13 @@
  * Supabase adapter — real, persisted data. Schema + RLS: see
  * supabase/migrations/0001_init.sql. Product context: docs/PRODUCT-VISION.md.
  *
- * Scope note: a couple of RaagApi surfaces still don't have a real data
- * source and are called out inline — honest empty results, not fabricated
- * demo data:
+ * Scope note: one RaagApi surface still doesn't have a real data source
+ * and is called out inline — honest empty results, not fabricated demo
+ * data:
  *   - getSleep / getActivity: wait on wearable ingestion (V2, not started)
- *   - getRisks: wait on a rule-based risk engine (V2, not started —
- *     getInsights already ships one, see 0009_insights_engine.sql)
  * Everything else — profile, records, labs, meds, vitals, symptoms, goals,
  * appointments, nutrition, family history, notifications, care team,
- * insights, ai-chat — is fully real today.
+ * insights, risks, share links, ai-chat — is fully real today.
  */
 import { getSupabaseBrowserClient } from "../supabase/client";
 import { getMySubjectId, getCurrentUserId } from "../supabase/subject";
@@ -34,6 +32,7 @@ import type {
   Medication,
   MedicalRecord,
   NutritionEntry,
+  ShareLink,
   SymptomEntry,
   UserProfile,
   VitalEntry,
@@ -1168,6 +1167,87 @@ export const supabaseApi: RaagApi = {
     const { data, error } = await sb.functions.invoke("request-report", { body: req });
     if (error) throw error;
     return data as { id: string; status: "queued" };
+  },
+
+  async getShareLinks() {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const rows = unwrap(
+      await sb
+        .from("share_links")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .order("created_at", { ascending: false }),
+    ) as {
+      id: string;
+      token: string;
+      label: string | null;
+      scope: ShareLink["scope"];
+      expires_at: string;
+      revoked_at: string | null;
+      last_accessed_at: string | null;
+      access_count: number;
+      created_at: string;
+    }[];
+    return rows.map((r): ShareLink => ({
+      id: r.id,
+      token: r.token,
+      label: r.label ?? undefined,
+      scope: r.scope,
+      expiresAt: r.expires_at,
+      revokedAt: r.revoked_at ?? undefined,
+      lastAccessedAt: r.last_accessed_at ?? undefined,
+      accessCount: r.access_count,
+      createdAt: r.created_at,
+    }));
+  },
+  async createShareLink(input) {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const userId = await getCurrentUserId();
+    const expiresAt = new Date(
+      Date.now() + input.expiresInDays * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const row = unwrap(
+      await sb
+        .from("share_links")
+        .insert({
+          subject_id: subjectId,
+          created_by: userId,
+          label: input.label,
+          scope: input.scope,
+          expires_at: expiresAt,
+        })
+        .select()
+        .single(),
+    ) as {
+      id: string;
+      token: string;
+      label: string | null;
+      scope: ShareLink["scope"];
+      expires_at: string;
+      revoked_at: string | null;
+      last_accessed_at: string | null;
+      access_count: number;
+      created_at: string;
+    };
+    return {
+      id: row.id,
+      token: row.token,
+      label: row.label ?? undefined,
+      scope: row.scope,
+      expiresAt: row.expires_at,
+      revokedAt: row.revoked_at ?? undefined,
+      lastAccessedAt: row.last_accessed_at ?? undefined,
+      accessCount: row.access_count,
+      createdAt: row.created_at,
+    };
+  },
+  async revokeShareLink(id) {
+    const sb = getSupabaseBrowserClient();
+    unwrap(
+      await sb.from("share_links").update({ revoked_at: new Date().toISOString() }).eq("id", id),
+    );
   },
 
   async getConsentSettings() {

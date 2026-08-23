@@ -8,6 +8,7 @@ import { api } from "./api";
 import type {
   Appointment,
   ConsentSettings,
+  CreateShareLinkInput,
   FamilyMember,
   Goal,
   ID,
@@ -47,6 +48,7 @@ export const qk = {
   lifestyle: ["lifestyle"] as const,
   consent: ["consent"] as const,
   notificationPrefs: ["notification-preferences"] as const,
+  shareLinks: ["share-links"] as const,
 };
 
 /* ---------- queryOptions (usable in route loaders for prefetch) ---------- */
@@ -115,6 +117,10 @@ export const notificationPrefsQuery = queryOptions({
   queryKey: qk.notificationPrefs,
   queryFn: () => api.getNotificationPreferences(),
 });
+export const shareLinksQuery = queryOptions({
+  queryKey: qk.shareLinks,
+  queryFn: () => api.getShareLinks(),
+});
 
 /* ---------- read hooks ---------- */
 export const useProfile = () => useQuery(profileQuery);
@@ -156,6 +162,7 @@ export const useChatHistory = () => useQuery(chatQuery);
 export const useLifestyleProfile = () => useQuery(lifestyleQuery);
 export const useConsentSettings = () => useQuery(consentQuery);
 export const useNotificationPreferences = () => useQuery(notificationPrefsQuery);
+export const useShareLinks = () => useQuery(shareLinksQuery);
 
 /* ---------- mutations ---------- */
 function useInvalidate() {
@@ -434,5 +441,29 @@ export function useSendChatMessage() {
       api.sendChatMessage(content, onDelta),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.chat }),
     onError: () => toast.error("The assistant is unavailable right now"),
+  });
+}
+
+export function useCreateShareLink() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (input: CreateShareLinkInput) => api.createShareLink(input),
+    onSuccess: () => {
+      invalidate(qk.shareLinks);
+      toast.success("Share link created");
+    },
+    onError: () => toast.error("Couldn't create the share link"),
+  });
+}
+
+export function useRevokeShareLink() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (id: ID) => api.revokeShareLink(id),
+    onSuccess: () => {
+      invalidate(qk.shareLinks);
+      toast.success("Link revoked");
+    },
+    onError: () => toast.error("Couldn't revoke the link"),
   });
 }

@@ -12,6 +12,7 @@ import type {
   CareTeamMember,
   ChatMessage,
   ConsentSettings,
+  CreateShareLinkInput,
   FamilyMember,
   Goal,
   HealthScore,
@@ -26,6 +27,7 @@ import type {
   NutritionTargets,
   ReportRequest,
   RiskFactor,
+  ShareLink,
   SleepPoint,
   SymptomEntry,
   TimelineEvent,
@@ -105,6 +107,12 @@ export interface RaagApi {
   setCareSharing(id: ID, sharing: boolean): Promise<CareTeamMember>;
 
   requestReport(req: ReportRequest): Promise<{ id: ID; status: "queued" }>;
+
+  /* share links (owner-side management; the public viewer side never goes
+     through this contract — no session exists for it, see src/lib/share.ts) */
+  getShareLinks(): Promise<ShareLink[]>;
+  createShareLink(input: CreateShareLinkInput): Promise<ShareLink>;
+  revokeShareLink(id: ID): Promise<void>;
 
   /* account */
   getConsentSettings(): Promise<ConsentSettings>;

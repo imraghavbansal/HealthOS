@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "verify:supabase": "node --env-file=.env scripts/verify-supabase.mjs",
     "verify:functions": "node --env-file=.env scripts/verify-new-functions.mjs",
-    "verify:insights": "node --env-file=.env scripts/verify-insights-engine.mjs"
+    "verify:insights": "node --env-file=.env scripts/verify-insights-engine.mjs",
+    "verify:share-links": "node --env-file=.env scripts/verify-share-links.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

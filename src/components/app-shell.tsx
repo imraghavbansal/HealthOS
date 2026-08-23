@@ -14,6 +14,7 @@ import {
   Pill,
   Search,
   Settings,
+  Share2,
   Sparkles,
   Stethoscope,
   Sun,
@@ -81,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/family", label: "Family & Risk", icon: Users },
       { to: "/reports", label: "Reports", icon: FileBarChart },
+      { to: "/share", label: "Share Links", icon: Share2 },
       { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -132,7 +134,11 @@ export function AppShell({
   }
 
   if (checkingSession) {
-    return <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">Checking your session…</div>;
+    return (
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
+        Checking your session…
+      </div>
+    );
   }
 
   return (
@@ -154,7 +160,9 @@ export function AppShell({
             </div>
             <div>
               <div className="text-sm font-semibold tracking-tight">Raag</div>
-              <div className="text-[10px] tracking-widest text-muted-foreground uppercase">Personal OS</div>
+              <div className="text-[10px] tracking-widest text-muted-foreground uppercase">
+                Personal OS
+              </div>
             </div>
           </Link>
 
@@ -186,7 +194,9 @@ export function AppShell({
                         )}
                         <Icon className={`relative z-10 h-4 w-4 ${active ? "text-primary" : ""}`} />
                         <span className="relative z-10 font-medium">{label}</span>
-                        {active && <span className="relative z-10 ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+                        {active && (
+                          <span className="relative z-10 ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
+                        )}
                       </Link>
                     );
                   })}
@@ -203,7 +213,9 @@ export function AppShell({
               Insights are informational and not a substitute for medical advice.
             </p>
             {IS_DEMO && (
-              <Badge className="mt-3 rounded-full bg-warning/20 text-[10px] text-warning-foreground">Demo data</Badge>
+              <Badge className="mt-3 rounded-full bg-warning/20 text-[10px] text-warning-foreground">
+                Demo data
+              </Badge>
             )}
           </div>
         </aside>
@@ -218,7 +230,9 @@ export function AppShell({
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))}
+                  onClick={() =>
+                    window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))
+                  }
                   className="hidden items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground transition hover:bg-muted md:flex"
                   aria-label="Open command palette"
                 >
@@ -228,7 +242,13 @@ export function AppShell({
                   </kbd>
                 </button>
                 {actions}
-                <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme" className="rounded-full">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggle}
+                  aria-label="Toggle theme"
+                  className="rounded-full"
+                >
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                       key={theme}
@@ -238,7 +258,11 @@ export function AppShell({
                       transition={{ duration: 0.2 }}
                       className="grid place-items-center"
                     >
-                      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                      {theme === "dark" ? (
+                        <Sun className="h-4 w-4" />
+                      ) : (
+                        <Moon className="h-4 w-4" />
+                      )}
                     </motion.span>
                   </AnimatePresence>
                 </Button>
@@ -257,7 +281,9 @@ export function AppShell({
                     <DropdownMenuContent align="end" className="w-56">
                       <DropdownMenuLabel className="font-normal">
                         <div className="text-sm font-medium truncate">{profile.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{profile.email}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {profile.email}
+                        </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
@@ -271,7 +297,10 @@ export function AppShell({
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+                      <DropdownMenuItem
+                        onClick={handleSignOut}
+                        className="text-destructive focus:text-destructive"
+                      >
                         <LogOut className="mr-2 h-4 w-4" /> Sign out
                       </DropdownMenuItem>
                     </DropdownMenuContent>
