@@ -4,11 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AsyncBoundary, EmptyState } from "@/components/data-states";
-import { Stagger, StaggerItem, motion } from "@/components/motion";
-import { useToggleWearable, useWearables } from "@/lib/queries";
+import { Stagger, StaggerItem } from "@/components/motion";
+import { useWearables } from "@/lib/queries";
 import type { WearableConnection } from "@/lib/types";
-import { Loader2, Watch } from "lucide-react";
-import { useState } from "react";
+import { Watch } from "lucide-react";
 
 export const Route = createFileRoute("/wearables")({
   head: () => ({
@@ -26,9 +25,20 @@ function Wearables() {
   const wearablesQuery = useWearables();
   return (
     <AppShell title="Wearables & Devices" subtitle="One dashboard for every ecosystem.">
+      <div className="mb-5 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-xs text-warning-foreground">
+        Wearable sync isn't live yet — connecting a provider here doesn't pull in real data until a
+        wearable aggregator account (Vital or Terra) is set up. The schema and sync pipeline are
+        already built and ready; this is genuinely "coming soon," not a working feature in disguise.
+      </div>
       <AsyncBoundary
         query={wearablesQuery}
-        empty={<EmptyState icon={Watch} title="No devices found" body="Connect a wearable to see your data here." />}
+        empty={
+          <EmptyState
+            icon={Watch}
+            title="No devices found"
+            body="Connect a wearable to see your data here."
+          />
+        }
       >
         {(wearables) => <WearablesBody wearables={wearables} />}
       </AsyncBoundary>
@@ -37,8 +47,6 @@ function Wearables() {
 }
 
 function WearablesBody({ wearables }: { wearables: WearableConnection[] }) {
-  const toggle = useToggleWearable();
-  const [pendingName, setPendingName] = useState<string | null>(null);
   const connectedCount = wearables.filter((w) => w.connected).length;
 
   return (
@@ -50,34 +58,21 @@ function WearablesBody({ wearables }: { wearables: WearableConnection[] }) {
             <div className="text-xs text-muted-foreground">Sync status across your ecosystem</div>
           </div>
           <div className="font-display text-2xl">
-            {connectedCount} <span className="text-sm text-muted-foreground">of {wearables.length}</span>
+            {connectedCount}{" "}
+            <span className="text-sm text-muted-foreground">of {wearables.length}</span>
           </div>
         </CardContent>
       </Card>
 
       <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {wearables.map((w) => {
-          const isPending = toggle.isPending && pendingName === w.name;
           return (
             <StaggerItem key={w.name}>
-              <Card className="rounded-3xl border-border/60 overflow-hidden">
+              <Card className="rounded-3xl border-border/60 overflow-hidden opacity-70">
                 <div className={`h-24 bg-gradient-to-br ${w.color} relative`}>
                   <div className="absolute inset-0 grid place-items-center text-white/95">
                     <Watch className="h-8 w-8" />
                   </div>
-                  {w.connected && (
-                    <span className="absolute top-3 right-3 flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full bg-white/25 text-white backdrop-blur">
-                      <span className="relative flex h-2 w-2">
-                        <motion.span
-                          className="absolute inline-flex h-full w-full rounded-full bg-white/80"
-                          animate={{ scale: [1, 1.8], opacity: [0.8, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                        />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
-                      </span>
-                      Live
-                    </span>
-                  )}
                 </div>
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between">
@@ -85,26 +80,16 @@ function WearablesBody({ wearables }: { wearables: WearableConnection[] }) {
                       <div className="font-semibold">{w.name}</div>
                       <div className="text-xs text-muted-foreground">{w.desc}</div>
                     </div>
-                    <Badge className={`rounded-full text-[10px] ${w.connected ? "bg-success/20 text-success-foreground" : "bg-muted text-muted-foreground"}`}>
-                      {w.connected ? "Connected" : "Disconnected"}
+                    <Badge variant="outline" className="rounded-full text-[10px]">
+                      Coming soon
                     </Badge>
                   </div>
                   <div className="mt-4 flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">Last sync · {w.last}</div>
-                    <Button
-                      size="sm"
-                      variant={w.connected ? "outline" : "default"}
-                      className={`rounded-full ${w.connected ? "" : "gradient-primary text-white border-0"}`}
-                      disabled={isPending}
-                      onClick={() => {
-                        setPendingName(w.name);
-                        toggle.mutate(
-                          { name: w.name, connect: !w.connected },
-                          { onSettled: () => setPendingName(null) },
-                        );
-                      }}
-                    >
-                      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : w.connected ? "Manage" : "Connect"}
+                    <div className="text-xs text-muted-foreground">
+                      Needs a wearable aggregator account
+                    </div>
+                    <Button size="sm" variant="outline" className="rounded-full" disabled>
+                      Connect
                     </Button>
                   </div>
                 </CardContent>

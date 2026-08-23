@@ -261,12 +261,59 @@ export const supabaseApi: RaagApi = {
     unwrap(await sb.from("insights").update({ dismissed: true }).eq("id", id));
   },
 
-  // Wait on wearable sync (V2) — no fabricated series in the meantime.
-  async getSleep() {
-    return [];
+  // Real tables (0014_wearables_architecture.sql) — genuinely empty
+  // until a wearable aggregator account exists and wearable-webhook is
+  // wired up (see CLAUDE.md), not hardcoded. Whatever's actually in
+  // sleep_entries/activity_entries renders, including anything inserted
+  // for local testing before a real provider is connected. Caught
+  // separately from the usual unwrap() pattern: the migration is
+  // deliberately optional to run right away (the user doesn't have a
+  // wearables account yet), so a not-yet-applied migration must degrade
+  // to an empty result here, the same as it always has, not throw and
+  // break the dashboard's sleep/activity cards.
+  async getSleep(range = "7d") {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const days = range === "90d" ? 90 : range === "30d" ? 30 : 7;
+    const { data, error } = await sb
+      .from("sleep_entries")
+      .select("date, total_minutes, deep_minutes")
+      .eq("subject_id", subjectId)
+      .gte("date", new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
+      .order("date", { ascending: true });
+    if (error) {
+      console.warn(
+        "getSleep: sleep_entries not queryable yet (migration 0014 not applied?):",
+        error.message,
+      );
+      return [];
+    }
+    const rows = data as { date: string; total_minutes: number; deep_minutes: number | null }[];
+    return rows.map((r) => ({
+      day: r.date,
+      hours: Math.round((r.total_minutes / 60) * 10) / 10,
+      deep: Math.round(((r.deep_minutes ?? 0) / 60) * 10) / 10,
+    }));
   },
-  async getActivity() {
-    return [];
+  async getActivity(range = "7d") {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const days = range === "90d" ? 90 : range === "30d" ? 30 : 7;
+    const { data, error } = await sb
+      .from("activity_entries")
+      .select("date, steps, calories_burned")
+      .eq("subject_id", subjectId)
+      .gte("date", new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
+      .order("date", { ascending: true });
+    if (error) {
+      console.warn(
+        "getActivity: activity_entries not queryable yet (migration 0014 not applied?):",
+        error.message,
+      );
+      return [];
+    }
+    const rows = data as { date: string; steps: number | null; calories_burned: number | null }[];
+    return rows.map((r) => ({ day: r.date, steps: r.steps ?? 0, cal: r.calories_burned ?? 0 }));
   },
 
   async getLabMarkers() {

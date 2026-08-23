@@ -28,7 +28,7 @@ Original architecture handoff (now partially superseded by this file): **`docs/H
 `docs/MASTER-BUILD-SPEC.md`.** Read this for the required build order,
 non-negotiable AI guardrails, "definition of done" checklist, latency
 requirements, and the required status-report format. This file tracks
-progress *against* that spec.
+progress _against_ that spec.
 
 ## Stack
 
@@ -85,6 +85,7 @@ credentials never pass through Claude). Migrations so far:
 
 **Regression tests, not throwaway scripts** — re-run after any schema/
 function change:
+
 - `npm run verify:supabase` — schema presence, signup bootstrap trigger,
   persistence, cross-user RLS isolation (actually attempts the attack),
   unauthenticated failure cases, audit-log append-only. 24 checks.
@@ -120,7 +121,7 @@ auto-sync.**
   documentId the queue selected). Secrets: `ANTHROPIC_API_KEY`,
   `INTERNAL_QUEUE_SECRET`.
 - **`ai-chat`** — "Ask Raag". Deterministic red-flag symptom check runs
-  *before* any model call (chest pain, stroke signs, suicidal ideation,
+  _before_ any model call (chest pain, stroke signs, suicidal ideation,
   anaphylaxis, etc. — see the pattern list in the file) and returns
   emergency guidance without touching Claude at all — verified to work
   even with zero API credit. Otherwise assembles structured context
@@ -177,13 +178,13 @@ status changes, don't let this drift from reality.)
   needed for that path at all. Google provider is now enabled in Supabase
   (OAuth client created, credentials pasted in) — **but the first live
   attempt hit a real bug**: `/auth/callback` errored `"PKCE code verifier
-  not found in storage"`. Root cause, confirmed by reading
+not found in storage"`. Root cause, confirmed by reading
   `@supabase/auth-js`'s `GoTrueClient` source directly
   (`node_modules/@supabase/auth-js/dist/main/GoTrueClient.js`): the
   browser client's own `_initialize()` already auto-detects and exchanges
   a `?code=` in the URL when `detectSessionInUrl` is true (the default) —
   that exchange is single-use, since it deletes the PKCE `code_verifier`
-  once consumed. The callback page was *also* calling
+  once consumed. The callback page was _also_ calling
   `exchangeCodeForSession(code)` manually right after, racing the
   automatic exchange; whichever ran second found the verifier already
   gone. Fixed by deleting the manual call entirely and just awaiting
@@ -211,7 +212,7 @@ status changes, don't let this drift from reality.)
   never created, so the queue function ran every minute "successfully"
   while silently doing nothing. `scripts/verify-ingestion-queue.mjs` now
   confirms the cron job dispatches (retry_count increments within ~45s of
-  insert). Minor open item: that script confirms *dispatch*, not full
+  insert). Minor open item: that script confirms _dispatch_, not full
   round-trip delivery to `parse-record` (pg_net is async) — worth one more
   spot-check via `net._http_response`, not currently blocking.
 - **Stage 4 (RAG + citations): Mostly done.** Red-flag escalation ✅
@@ -228,8 +229,42 @@ status changes, don't let this drift from reality.)
   ai-chat grounded answers) hits a clean, confirmed-working "credit balance
   too low" error. The plumbing is proven; the feature can't be experienced
   until billing is added.
-- **Stage 5 (wearables): Not started.** Needs a Vital/Terra account +
-  API key decision from the user.
+- **Stage 5 (wearables): Architecture built and verified live; still
+  blocked on the account decision (deliberately — user doesn't want the
+  cost yet, explicitly asked to keep the plumbing ready).**
+  `0014_wearables_architecture.sql`: real `sleep_entries`/
+  `activity_entries` tables (RLS matching the standard
+  `can_view_subject`/`can_edit_subject` pattern, unique on
+  subject+provider+date so a redelivered webhook can't double-insert),
+  `wearable_connections` extended with `last_sync_status`/
+  `last_sync_error` for honest connection-state display later.
+  `getSleep()`/`getActivity()` in `supabase.ts` now read these real
+  tables instead of an unconditionally-hardcoded `[]` — whatever's
+  actually in the DB renders. New Edge Function
+  `supabase/functions/wearable-webhook/index.ts` has the
+  provider-agnostic half done (shared-secret auth, subject resolution
+  via `external_user_id`, idempotent upsert) with exactly one function,
+  `parseProviderPayload()`, left throwing on purpose — Vital's and
+  Terra's actual webhook JSON shapes differ and neither's been chosen,
+  so guessing at that mapping now would be untested code pretending to
+  be real. **Also fixed a real honesty problem found while scoping
+  this**: the `/wearables` page's "Connect" button previously flipped a
+  DB boolean with zero real effect behind it, while showing a pulsing
+  "Live" badge as if a real connection existed. Replaced with an honest
+  disabled "Coming soon" state + a banner explaining the architecture is
+  ready but no provider is connected yet — matches the same
+  honestly-disabled pattern Settings already used for 2FA. **Not yet
+  applied/verified** — `npm run verify:wearables-architecture` was run
+  against the live project before the migration, confirming exactly what
+  you'd expect: table-not-found on both new tables, while the RLS-
+  isolation checks still passed vacuously (no rows to leak). **User still
+  needs to**: run `0014_wearables_architecture.sql` whenever ready (no
+  urgency — nothing currently depends on it being live, `getSleep`/
+  `getActivity` degrade to empty results via the same `unwrap()` error
+  path every other missing-table case hits), then re-run
+  `npm run verify:wearables-architecture` to confirm insert/read/RLS/
+  unique-constraint all actually pass. The webhook function stays
+  undeployed until there's a real provider to point it at.
 - **Stage 6 (billing): Done, verified.** Switched from Stripe (assumed in
   `BUSINESS-MODEL.md`) to **Razorpay** — the user is India-based, and
   Stripe has restricted availability for new India-recipient accounts
@@ -413,7 +448,7 @@ status changes, don't let this drift from reality.)
   "push delivery arrives with the mobile app" placeholder copy.
   **Deliberately doesn't cover medication-reminder pushes at a specific
   time** — `medications.schedule` is free text, not a structured time, so
-  there's nothing reliably schedulable yet; adherence-drop *insights*
+  there's nothing reliably schedulable yet; adherence-drop _insights_
   still notify, actual scheduled reminders are a real gap, not silently
   dropped. VAPID key pair already generated (public key committed to
   `.env`/`.env.example` since it's genuinely public by design; private
@@ -445,7 +480,7 @@ status changes, don't let this drift from reality.)
   `dist/index.html` placeholder first, since `webDir` must exist on disk
   even though it's unused with `server.url`).
   **What genuinely cannot be done from this environment**: `npx cap add
-  ios` requires Xcode, which only runs on macOS — this dev environment
+ios` requires Xcode, which only runs on macOS — this dev environment
   is Windows, so this was never attempted, not attempted-and-failed.
   `npx cap add android` needs the Android SDK, which may or may not be
   installed on the user's own machine. **Native push notifications are
