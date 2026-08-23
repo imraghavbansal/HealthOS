@@ -41,6 +41,7 @@ export interface RaagApi {
   updateProfile(patch: Partial<UserProfile>): Promise<UserProfile>;
   getHealthScore(): Promise<HealthScore>;
   getInsights(): Promise<Insight[]>;
+  dismissInsight(id: ID): Promise<void>;
   getSleep(range?: "7d" | "30d" | "90d"): Promise<SleepPoint[]>;
   getActivity(range?: "7d" | "30d" | "90d"): Promise<ActivityPoint[]>;
 
@@ -80,13 +81,17 @@ export interface RaagApi {
   cancelAppointment(id: ID): Promise<void>;
 
   getVitals(kind?: VitalKind): Promise<VitalEntry[]>;
-  addVital(input: Omit<VitalEntry, "id" | "source"> & { source?: VitalEntry["source"] }): Promise<VitalEntry>;
+  addVital(
+    input: Omit<VitalEntry, "id" | "source"> & { source?: VitalEntry["source"] },
+  ): Promise<VitalEntry>;
 
   getSymptoms(): Promise<SymptomEntry[]>;
   addSymptom(input: Omit<SymptomEntry, "id">): Promise<SymptomEntry>;
   deleteSymptom(id: ID): Promise<void>;
 
-  getNutrition(date?: string): Promise<{ entries: NutritionEntry[]; targets: NutritionTargets; waterMl: number }>;
+  getNutrition(
+    date?: string,
+  ): Promise<{ entries: NutritionEntry[]; targets: NutritionTargets; waterMl: number }>;
   addNutrition(input: Omit<NutritionEntry, "id">): Promise<NutritionEntry>;
   addWater(ml: number): Promise<number>;
 
@@ -105,7 +110,9 @@ export interface RaagApi {
   getConsentSettings(): Promise<ConsentSettings>;
   updateConsentSettings(patch: Partial<ConsentSettings>): Promise<ConsentSettings>;
   getNotificationPreferences(): Promise<NotificationPreferences>;
-  updateNotificationPreferences(patch: Partial<NotificationPreferences>): Promise<NotificationPreferences>;
+  updateNotificationPreferences(
+    patch: Partial<NotificationPreferences>,
+  ): Promise<NotificationPreferences>;
   /** Everything Raag has stored about the account, as one JSON-serializable object. */
   exportAllData(): Promise<Record<string, unknown>>;
   /** Permanently deletes the account and everything under it. Irreversible. */

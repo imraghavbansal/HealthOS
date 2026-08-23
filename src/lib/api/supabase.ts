@@ -2,19 +2,26 @@
  * Supabase adapter — real, persisted data. Schema + RLS: see
  * supabase/migrations/0001_init.sql. Product context: docs/PRODUCT-VISION.md.
  *
- * Scope note: a handful of RaagApi surfaces don't have a real data source
- * yet and are called out inline — they return honest empty/queued results
- * rather than fabricated demo data:
- *   - getSleep / getActivity: wait on wearable ingestion (roadmap V2)
- *   - getRisks / getInsights: wait on the rule-based risk & insight engine (V2)
- *   - sendChatMessage: wait on the `ai-chat` Edge Function (V2)
+ * Scope note: a couple of RaagApi surfaces still don't have a real data
+ * source and are called out inline — honest empty results, not fabricated
+ * demo data:
+ *   - getSleep / getActivity: wait on wearable ingestion (V2, not started)
+ *   - getRisks: wait on a rule-based risk engine (V2, not started —
+ *     getInsights already ships one, see 0009_insights_engine.sql)
  * Everything else — profile, records, labs, meds, vitals, symptoms, goals,
- * appointments, nutrition, family history, notifications, care team — is
- * fully real today.
+ * appointments, nutrition, family history, notifications, care team,
+ * insights, ai-chat — is fully real today.
  */
 import { getSupabaseBrowserClient } from "../supabase/client";
 import { getMySubjectId, getCurrentUserId } from "../supabase/subject";
-import { ageFromDob, initialsFromName, summarizeLabMarkers, computeAdherence, resolveContentType } from "../supabase/mappers";
+import {
+  ageFromDob,
+  initialsFromName,
+  summarizeLabMarkers,
+  computeAdherence,
+  computeRiskFactors,
+  resolveContentType,
+} from "../supabase/mappers";
 import type { RaagApi } from "./contract";
 import type {
   Appointment,
@@ -43,10 +50,29 @@ export const supabaseApi: RaagApi = {
     const userId = await getCurrentUserId();
     const [profileRes, subjectRes] = await Promise.all([
       sb.from("profiles").select("*").eq("id", userId).single(),
-      sb.from("health_subjects").select("date_of_birth, sex, height_cm, weight_kg, blood_type").eq("id", userId).single(),
+      sb
+        .from("health_subjects")
+        .select("date_of_birth, sex, height_cm, weight_kg, blood_type")
+        .eq("id", userId)
+        .single(),
     ]);
-    const profile = unwrap(profileRes) as { id: string; name: string; email: string; units: "metric" | "imperial"; timezone: string; plan: UserProfile["plan"]; avatar_url: string | null; onboarding_completed: boolean };
-    const subject = unwrap(subjectRes) as { date_of_birth: string | null; sex: string | null; height_cm: number | null; weight_kg: number | null; blood_type: string | null };
+    const profile = unwrap(profileRes) as {
+      id: string;
+      name: string;
+      email: string;
+      units: "metric" | "imperial";
+      timezone: string;
+      plan: UserProfile["plan"];
+      avatar_url: string | null;
+      onboarding_completed: boolean;
+    };
+    const subject = unwrap(subjectRes) as {
+      date_of_birth: string | null;
+      sex: string | null;
+      height_cm: number | null;
+      weight_kg: number | null;
+      blood_type: string | null;
+    };
     return {
       id: profile.id,
       name: profile.name,
@@ -74,7 +100,8 @@ export const supabaseApi: RaagApi = {
     if (patch.units !== undefined) profilePatch["units"] = patch.units;
     if (patch.timezone !== undefined) profilePatch["timezone"] = patch.timezone;
     if (patch.avatarUrl !== undefined) profilePatch["avatar_url"] = patch.avatarUrl;
-    if (patch.onboardingCompleted !== undefined) profilePatch["onboarding_completed"] = patch.onboardingCompleted;
+    if (patch.onboardingCompleted !== undefined)
+      profilePatch["onboarding_completed"] = patch.onboardingCompleted;
     if (Object.keys(profilePatch).length > 0) {
       unwrap(await sb.from("profiles").update(profilePatch).eq("id", userId));
     }
@@ -94,14 +121,23 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const [labsRes, dosesRes] = await Promise.all([
-      sb.from("lab_markers").select("value, range_low, range_high, collected_at, name").eq("subject_id", subjectId),
+      sb
+        .from("lab_markers")
+        .select("value, range_low, range_high, collected_at, name")
+        .eq("subject_id", subjectId),
       sb.from("dose_logs").select("taken_at, skipped").eq("subject_id", subjectId),
     ]);
-    const labRows = unwrap(labsRes) as { value: number; range_low: number | null; range_high: number | null }[];
+    const labRows = unwrap(labsRes) as {
+      value: number;
+      range_low: number | null;
+      range_high: number | null;
+    }[];
     const doseRows = unwrap(dosesRes) as { taken_at: string; skipped: boolean }[];
 
     const inRange = labRows.filter(
-      (r) => (r.range_low == null || r.value >= r.range_low) && (r.range_high == null || r.value <= r.range_high),
+      (r) =>
+        (r.range_low == null || r.value >= r.range_low) &&
+        (r.range_high == null || r.value <= r.range_high),
     ).length;
     const labsPillar = labRows.length ? Math.round((inRange / labRows.length) * 100) : 0;
     const adherencePillar = computeAdherence(doseRows);
@@ -118,13 +154,21 @@ export const supabaseApi: RaagApi = {
     return { score, delta: 0, lastSync: new Date().toISOString(), pillars };
   },
 
-  // No insight-generation engine yet (V2 rule-based risk & insight engine).
-  // Real, persisted, currently empty until that ships — not fabricated.
+  // Rule-based insight engine (0009_insights_engine.sql): deterministic
+  // trend/out-of-range/adherence checks, no AI call, dedupes against
+  // existing rows itself — safe to invoke on every read.
   async getInsights() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
+    const { error: genError } = await sb.rpc("generate_insights", { p_subject_id: subjectId });
+    if (genError) console.error("generate_insights failed:", genError.message);
     const rows = unwrap(
-      await sb.from("insights").select("*").eq("subject_id", subjectId).eq("dismissed", false).order("created_at", { ascending: false }),
+      await sb
+        .from("insights")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .eq("dismissed", false)
+        .order("created_at", { ascending: false }),
     ) as { id: string; title: string; body: string; severity: string; created_at: string }[];
     return rows.map((r) => ({
       id: r.id,
@@ -133,6 +177,10 @@ export const supabaseApi: RaagApi = {
       severity: r.severity as "info" | "success" | "warning" | "critical",
       createdAt: r.created_at,
     }));
+  },
+  async dismissInsight(id) {
+    const sb = getSupabaseBrowserClient();
+    unwrap(await sb.from("insights").update({ dismissed: true }).eq("id", id));
   },
 
   // Wait on wearable sync (V2) — no fabricated series in the meantime.
@@ -152,7 +200,15 @@ export const supabaseApi: RaagApi = {
         .select("id, name, value, unit, range_low, range_high, collected_at")
         .eq("subject_id", subjectId)
         .order("collected_at", { ascending: true }),
-    ) as { id: string; name: string; value: number; unit: string; range_low: number | null; range_high: number | null; collected_at: string }[];
+    ) as {
+      id: string;
+      name: string;
+      value: number;
+      unit: string;
+      range_low: number | null;
+      range_high: number | null;
+      collected_at: string;
+    }[];
     return summarizeLabMarkers(rows);
   },
 
@@ -165,31 +221,43 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const rows = unwrap(
-      await sb.from("source_documents").select("*").eq("subject_id", subjectId).order("document_date", { ascending: false }),
+      await sb
+        .from("source_documents")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .order("document_date", { ascending: false }),
     ) as {
-      id: string; document_type: string; title: string; provider: string | null; document_date: string | null;
-      storage_path: string; size_kb: number; summary: string | null; ocr_status: MedicalRecord["parseStatus"];
+      id: string;
+      document_type: string;
+      title: string;
+      provider: string | null;
+      document_date: string | null;
+      storage_path: string;
+      size_kb: number;
+      summary: string | null;
+      ocr_status: MedicalRecord["parseStatus"];
     }[];
 
     const { data: signedUrls } = rows.length
-      ? await sb.storage.from("medical-records").createSignedUrls(rows.map((r) => r.storage_path), 60 * 60)
+      ? await sb.storage.from("medical-records").createSignedUrls(
+          rows.map((r) => r.storage_path),
+          60 * 60,
+        )
       : { data: [] as { path: string | null; signedUrl: string }[] };
     const urlByPath = new Map((signedUrls ?? []).map((s) => [s.path, s.signedUrl]));
 
-    return rows.map(
-      (r): MedicalRecord => ({
-        id: r.id,
-        type: r.document_type,
-        title: r.title,
-        provider: r.provider ?? "—",
-        date: r.document_date ?? "",
-        tag: r.document_type,
-        fileUrl: urlByPath.get(r.storage_path) ?? null,
-        sizeKb: r.size_kb,
-        summary: r.summary ?? undefined,
-        parseStatus: r.ocr_status,
-      }),
-    );
+    return rows.map((r): MedicalRecord => ({
+      id: r.id,
+      type: r.document_type,
+      title: r.title,
+      provider: r.provider ?? "—",
+      date: r.document_date ?? "",
+      tag: r.document_type,
+      fileUrl: urlByPath.get(r.storage_path) ?? null,
+      sizeKb: r.size_kb,
+      summary: r.summary ?? undefined,
+      parseStatus: r.ocr_status,
+    }));
   },
 
   async uploadRecord(file) {
@@ -201,7 +269,9 @@ export const supabaseApi: RaagApi = {
     const path = `${subjectId}/${Date.now()}-${file.name}`;
 
     const contentType = resolveContentType(file);
-    const { error: uploadErr } = await sb.storage.from("medical-records").upload(path, file, { contentType });
+    const { error: uploadErr } = await sb.storage
+      .from("medical-records")
+      .upload(path, file, { contentType });
     if (uploadErr) throw uploadErr;
 
     const row = unwrap(
@@ -220,7 +290,15 @@ export const supabaseApi: RaagApi = {
         })
         .select()
         .single(),
-    ) as { id: string; document_type: string; title: string; provider: string | null; document_date: string | null; size_kb: number; summary: string | null };
+    ) as {
+      id: string;
+      document_type: string;
+      title: string;
+      provider: string | null;
+      document_date: string | null;
+      size_kb: number;
+      summary: string | null;
+    };
 
     // Fire-and-forget: parsing can take several seconds (Claude reads the
     // whole document) and shouldn't block the upload UI. ocr_status on the
@@ -229,7 +307,9 @@ export const supabaseApi: RaagApi = {
       console.error("parse-record invoke failed", err);
     });
 
-    const { data: signed } = await sb.storage.from("medical-records").createSignedUrl(path, 60 * 60);
+    const { data: signed } = await sb.storage
+      .from("medical-records")
+      .createSignedUrl(path, 60 * 60);
     return {
       id: row.id,
       type: row.document_type,
@@ -246,7 +326,11 @@ export const supabaseApi: RaagApi = {
 
   async deleteRecord(id) {
     const sb = getSupabaseBrowserClient();
-    const { data: rec } = await sb.from("source_documents").select("storage_path").eq("id", id).single();
+    const { data: rec } = await sb
+      .from("source_documents")
+      .select("storage_path")
+      .eq("id", id)
+      .single();
     unwrap(await sb.from("source_documents").delete().eq("id", id));
     if (rec?.storage_path) await sb.storage.from("medical-records").remove([rec.storage_path]);
   },
@@ -274,13 +358,24 @@ export const supabaseApi: RaagApi = {
       await sb
         .from("wearable_connections")
         .upsert(
-          { subject_id: subjectId, provider: name, connected: connect, last_sync_at: connect ? new Date().toISOString() : null },
+          {
+            subject_id: subjectId,
+            provider: name,
+            connected: connect,
+            last_sync_at: connect ? new Date().toISOString() : null,
+          },
           { onConflict: "subject_id,provider" },
         )
         .select()
         .single(),
     ) as { provider: string; connected: boolean; last_sync_at: string | null };
-    return { name: row.provider, desc: "", connected: row.connected, last: row.last_sync_at ?? "—", color: "" };
+    return {
+      name: row.provider,
+      desc: "",
+      connected: row.connected,
+      last: row.last_sync_at ?? "—",
+      color: "",
+    };
   },
 
   async getMedications() {
@@ -290,27 +385,41 @@ export const supabaseApi: RaagApi = {
       sb.from("medications").select("*").eq("subject_id", subjectId).eq("active", true),
       sb.from("dose_logs").select("medication_id, taken_at, skipped").eq("subject_id", subjectId),
     ]);
-    const meds = unwrap(medsRes) as { id: string; name: string; dose: string | null; schedule: string | null; type: string; refills_left: number | null; interactions: string[] | null }[];
-    const doses = unwrap(dosesRes) as { medication_id: string; taken_at: string; skipped: boolean }[];
-    return meds.map(
-      (m): Medication => ({
-        id: m.id,
-        name: m.name,
-        dose: m.dose ?? "",
-        schedule: m.schedule ?? "",
-        adherence: computeAdherence(doses.filter((d) => d.medication_id === m.id)),
-        next: "—",
-        type: m.type,
-        refillsLeft: m.refills_left ?? undefined,
-        interactions: m.interactions ?? undefined,
-      }),
-    );
+    const meds = unwrap(medsRes) as {
+      id: string;
+      name: string;
+      dose: string | null;
+      schedule: string | null;
+      type: string;
+      refills_left: number | null;
+      interactions: string[] | null;
+    }[];
+    const doses = unwrap(dosesRes) as {
+      medication_id: string;
+      taken_at: string;
+      skipped: boolean;
+    }[];
+    return meds.map((m): Medication => ({
+      id: m.id,
+      name: m.name,
+      dose: m.dose ?? "",
+      schedule: m.schedule ?? "",
+      adherence: computeAdherence(doses.filter((d) => d.medication_id === m.id)),
+      next: "—",
+      type: m.type,
+      refillsLeft: m.refills_left ?? undefined,
+      interactions: m.interactions ?? undefined,
+    }));
   },
 
   async logDose(medicationId, taken) {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
-    unwrap(await sb.from("dose_logs").insert({ medication_id: medicationId, subject_id: subjectId, skipped: !taken }));
+    unwrap(
+      await sb
+        .from("dose_logs")
+        .insert({ medication_id: medicationId, subject_id: subjectId, skipped: !taken }),
+    );
     const meds = await supabaseApi.getMedications();
     return meds.find((m) => m.id === medicationId)!;
   },
@@ -321,22 +430,54 @@ export const supabaseApi: RaagApi = {
     const row = unwrap(
       await sb
         .from("medications")
-        .insert({ subject_id: subjectId, name: input.name, dose: input.dose, schedule: input.schedule, type: input.type })
+        .insert({
+          subject_id: subjectId,
+          name: input.name,
+          dose: input.dose,
+          schedule: input.schedule,
+          type: input.type,
+        })
         .select()
         .single(),
     ) as { id: string; name: string; dose: string | null; schedule: string | null; type: string };
-    return { id: row.id, name: row.name, dose: row.dose ?? "", schedule: row.schedule ?? "", adherence: 100, next: "—", type: row.type };
+    return {
+      id: row.id,
+      name: row.name,
+      dose: row.dose ?? "",
+      schedule: row.schedule ?? "",
+      adherence: 100,
+      next: "—",
+      type: row.type,
+    };
   },
 
   async getGoals() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const rows = unwrap(
-      await sb.from("goals").select("*").eq("subject_id", subjectId).order("created_at", { ascending: false }),
-    ) as { id: string; title: string; category: string; target: string | null; due_date: string | null; progress: number; streak: number }[];
-    return rows.map(
-      (g): Goal => ({ id: g.id, title: g.title, category: g.category, target: g.target ?? undefined, dueDate: g.due_date ?? undefined, progress: g.progress, streak: g.streak }),
-    );
+      await sb
+        .from("goals")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .order("created_at", { ascending: false }),
+    ) as {
+      id: string;
+      title: string;
+      category: string;
+      target: string | null;
+      due_date: string | null;
+      progress: number;
+      streak: number;
+    }[];
+    return rows.map((g): Goal => ({
+      id: g.id,
+      title: g.title,
+      category: g.category,
+      target: g.target ?? undefined,
+      dueDate: g.due_date ?? undefined,
+      progress: g.progress,
+      streak: g.streak,
+    }));
   },
   async addGoal(input) {
     const sb = getSupabaseBrowserClient();
@@ -344,11 +485,31 @@ export const supabaseApi: RaagApi = {
     const row = unwrap(
       await sb
         .from("goals")
-        .insert({ subject_id: subjectId, title: input.title, category: input.category, target: input.target, due_date: input.dueDate })
+        .insert({
+          subject_id: subjectId,
+          title: input.title,
+          category: input.category,
+          target: input.target,
+          due_date: input.dueDate,
+        })
         .select()
         .single(),
-    ) as { id: string; title: string; category: string; target: string | null; due_date: string | null };
-    return { id: row.id, title: row.title, category: row.category, target: row.target ?? undefined, dueDate: row.due_date ?? undefined, progress: 0, streak: 0 };
+    ) as {
+      id: string;
+      title: string;
+      category: string;
+      target: string | null;
+      due_date: string | null;
+    };
+    return {
+      id: row.id,
+      title: row.title,
+      category: row.category,
+      target: row.target ?? undefined,
+      dueDate: row.due_date ?? undefined,
+      progress: 0,
+      streak: 0,
+    };
   },
   async updateGoal(id, patch) {
     const sb = getSupabaseBrowserClient();
@@ -359,9 +520,23 @@ export const supabaseApi: RaagApi = {
     if (patch.target !== undefined) dbPatch["target"] = patch.target;
     if (patch.dueDate !== undefined) dbPatch["due_date"] = patch.dueDate;
     const row = unwrap(await sb.from("goals").update(dbPatch).eq("id", id).select().single()) as {
-      id: string; title: string; category: string; target: string | null; due_date: string | null; progress: number; streak: number;
+      id: string;
+      title: string;
+      category: string;
+      target: string | null;
+      due_date: string | null;
+      progress: number;
+      streak: number;
     };
-    return { id: row.id, title: row.title, category: row.category, target: row.target ?? undefined, dueDate: row.due_date ?? undefined, progress: row.progress, streak: row.streak };
+    return {
+      id: row.id,
+      title: row.title,
+      category: row.category,
+      target: row.target ?? undefined,
+      dueDate: row.due_date ?? undefined,
+      progress: row.progress,
+      streak: row.streak,
+    };
   },
   async deleteGoal(id) {
     const sb = getSupabaseBrowserClient();
@@ -374,7 +549,12 @@ export const supabaseApi: RaagApi = {
     const rows = unwrap(
       await sb.from("family_history_entries").select("*").eq("subject_id", subjectId),
     ) as { id: string; relation: string; age: number | null; conditions: string[] | null }[];
-    return rows.map((r): FamilyMember => ({ id: r.id, relation: r.relation, age: r.age ?? 0, conditions: r.conditions ?? [] }));
+    return rows.map((r): FamilyMember => ({
+      id: r.id,
+      relation: r.relation,
+      age: r.age ?? 0,
+      conditions: r.conditions ?? [],
+    }));
   },
   async addFamilyMember(input) {
     const sb = getSupabaseBrowserClient();
@@ -382,30 +562,122 @@ export const supabaseApi: RaagApi = {
     const row = unwrap(
       await sb
         .from("family_history_entries")
-        .insert({ subject_id: subjectId, relation: input.relation, age: input.age, conditions: input.conditions })
+        .insert({
+          subject_id: subjectId,
+          relation: input.relation,
+          age: input.age,
+          conditions: input.conditions,
+        })
         .select()
         .single(),
     ) as { id: string; relation: string; age: number | null; conditions: string[] | null };
-    return { id: row.id, relation: row.relation, age: row.age ?? 0, conditions: row.conditions ?? [] };
+    return {
+      id: row.id,
+      relation: row.relation,
+      age: row.age ?? 0,
+      conditions: row.conditions ?? [],
+    };
   },
 
-  // Rule-based risk engine is V2 — real table, honestly empty until then.
+  // Rule-based risk engine (V2): additive point scoring over real lifestyle/
+  // vitals/conditions/family-history data — see computeRiskFactors() in
+  // supabase/mappers.ts for the scoring itself. Computed live on every
+  // read, not stored, so it's always current with the latest data.
   async getRisks() {
-    return [];
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+
+    const [subjectRes, lifestyleRes, conditionsRes, familyRes, vitalsRes] = await Promise.all([
+      sb
+        .from("health_subjects")
+        .select("date_of_birth, height_cm, weight_kg")
+        .eq("id", subjectId)
+        .single(),
+      sb
+        .from("lifestyle_profile")
+        .select("alcohol, smoking, exercise")
+        .eq("subject_id", subjectId)
+        .maybeSingle(),
+      sb
+        .from("conditions")
+        .select("name")
+        .eq("subject_id", subjectId)
+        .in("status", ["active", "chronic"]),
+      sb.from("family_history_entries").select("conditions").eq("subject_id", subjectId),
+      sb
+        .from("vitals")
+        .select("kind, value, secondary, recorded_at")
+        .eq("subject_id", subjectId)
+        .in("kind", ["bloodPressure", "glucose", "spo2"])
+        .order("recorded_at", { ascending: false }),
+    ]);
+
+    const subject = unwrap(subjectRes) as {
+      date_of_birth: string | null;
+      height_cm: number | null;
+      weight_kg: number | null;
+    };
+    const lifestyle = unwrap(lifestyleRes) as {
+      alcohol: string | null;
+      smoking: string | null;
+      exercise: string | null;
+    } | null;
+    const conditions = unwrap(conditionsRes) as { name: string }[];
+    const family = unwrap(familyRes) as { conditions: string[] | null }[];
+    const vitals = unwrap(vitalsRes) as {
+      kind: string;
+      value: number;
+      secondary: number | null;
+      recorded_at: string;
+    }[];
+
+    const latestOf = (kind: string) => vitals.find((v) => v.kind === kind);
+    const bp = latestOf("bloodPressure");
+    const glucose = latestOf("glucose");
+    const spo2 = latestOf("spo2");
+
+    return computeRiskFactors({
+      age: ageFromDob(subject.date_of_birth),
+      heightCm: subject.height_cm,
+      weightKg: subject.weight_kg,
+      alcohol: lifestyle?.alcohol ?? undefined,
+      smoking: lifestyle?.smoking ?? undefined,
+      exercise: lifestyle?.exercise ?? undefined,
+      activeConditions: conditions.map((c) => c.name.toLowerCase()),
+      familyConditions: family.flatMap((f) => f.conditions ?? []).map((c) => c.toLowerCase()),
+      latestSystolicBp: bp?.value ?? null,
+      latestDiastolicBp: bp?.secondary ?? null,
+      latestGlucose: glucose?.value ?? null,
+      latestSpo2: spo2?.value ?? null,
+    });
   },
 
   async getLifestyleProfile() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const row = unwrap(
-      await sb.from("lifestyle_profile").select("alcohol, smoking, exercise, diet").eq("subject_id", subjectId).single(),
+      await sb
+        .from("lifestyle_profile")
+        .select("alcohol, smoking, exercise, diet")
+        .eq("subject_id", subjectId)
+        .single(),
     ) as LifestyleProfile;
-    return { alcohol: row.alcohol ?? undefined, smoking: row.smoking ?? undefined, exercise: row.exercise ?? undefined, diet: row.diet ?? undefined };
+    return {
+      alcohol: row.alcohol ?? undefined,
+      smoking: row.smoking ?? undefined,
+      exercise: row.exercise ?? undefined,
+      diet: row.diet ?? undefined,
+    };
   },
   async updateLifestyleProfile(patch) {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
-    unwrap(await sb.from("lifestyle_profile").update({ ...patch, updated_at: new Date().toISOString() }).eq("subject_id", subjectId));
+    unwrap(
+      await sb
+        .from("lifestyle_profile")
+        .update({ ...patch, updated_at: new Date().toISOString() })
+        .eq("subject_id", subjectId),
+    );
     return supabaseApi.getLifestyleProfile();
   },
 
@@ -413,14 +685,35 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const rows = unwrap(
-      await sb.from("appointments").select("*").eq("subject_id", subjectId).order("start_at", { ascending: true }),
-    ) as { id: string; title: string; provider: string | null; specialty: string | null; start_at: string; duration_min: number; location: string | null; mode: Appointment["mode"]; status: Appointment["status"]; prep_notes: string[] | null }[];
-    return rows.map(
-      (a): Appointment => ({
-        id: a.id, title: a.title, provider: a.provider ?? "", specialty: a.specialty ?? "", start: a.start_at,
-        durationMin: a.duration_min, location: a.location ?? "", mode: a.mode, status: a.status, prepNotes: a.prep_notes ?? undefined,
-      }),
-    );
+      await sb
+        .from("appointments")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .order("start_at", { ascending: true }),
+    ) as {
+      id: string;
+      title: string;
+      provider: string | null;
+      specialty: string | null;
+      start_at: string;
+      duration_min: number;
+      location: string | null;
+      mode: Appointment["mode"];
+      status: Appointment["status"];
+      prep_notes: string[] | null;
+    }[];
+    return rows.map((a): Appointment => ({
+      id: a.id,
+      title: a.title,
+      provider: a.provider ?? "",
+      specialty: a.specialty ?? "",
+      start: a.start_at,
+      durationMin: a.duration_min,
+      location: a.location ?? "",
+      mode: a.mode,
+      status: a.status,
+      prepNotes: a.prep_notes ?? undefined,
+    }));
   },
   async addAppointment(input) {
     const sb = getSupabaseBrowserClient();
@@ -429,15 +722,40 @@ export const supabaseApi: RaagApi = {
       await sb
         .from("appointments")
         .insert({
-          subject_id: subjectId, title: input.title, provider: input.provider, specialty: input.specialty,
-          start_at: input.start, duration_min: input.durationMin, location: input.location, mode: input.mode, prep_notes: input.prepNotes,
+          subject_id: subjectId,
+          title: input.title,
+          provider: input.provider,
+          specialty: input.specialty,
+          start_at: input.start,
+          duration_min: input.durationMin,
+          location: input.location,
+          mode: input.mode,
+          prep_notes: input.prepNotes,
         })
         .select()
         .single(),
-    ) as { id: string; title: string; provider: string | null; specialty: string | null; start_at: string; duration_min: number; location: string | null; mode: Appointment["mode"]; prep_notes: string[] | null };
+    ) as {
+      id: string;
+      title: string;
+      provider: string | null;
+      specialty: string | null;
+      start_at: string;
+      duration_min: number;
+      location: string | null;
+      mode: Appointment["mode"];
+      prep_notes: string[] | null;
+    };
     return {
-      id: row.id, title: row.title, provider: row.provider ?? "", specialty: row.specialty ?? "", start: row.start_at,
-      durationMin: row.duration_min, location: row.location ?? "", mode: row.mode, status: "upcoming", prepNotes: row.prep_notes ?? undefined,
+      id: row.id,
+      title: row.title,
+      provider: row.provider ?? "",
+      specialty: row.specialty ?? "",
+      start: row.start_at,
+      durationMin: row.duration_min,
+      location: row.location ?? "",
+      mode: row.mode,
+      status: "upcoming",
+      prepNotes: row.prep_notes ?? undefined,
     };
   },
   async cancelAppointment(id) {
@@ -448,10 +766,32 @@ export const supabaseApi: RaagApi = {
   async getVitals(kind) {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
-    let query = sb.from("vitals").select("*").eq("subject_id", subjectId).order("recorded_at", { ascending: false });
+    let query = sb
+      .from("vitals")
+      .select("*")
+      .eq("subject_id", subjectId)
+      .order("recorded_at", { ascending: false });
     if (kind) query = query.eq("kind", kind);
-    const rows = unwrap(await query) as { id: string; kind: VitalEntry["kind"]; value: number; secondary: number | null; unit: string; recorded_at: string; note: string | null; source: VitalEntry["source"] }[];
-    return rows.map((v): VitalEntry => ({ id: v.id, kind: v.kind, value: v.value, secondary: v.secondary ?? undefined, unit: v.unit, recordedAt: v.recorded_at, note: v.note ?? undefined, source: v.source }));
+    const rows = unwrap(await query) as {
+      id: string;
+      kind: VitalEntry["kind"];
+      value: number;
+      secondary: number | null;
+      unit: string;
+      recorded_at: string;
+      note: string | null;
+      source: VitalEntry["source"];
+    }[];
+    return rows.map((v): VitalEntry => ({
+      id: v.id,
+      kind: v.kind,
+      value: v.value,
+      secondary: v.secondary ?? undefined,
+      unit: v.unit,
+      recordedAt: v.recorded_at,
+      note: v.note ?? undefined,
+      source: v.source,
+    }));
   },
   async addVital(input) {
     const sb = getSupabaseBrowserClient();
@@ -459,20 +799,67 @@ export const supabaseApi: RaagApi = {
     const row = unwrap(
       await sb
         .from("vitals")
-        .insert({ subject_id: subjectId, kind: input.kind, value: input.value, secondary: input.secondary, unit: input.unit, recorded_at: input.recordedAt, note: input.note, source: input.source ?? "manual" })
+        .insert({
+          subject_id: subjectId,
+          kind: input.kind,
+          value: input.value,
+          secondary: input.secondary,
+          unit: input.unit,
+          recorded_at: input.recordedAt,
+          note: input.note,
+          source: input.source ?? "manual",
+        })
         .select()
         .single(),
-    ) as { id: string; kind: VitalEntry["kind"]; value: number; secondary: number | null; unit: string; recorded_at: string; note: string | null; source: VitalEntry["source"] };
-    return { id: row.id, kind: row.kind, value: row.value, secondary: row.secondary ?? undefined, unit: row.unit, recordedAt: row.recorded_at, note: row.note ?? undefined, source: row.source };
+    ) as {
+      id: string;
+      kind: VitalEntry["kind"];
+      value: number;
+      secondary: number | null;
+      unit: string;
+      recorded_at: string;
+      note: string | null;
+      source: VitalEntry["source"];
+    };
+    return {
+      id: row.id,
+      kind: row.kind,
+      value: row.value,
+      secondary: row.secondary ?? undefined,
+      unit: row.unit,
+      recordedAt: row.recorded_at,
+      note: row.note ?? undefined,
+      source: row.source,
+    };
   },
 
   async getSymptoms() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const rows = unwrap(
-      await sb.from("symptoms").select("*").eq("subject_id", subjectId).order("started_at", { ascending: false }),
-    ) as { id: string; label: string; severity: number; body_area: string | null; started_at: string; tags: string[] | null; note: string | null }[];
-    return rows.map((s): SymptomEntry => ({ id: s.id, label: s.label, severity: s.severity, bodyArea: s.body_area ?? "", startedAt: s.started_at, tags: s.tags ?? [], note: s.note ?? undefined }));
+      await sb
+        .from("symptoms")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .order("started_at", { ascending: false }),
+    ) as {
+      id: string;
+      label: string;
+      severity: number;
+      body_area: string | null;
+      started_at: string;
+      tags: string[] | null;
+      note: string | null;
+    }[];
+    return rows.map((s): SymptomEntry => ({
+      id: s.id,
+      label: s.label,
+      severity: s.severity,
+      bodyArea: s.body_area ?? "",
+      startedAt: s.started_at,
+      tags: s.tags ?? [],
+      note: s.note ?? undefined,
+    }));
   },
   async addSymptom(input) {
     const sb = getSupabaseBrowserClient();
@@ -480,11 +867,35 @@ export const supabaseApi: RaagApi = {
     const row = unwrap(
       await sb
         .from("symptoms")
-        .insert({ subject_id: subjectId, label: input.label, severity: input.severity, body_area: input.bodyArea, started_at: input.startedAt, tags: input.tags, note: input.note })
+        .insert({
+          subject_id: subjectId,
+          label: input.label,
+          severity: input.severity,
+          body_area: input.bodyArea,
+          started_at: input.startedAt,
+          tags: input.tags,
+          note: input.note,
+        })
         .select()
         .single(),
-    ) as { id: string; label: string; severity: number; body_area: string | null; started_at: string; tags: string[] | null; note: string | null };
-    return { id: row.id, label: row.label, severity: row.severity, bodyArea: row.body_area ?? "", startedAt: row.started_at, tags: row.tags ?? [], note: row.note ?? undefined };
+    ) as {
+      id: string;
+      label: string;
+      severity: number;
+      body_area: string | null;
+      started_at: string;
+      tags: string[] | null;
+      note: string | null;
+    };
+    return {
+      id: row.id,
+      label: row.label,
+      severity: row.severity,
+      bodyArea: row.body_area ?? "",
+      startedAt: row.started_at,
+      tags: row.tags ?? [],
+      note: row.note ?? undefined,
+    };
   },
   async deleteSymptom(id) {
     const sb = getSupabaseBrowserClient();
@@ -497,16 +908,56 @@ export const supabaseApi: RaagApi = {
     const dayStart = date ? new Date(date) : new Date(new Date().toDateString());
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
     const [entriesRes, targetsRes, waterRes] = await Promise.all([
-      sb.from("nutrition_entries").select("*").eq("subject_id", subjectId).gte("logged_at", dayStart.toISOString()).lt("logged_at", dayEnd.toISOString()),
+      sb
+        .from("nutrition_entries")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .gte("logged_at", dayStart.toISOString())
+        .lt("logged_at", dayEnd.toISOString()),
       sb.from("nutrition_targets").select("*").eq("subject_id", subjectId).single(),
-      sb.from("water_logs").select("ml").eq("subject_id", subjectId).gte("logged_at", dayStart.toISOString()).lt("logged_at", dayEnd.toISOString()),
+      sb
+        .from("water_logs")
+        .select("ml")
+        .eq("subject_id", subjectId)
+        .gte("logged_at", dayStart.toISOString())
+        .lt("logged_at", dayEnd.toISOString()),
     ]);
-    const entries = unwrap(entriesRes) as { id: string; meal: NutritionEntry["meal"]; name: string; kcal: number; protein: number; carbs: number; fat: number; logged_at: string }[];
-    const targets = unwrap(targetsRes) as { kcal: number; protein: number; carbs: number; fat: number; water_ml: number };
+    const entries = unwrap(entriesRes) as {
+      id: string;
+      meal: NutritionEntry["meal"];
+      name: string;
+      kcal: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      logged_at: string;
+    }[];
+    const targets = unwrap(targetsRes) as {
+      kcal: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      water_ml: number;
+    };
     const waterLogs = unwrap(waterRes) as { ml: number }[];
     return {
-      entries: entries.map((e) => ({ id: e.id, meal: e.meal, name: e.name, kcal: e.kcal, protein: e.protein, carbs: e.carbs, fat: e.fat, loggedAt: e.logged_at })),
-      targets: { kcal: targets.kcal, protein: targets.protein, carbs: targets.carbs, fat: targets.fat, waterMl: targets.water_ml },
+      entries: entries.map((e) => ({
+        id: e.id,
+        meal: e.meal,
+        name: e.name,
+        kcal: e.kcal,
+        protein: e.protein,
+        carbs: e.carbs,
+        fat: e.fat,
+        loggedAt: e.logged_at,
+      })),
+      targets: {
+        kcal: targets.kcal,
+        protein: targets.protein,
+        carbs: targets.carbs,
+        fat: targets.fat,
+        waterMl: targets.water_ml,
+      },
       waterMl: waterLogs.reduce((sum, w) => sum + w.ml, 0),
     };
   },
@@ -516,11 +967,37 @@ export const supabaseApi: RaagApi = {
     const row = unwrap(
       await sb
         .from("nutrition_entries")
-        .insert({ subject_id: subjectId, meal: input.meal, name: input.name, kcal: input.kcal, protein: input.protein, carbs: input.carbs, fat: input.fat })
+        .insert({
+          subject_id: subjectId,
+          meal: input.meal,
+          name: input.name,
+          kcal: input.kcal,
+          protein: input.protein,
+          carbs: input.carbs,
+          fat: input.fat,
+        })
         .select()
         .single(),
-    ) as { id: string; meal: NutritionEntry["meal"]; name: string; kcal: number; protein: number; carbs: number; fat: number; logged_at: string };
-    return { id: row.id, meal: row.meal, name: row.name, kcal: row.kcal, protein: row.protein, carbs: row.carbs, fat: row.fat, loggedAt: row.logged_at };
+    ) as {
+      id: string;
+      meal: NutritionEntry["meal"];
+      name: string;
+      kcal: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      logged_at: string;
+    };
+    return {
+      id: row.id,
+      meal: row.meal,
+      name: row.name,
+      kcal: row.kcal,
+      protein: row.protein,
+      carbs: row.carbs,
+      fat: row.fat,
+      loggedAt: row.logged_at,
+    };
   },
   async addWater(ml) {
     const sb = getSupabaseBrowserClient();
@@ -537,28 +1014,103 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const [labs, records, meds, appts] = await Promise.all([
-      sb.from("lab_markers").select("id, name, value, unit, collected_at").eq("subject_id", subjectId),
-      sb.from("source_documents").select("id, title, document_type, document_date").eq("subject_id", subjectId),
+      sb
+        .from("lab_markers")
+        .select("id, name, value, unit, collected_at")
+        .eq("subject_id", subjectId),
+      sb
+        .from("source_documents")
+        .select("id, title, document_type, document_date")
+        .eq("subject_id", subjectId),
       sb.from("medications").select("id, name, dose, created_at").eq("subject_id", subjectId),
       sb.from("appointments").select("id, title, provider, start_at").eq("subject_id", subjectId),
     ]);
-    type TimelineEventRow = { id: string; date: string; kind: "lab" | "visit" | "med" | "vital" | "goal" | "device" | "note"; title: string; detail: string };
+    type TimelineEventRow = {
+      id: string;
+      date: string;
+      kind: "lab" | "visit" | "med" | "vital" | "goal" | "device" | "note";
+      title: string;
+      detail: string;
+    };
     const events: TimelineEventRow[] = [
-      ...(unwrap(labs) as { id: string; name: string; value: number; unit: string; collected_at: string }[]).map((l) => ({ id: l.id, date: l.collected_at, kind: "lab" as const, title: l.name, detail: `${l.value} ${l.unit}` })),
-      ...(unwrap(records) as { id: string; title: string; document_type: string; document_date: string | null }[]).map((r) => ({ id: r.id, date: r.document_date ?? "", kind: "note" as const, title: r.title, detail: r.document_type })),
-      ...(unwrap(meds) as { id: string; name: string; dose: string | null; created_at: string }[]).map((m) => ({ id: m.id, date: m.created_at, kind: "med" as const, title: m.name, detail: m.dose ?? "" })),
-      ...(unwrap(appts) as { id: string; title: string; provider: string | null; start_at: string }[]).map((a) => ({ id: a.id, date: a.start_at, kind: "visit" as const, title: a.title, detail: a.provider ?? "" })),
+      ...(
+        unwrap(labs) as {
+          id: string;
+          name: string;
+          value: number;
+          unit: string;
+          collected_at: string;
+        }[]
+      ).map((l) => ({
+        id: l.id,
+        date: l.collected_at,
+        kind: "lab" as const,
+        title: l.name,
+        detail: `${l.value} ${l.unit}`,
+      })),
+      ...(
+        unwrap(records) as {
+          id: string;
+          title: string;
+          document_type: string;
+          document_date: string | null;
+        }[]
+      ).map((r) => ({
+        id: r.id,
+        date: r.document_date ?? "",
+        kind: "note" as const,
+        title: r.title,
+        detail: r.document_type,
+      })),
+      ...(
+        unwrap(meds) as { id: string; name: string; dose: string | null; created_at: string }[]
+      ).map((m) => ({
+        id: m.id,
+        date: m.created_at,
+        kind: "med" as const,
+        title: m.name,
+        detail: m.dose ?? "",
+      })),
+      ...(
+        unwrap(appts) as { id: string; title: string; provider: string | null; start_at: string }[]
+      ).map((a) => ({
+        id: a.id,
+        date: a.start_at,
+        kind: "visit" as const,
+        title: a.title,
+        detail: a.provider ?? "",
+      })),
     ];
-    return events.filter((e) => e.date).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return events
+      .filter((e) => e.date)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 
   async getNotifications() {
     const sb = getSupabaseBrowserClient();
     const userId = await getCurrentUserId();
     const rows = unwrap(
-      await sb.from("notifications").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-    ) as { id: string; title: string; body: string; created_at: string; read: boolean; kind: AppNotification["kind"] }[];
-    return rows.map((n) => ({ id: n.id, title: n.title, body: n.body, createdAt: n.created_at, read: n.read, kind: n.kind }));
+      await sb
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+    ) as {
+      id: string;
+      title: string;
+      body: string;
+      created_at: string;
+      read: boolean;
+      kind: AppNotification["kind"];
+    }[];
+    return rows.map((n) => ({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      createdAt: n.created_at,
+      read: n.read,
+      kind: n.kind,
+    }));
   },
   async markNotificationRead(id) {
     const sb = getSupabaseBrowserClient();
@@ -577,15 +1129,36 @@ export const supabaseApi: RaagApi = {
   async getCareTeam() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
-    const rows = unwrap(
-      await sb.from("care_team").select("*").eq("subject_id", subjectId),
-    ) as { id: string; name: string; role: string; org: string; phone: string; sharing: boolean }[];
-    return rows.map((c): CareTeamMember => ({ id: c.id, name: c.name, role: c.role, org: c.org, phone: c.phone, sharing: c.sharing }));
+    const rows = unwrap(await sb.from("care_team").select("*").eq("subject_id", subjectId)) as {
+      id: string;
+      name: string;
+      role: string;
+      org: string;
+      phone: string;
+      sharing: boolean;
+    }[];
+    return rows.map((c): CareTeamMember => ({
+      id: c.id,
+      name: c.name,
+      role: c.role,
+      org: c.org,
+      phone: c.phone,
+      sharing: c.sharing,
+    }));
   },
   async setCareSharing(id, sharing) {
     const sb = getSupabaseBrowserClient();
-    const row = unwrap(await sb.from("care_team").update({ sharing }).eq("id", id).select().single()) as { id: string; name: string; role: string; org: string; phone: string; sharing: boolean };
-    return { id: row.id, name: row.name, role: row.role, org: row.org, phone: row.phone, sharing: row.sharing };
+    const row = unwrap(
+      await sb.from("care_team").update({ sharing }).eq("id", id).select().single(),
+    ) as { id: string; name: string; role: string; org: string; phone: string; sharing: boolean };
+    return {
+      id: row.id,
+      name: row.name,
+      role: row.role,
+      org: row.org,
+      phone: row.phone,
+      sharing: row.sharing,
+    };
   },
 
   // Report generation runs server-side (Edge Function) so it can pull
@@ -602,7 +1175,12 @@ export const supabaseApi: RaagApi = {
     const userId = await getCurrentUserId();
     const row = unwrap(
       await sb.from("consent_settings").select("*").eq("user_id", userId).single(),
-    ) as { share_deidentified: boolean; ai_use_family_history: boolean; share_with_pcp: boolean; pcp_contact: string | null };
+    ) as {
+      share_deidentified: boolean;
+      ai_use_family_history: boolean;
+      share_with_pcp: boolean;
+      pcp_contact: string | null;
+    };
     return {
       shareDeidentified: row.share_deidentified,
       aiUseFamilyHistory: row.ai_use_family_history,
@@ -614,8 +1192,10 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const userId = await getCurrentUserId();
     const dbPatch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (patch.shareDeidentified !== undefined) dbPatch["share_deidentified"] = patch.shareDeidentified;
-    if (patch.aiUseFamilyHistory !== undefined) dbPatch["ai_use_family_history"] = patch.aiUseFamilyHistory;
+    if (patch.shareDeidentified !== undefined)
+      dbPatch["share_deidentified"] = patch.shareDeidentified;
+    if (patch.aiUseFamilyHistory !== undefined)
+      dbPatch["ai_use_family_history"] = patch.aiUseFamilyHistory;
     if (patch.shareWithPcp !== undefined) dbPatch["share_with_pcp"] = patch.shareWithPcp;
     if (patch.pcpContact !== undefined) dbPatch["pcp_contact"] = patch.pcpContact;
     unwrap(await sb.from("consent_settings").update(dbPatch).eq("user_id", userId));
@@ -627,7 +1207,12 @@ export const supabaseApi: RaagApi = {
     const userId = await getCurrentUserId();
     const row = unwrap(
       await sb.from("notification_preferences").select("*").eq("user_id", userId).single(),
-    ) as { medication_reminders: boolean; weekly_brief: boolean; new_lab_results: boolean; trend_alerts: boolean };
+    ) as {
+      medication_reminders: boolean;
+      weekly_brief: boolean;
+      new_lab_results: boolean;
+      trend_alerts: boolean;
+    };
     return {
       medicationReminders: row.medication_reminders,
       weeklyBrief: row.weekly_brief,
@@ -639,7 +1224,8 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const userId = await getCurrentUserId();
     const dbPatch: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (patch.medicationReminders !== undefined) dbPatch["medication_reminders"] = patch.medicationReminders;
+    if (patch.medicationReminders !== undefined)
+      dbPatch["medication_reminders"] = patch.medicationReminders;
     if (patch.weeklyBrief !== undefined) dbPatch["weekly_brief"] = patch.weeklyBrief;
     if (patch.newLabResults !== undefined) dbPatch["new_lab_results"] = patch.newLabResults;
     if (patch.trendAlerts !== undefined) dbPatch["trend_alerts"] = patch.trendAlerts;
@@ -693,9 +1279,25 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const rows = unwrap(
-      await sb.from("chat_messages").select("*").eq("subject_id", subjectId).order("created_at", { ascending: true }),
-    ) as { id: string; role: ChatMessage["role"]; content: string; citations: ChatMessage["citations"] | null; created_at: string }[];
-    return rows.map((m) => ({ id: m.id, role: m.role, content: m.content, citations: m.citations ?? undefined, createdAt: m.created_at }));
+      await sb
+        .from("chat_messages")
+        .select("*")
+        .eq("subject_id", subjectId)
+        .order("created_at", { ascending: true }),
+    ) as {
+      id: string;
+      role: ChatMessage["role"];
+      content: string;
+      citations: ChatMessage["citations"] | null;
+      created_at: string;
+    }[];
+    return rows.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      citations: m.citations ?? undefined,
+      createdAt: m.created_at,
+    }));
   },
 
   // The actual grounding (structured-data queries + document retrieval +
@@ -705,7 +1307,11 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const userId = await getCurrentUserId();
-    unwrap(await sb.from("chat_messages").insert({ subject_id: subjectId, user_id: userId, role: "user", content }));
+    unwrap(
+      await sb
+        .from("chat_messages")
+        .insert({ subject_id: subjectId, user_id: userId, role: "user", content }),
+    );
 
     // functions.invoke() buffers the whole response — a real token stream
     // needs a raw fetch against the function URL so the reader sees bytes
@@ -718,7 +1324,11 @@ export const supabaseApi: RaagApi = {
     const anonKey = import.meta.env["VITE_SUPABASE_ANON_KEY"];
     const res = await fetch(`${url}/functions/v1/ai-chat`, {
       method: "POST",
-      headers: { "content-type": "application/json", apikey: anonKey, Authorization: `Bearer ${accessToken}` },
+      headers: {
+        "content-type": "application/json",
+        apikey: anonKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({ subjectId, content }),
     });
     if (!res.ok || !res.body) {
@@ -750,6 +1360,12 @@ export const supabaseApi: RaagApi = {
       }
     }
     if (!final) throw new Error("Stream ended without a final message");
-    return { id: final.id, role: "assistant", content: accumulated, citations: final.citations, createdAt: final.createdAt };
+    return {
+      id: final.id,
+      role: "assistant",
+      content: accumulated,
+      citations: final.citations,
+      createdAt: final.createdAt,
+    };
   },
 };

@@ -1,4 +1,4 @@
-import type { LabMarker, MarkerStatus } from "../types";
+import type { LabMarker, MarkerStatus, RiskFactor } from "../types";
 
 /** Age in whole years from a DOB, as of today. No stored/stale age field. */
 export function ageFromDob(dob: string | null): number {
@@ -87,13 +87,14 @@ export function summarizeLabMarkers(rows: LabMarkerRow[]): LabMarker[] {
     );
     const latest = sorted[sorted.length - 1]!;
     const prior = sorted[sorted.length - 2];
-    const range = latest.range_low != null && latest.range_high != null
-      ? `${latest.range_low}–${latest.range_high}`
-      : latest.range_high != null
-        ? `<${latest.range_high}`
-        : latest.range_low != null
-          ? `>${latest.range_low}`
-          : "—";
+    const range =
+      latest.range_low != null && latest.range_high != null
+        ? `${latest.range_low}–${latest.range_high}`
+        : latest.range_high != null
+          ? `<${latest.range_high}`
+          : latest.range_low != null
+            ? `>${latest.range_low}`
+            : "—";
 
     markers.push({
       id: latest.id,
@@ -126,4 +127,259 @@ export function computeAdherence(logs: DoseLogRow[]): number {
   if (recent.length === 0) return 100;
   const taken = recent.filter((l) => !l.skipped).length;
   return Math.round((taken / recent.length) * 100);
+}
+
+/* ---------- rule-based risk engine (V2) ---------- */
+
+function riskLevel(pct: number): RiskFactor["level"] {
+  if (pct >= 75) return "High";
+  if (pct >= 50) return "Elevated";
+  if (pct >= 25) return "Moderate";
+  return "Low";
+}
+
+function bmiOf(heightCm: number | null, weightKg: number | null): number | null {
+  if (!heightCm || !weightKg) return null;
+  const m = heightCm / 100;
+  return weightKg / (m * m);
+}
+
+function includesAny(haystack: string[], needles: string[]): boolean {
+  return haystack.some((h) => needles.some((n) => h.includes(n)));
+}
+
+export type RiskEngineInput = {
+  age: number;
+  heightCm: number | null;
+  weightKg: number | null;
+  alcohol?: string;
+  smoking?: string;
+  exercise?: string;
+  activeConditions: string[]; // lowercased condition names
+  familyConditions: string[]; // lowercased conditions from family history
+  latestSystolicBp: number | null;
+  latestDiastolicBp: number | null;
+  latestGlucose: number | null;
+  latestSpo2: number | null;
+};
+
+/**
+ * Additive point scoring per category, clamped to 0-100 and bucketed into
+ * Low/Moderate/Elevated/High. Deliberately narrow to categories we have
+ * real structured signal for (lifestyle, vitals, labs, conditions, family
+ * history) — no cancer-type risk models, those need real clinical scoring
+ * (e.g. Gail score) this data can't responsibly approximate. Framed as
+ * informational throughout, matching the AI assistant's cite-don't-diagnose
+ * rule (docs/PRODUCT-VISION.md) — this is a rules engine, not a diagnosis.
+ */
+export function computeRiskFactors(input: RiskEngineInput): RiskFactor[] {
+  const bmi = bmiOf(input.heightCm, input.weightKg);
+  const results: RiskFactor[] = [];
+
+  // Cardiovascular
+  {
+    let pct = 10;
+    const factors: string[] = [];
+    if (input.age >= 60) {
+      pct += 25;
+      factors.push("age 60+");
+    } else if (input.age >= 45) {
+      pct += 15;
+      factors.push("age 45+");
+    }
+    if (input.smoking === "Daily") {
+      pct += 25;
+      factors.push("daily smoking");
+    } else if (input.smoking === "Occasional") {
+      pct += 15;
+      factors.push("smoking");
+    } else if (input.smoking === "Former") {
+      pct += 5;
+    }
+    if (input.exercise === "Sedentary") {
+      pct += 15;
+      factors.push("low activity level");
+    } else if (input.exercise === "Light") {
+      pct += 5;
+    } else if (input.exercise === "Athlete") {
+      pct -= 5;
+    }
+    if (bmi !== null && bmi >= 30) {
+      pct += 20;
+      factors.push("BMI in the obese range");
+    } else if (bmi !== null && bmi >= 25) {
+      pct += 10;
+      factors.push("BMI in the overweight range");
+    }
+    if (input.latestSystolicBp !== null && input.latestDiastolicBp !== null) {
+      if (input.latestSystolicBp >= 140 || input.latestDiastolicBp >= 90) {
+        pct += 20;
+        factors.push("an elevated blood pressure reading");
+      } else if (input.latestSystolicBp >= 130 || input.latestDiastolicBp >= 80) {
+        pct += 10;
+        factors.push("a borderline blood pressure reading");
+      }
+    }
+    if (
+      includesAny(input.familyConditions, [
+        "heart",
+        "cardiac",
+        "hypertension",
+        "stroke",
+        "cholesterol",
+      ])
+    ) {
+      pct += 15;
+      factors.push("family cardiovascular history");
+    }
+    if (includesAny(input.activeConditions, ["hypertension", "heart", "cardiac", "cholesterol"])) {
+      pct += 20;
+      factors.push("an existing related condition on file");
+    }
+    pct = Math.max(0, Math.min(100, pct));
+    results.push({
+      name: "Cardiovascular disease",
+      level: riskLevel(pct),
+      pct,
+      note:
+        factors.length > 0
+          ? `Based on ${factors.join(", ")}.`
+          : "No elevated factors found in your data yet.",
+      action:
+        pct >= 50
+          ? "Discuss cardiovascular screening with your doctor."
+          : "Keep logging vitals — trends matter more than single readings.",
+    });
+  }
+
+  // Type 2 diabetes / metabolic
+  {
+    let pct = 5;
+    const factors: string[] = [];
+    if (input.age >= 60) {
+      pct += 15;
+      factors.push("age 60+");
+    } else if (input.age >= 45) {
+      pct += 10;
+      factors.push("age 45+");
+    }
+    if (bmi !== null && bmi >= 30) {
+      pct += 25;
+      factors.push("BMI in the obese range");
+    } else if (bmi !== null && bmi >= 25) {
+      pct += 12;
+      factors.push("BMI in the overweight range");
+    }
+    if (input.exercise === "Sedentary") {
+      pct += 15;
+      factors.push("low activity level");
+    } else if (input.exercise === "Light") {
+      pct += 5;
+    }
+    if (input.latestGlucose !== null && input.latestGlucose >= 140) {
+      pct += 20;
+      factors.push("an elevated glucose reading");
+    }
+    if (includesAny(input.familyConditions, ["diabetes", "diabetic"])) {
+      pct += 20;
+      factors.push("family history of diabetes");
+    }
+    if (includesAny(input.activeConditions, ["diabetes", "insulin resistance", "prediabetes"])) {
+      pct += 30;
+      factors.push("an existing related condition on file");
+    }
+    pct = Math.max(0, Math.min(100, pct));
+    results.push({
+      name: "Type 2 diabetes",
+      level: riskLevel(pct),
+      pct,
+      note:
+        factors.length > 0
+          ? `Based on ${factors.join(", ")}.`
+          : "No elevated factors found in your data yet.",
+      action:
+        pct >= 50
+          ? "Ask your doctor about an HbA1c or fasting glucose test."
+          : "Continue routine screening as your doctor recommends.",
+    });
+  }
+
+  // Respiratory
+  {
+    let pct = 5;
+    const factors: string[] = [];
+    if (input.smoking === "Daily") {
+      pct += 30;
+      factors.push("daily smoking");
+    } else if (input.smoking === "Occasional") {
+      pct += 15;
+      factors.push("smoking");
+    } else if (input.smoking === "Former") {
+      pct += 10;
+      factors.push("smoking history");
+    }
+    if (includesAny(input.familyConditions, ["asthma", "copd", "lung", "emphysema"])) {
+      pct += 20;
+      factors.push("family respiratory history");
+    }
+    if (includesAny(input.activeConditions, ["asthma", "copd", "bronchitis"])) {
+      pct += 25;
+      factors.push("an existing related condition on file");
+    }
+    if (input.latestSpo2 !== null && input.latestSpo2 < 95) {
+      pct += 25;
+      factors.push("a low oxygen saturation reading");
+    }
+    pct = Math.max(0, Math.min(100, pct));
+    results.push({
+      name: "Respiratory disease",
+      level: riskLevel(pct),
+      pct,
+      note:
+        factors.length > 0
+          ? `Based on ${factors.join(", ")}.`
+          : "No elevated factors found in your data yet.",
+      action:
+        pct >= 50
+          ? "Discuss lung function screening with your doctor."
+          : "No action needed beyond routine checkups.",
+    });
+  }
+
+  // Liver / alcohol-related
+  {
+    let pct = 5;
+    const factors: string[] = [];
+    if (input.alcohol === "Daily") {
+      pct += 30;
+      factors.push("daily alcohol use");
+    } else if (input.alcohol === "Weekly") {
+      pct += 10;
+      factors.push("weekly alcohol use");
+    }
+    if (includesAny(input.familyConditions, ["liver", "cirrhosis", "hepatitis"])) {
+      pct += 20;
+      factors.push("family liver history");
+    }
+    if (includesAny(input.activeConditions, ["liver", "cirrhosis", "hepatitis"])) {
+      pct += 30;
+      factors.push("an existing related condition on file");
+    }
+    pct = Math.max(0, Math.min(100, pct));
+    results.push({
+      name: "Liver disease",
+      level: riskLevel(pct),
+      pct,
+      note:
+        factors.length > 0
+          ? `Based on ${factors.join(", ")}.`
+          : "No elevated factors found in your data yet.",
+      action:
+        pct >= 50
+          ? "Discuss a liver panel with your doctor."
+          : "No action needed beyond routine checkups.",
+    });
+  }
+
+  return results;
 }

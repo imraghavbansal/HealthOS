@@ -166,10 +166,10 @@ status changes, don't let this drift from reality.)
   project owner's own inbox. Fix is custom SMTP (Resend recommended) via
   Auth → Settings → SMTP Settings, not yet done — see Pending decisions.
 - **Stage 2 (Contract implementation): Done.** `src/lib/api/supabase.ts`
-  implements the full `RaagApi` contract. A few surfaces are honest empty
-  states pending later stages: `getSleep`/`getActivity` (wait on
-  wearables), `getRisks`/`getInsights` (wait on an alerts/risk engine,
-  not yet built), `requestReport` (edge function doesn't exist).
+  implements the full `RaagApi` contract. Remaining honest-empty surface:
+  `getSleep`/`getActivity` (wait on wearables, V2 not started),
+  `requestReport` (edge function doesn't exist). `getInsights`/`getRisks`
+  are now real — see Stage 8 below.
 - **Stage 3 (Storage + ingestion): Done, verified.** Real Storage upload,
   `parse-record` extraction with dedupe, background `pg_cron` retry queue
   as a resilience backstop under the client's fast-path invoke. Root-caused
@@ -224,7 +224,28 @@ status changes, don't let this drift from reality.)
   question in a month is blocked with an upgrade message, no Anthropic
   call attempted, no audit-log entry (since no context was read); a
   within-quota question passes through normally.
-- **Stages 8–9 (alerts engine, share links): Not started.**
+- **Stage 8 (insights + risk engine): Done.** Both deterministic, no AI
+  call, no Anthropic billing dependency. **Insights**:
+  `generate_insights(p_subject_id)` in `0009_insights_engine.sql` —
+  vital-trend drift (recent-vs-baseline average over vitals, per kind,
+  threshold-gated), out-of-range lab markers, medication-adherence drop
+  (mirrors `computeAdherence()`'s 30-day window). Security invoker, RLS-
+  scoped via `can_edit_subject`, dedupes against existing non-dismissed
+  rows before inserting so it's safe to call on every read — wired into
+  `getInsights()` in `src/lib/api/supabase.ts`, which RPCs it before every
+  select. `dismissInsight()` added end-to-end (contract → all three
+  adapters → `useDismissInsight` mutation → dismiss button on the
+  dashboard insight cards). **Risks**: `computeRiskFactors()` in
+  `src/lib/supabase/mappers.ts` — additive point scoring across
+  cardiovascular, type 2 diabetes, respiratory, and liver disease, from
+  real lifestyle/vitals/conditions/family-history data; computed live on
+  every `getRisks()` call, not stored, so always current. Deliberately
+  doesn't attempt cancer-type risk categories — those need real clinical
+  scoring models (e.g. Gail score) this heuristic can't responsibly
+  approximate. Not yet manually verified in-browser against a real
+  account with enough logged data to trigger each rule — only typechecked
+  and built.
+- **Stage 9 (share links): Not started.**
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

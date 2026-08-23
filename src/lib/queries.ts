@@ -51,37 +51,93 @@ export const qk = {
 
 /* ---------- queryOptions (usable in route loaders for prefetch) ---------- */
 export const profileQuery = queryOptions({ queryKey: qk.profile, queryFn: () => api.getProfile() });
-export const healthScoreQuery = queryOptions({ queryKey: qk.healthScore, queryFn: () => api.getHealthScore() });
-export const insightsQuery = queryOptions({ queryKey: qk.insights, queryFn: () => api.getInsights() });
-export const labMarkersQuery = queryOptions({ queryKey: qk.labMarkers, queryFn: () => api.getLabMarkers() });
+export const healthScoreQuery = queryOptions({
+  queryKey: qk.healthScore,
+  queryFn: () => api.getHealthScore(),
+});
+export const insightsQuery = queryOptions({
+  queryKey: qk.insights,
+  queryFn: () => api.getInsights(),
+});
+export const labMarkersQuery = queryOptions({
+  queryKey: qk.labMarkers,
+  queryFn: () => api.getLabMarkers(),
+});
 export const recordsQuery = queryOptions({ queryKey: qk.records, queryFn: () => api.getRecords() });
-export const medicationsQuery = queryOptions({ queryKey: qk.medications, queryFn: () => api.getMedications() });
+export const medicationsQuery = queryOptions({
+  queryKey: qk.medications,
+  queryFn: () => api.getMedications(),
+});
 export const goalsQuery = queryOptions({ queryKey: qk.goals, queryFn: () => api.getGoals() });
-export const appointmentsQuery = queryOptions({ queryKey: qk.appointments, queryFn: () => api.getAppointments() });
-export const symptomsQuery = queryOptions({ queryKey: qk.symptoms, queryFn: () => api.getSymptoms() });
-export const nutritionQuery = queryOptions({ queryKey: qk.nutrition, queryFn: () => api.getNutrition() });
-export const timelineQuery = queryOptions({ queryKey: qk.timeline, queryFn: () => api.getTimeline() });
-export const notificationsQuery = queryOptions({ queryKey: qk.notifications, queryFn: () => api.getNotifications() });
-export const careTeamQuery = queryOptions({ queryKey: qk.careTeam, queryFn: () => api.getCareTeam() });
-export const wearablesQuery = queryOptions({ queryKey: qk.wearables, queryFn: () => api.getWearables() });
-export const familyQuery = queryOptions({ queryKey: qk.family, queryFn: () => api.getFamilyHistory() });
+export const appointmentsQuery = queryOptions({
+  queryKey: qk.appointments,
+  queryFn: () => api.getAppointments(),
+});
+export const symptomsQuery = queryOptions({
+  queryKey: qk.symptoms,
+  queryFn: () => api.getSymptoms(),
+});
+export const nutritionQuery = queryOptions({
+  queryKey: qk.nutrition,
+  queryFn: () => api.getNutrition(),
+});
+export const timelineQuery = queryOptions({
+  queryKey: qk.timeline,
+  queryFn: () => api.getTimeline(),
+});
+export const notificationsQuery = queryOptions({
+  queryKey: qk.notifications,
+  queryFn: () => api.getNotifications(),
+});
+export const careTeamQuery = queryOptions({
+  queryKey: qk.careTeam,
+  queryFn: () => api.getCareTeam(),
+});
+export const wearablesQuery = queryOptions({
+  queryKey: qk.wearables,
+  queryFn: () => api.getWearables(),
+});
+export const familyQuery = queryOptions({
+  queryKey: qk.family,
+  queryFn: () => api.getFamilyHistory(),
+});
 export const risksQuery = queryOptions({ queryKey: qk.risks, queryFn: () => api.getRisks() });
 export const chatQuery = queryOptions({ queryKey: qk.chat, queryFn: () => api.getChatHistory() });
-export const lifestyleQuery = queryOptions({ queryKey: qk.lifestyle, queryFn: () => api.getLifestyleProfile() });
-export const consentQuery = queryOptions({ queryKey: qk.consent, queryFn: () => api.getConsentSettings() });
-export const notificationPrefsQuery = queryOptions({ queryKey: qk.notificationPrefs, queryFn: () => api.getNotificationPreferences() });
+export const lifestyleQuery = queryOptions({
+  queryKey: qk.lifestyle,
+  queryFn: () => api.getLifestyleProfile(),
+});
+export const consentQuery = queryOptions({
+  queryKey: qk.consent,
+  queryFn: () => api.getConsentSettings(),
+});
+export const notificationPrefsQuery = queryOptions({
+  queryKey: qk.notificationPrefs,
+  queryFn: () => api.getNotificationPreferences(),
+});
 
 /* ---------- read hooks ---------- */
 export const useProfile = () => useQuery(profileQuery);
 export const useHealthScore = () => useQuery(healthScoreQuery);
 export const useInsights = () => useQuery(insightsQuery);
+export function useDismissInsight() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (id: ID) => api.dismissInsight(id),
+    onSuccess: () => invalidate(qk.insights),
+  });
+}
 export const useSleep = (range: "7d" | "30d" | "90d" = "7d") =>
   useQuery({ queryKey: qk.sleep(range), queryFn: () => api.getSleep(range) });
 export const useActivity = (range: "7d" | "30d" | "90d" = "7d") =>
   useQuery({ queryKey: qk.activity(range), queryFn: () => api.getActivity(range) });
 export const useLabMarkers = () => useQuery(labMarkersQuery);
 export const useLabTrend = (marker: string) =>
-  useQuery({ queryKey: qk.labTrend(marker), queryFn: () => api.getLabTrend(marker), enabled: !!marker });
+  useQuery({
+    queryKey: qk.labTrend(marker),
+    queryFn: () => api.getLabTrend(marker),
+    enabled: !!marker,
+  });
 export const useRecords = () => useQuery(recordsQuery);
 export const useWearables = () => useQuery(wearablesQuery);
 export const useMedications = () => useQuery(medicationsQuery);
@@ -145,7 +201,8 @@ export function useDeleteRecord() {
 export function useToggleWearable() {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: ({ name, connect }: { name: string; connect: boolean }) => api.toggleWearable(name, connect),
+    mutationFn: ({ name, connect }: { name: string; connect: boolean }) =>
+      api.toggleWearable(name, connect),
     onSuccess: (w) => {
       invalidate(qk.wearables);
       toast.success(w.connected ? `${w.name} connected` : `${w.name} disconnected`);
@@ -254,7 +311,10 @@ export function useAddSymptom() {
 
 export function useDeleteSymptom() {
   const invalidate = useInvalidate();
-  return useMutation({ mutationFn: (id: ID) => api.deleteSymptom(id), onSuccess: () => invalidate(qk.symptoms) });
+  return useMutation({
+    mutationFn: (id: ID) => api.deleteSymptom(id),
+    onSuccess: () => invalidate(qk.symptoms),
+  });
 }
 
 export function useAddNutrition() {
@@ -270,12 +330,18 @@ export function useAddNutrition() {
 
 export function useAddWater() {
   const invalidate = useInvalidate();
-  return useMutation({ mutationFn: (ml: number) => api.addWater(ml), onSuccess: () => invalidate(qk.nutrition) });
+  return useMutation({
+    mutationFn: (ml: number) => api.addWater(ml),
+    onSuccess: () => invalidate(qk.nutrition),
+  });
 }
 
 export function useMarkNotificationRead() {
   const invalidate = useInvalidate();
-  return useMutation({ mutationFn: (id: ID) => api.markNotificationRead(id), onSuccess: () => invalidate(qk.notifications) });
+  return useMutation({
+    mutationFn: (id: ID) => api.markNotificationRead(id),
+    onSuccess: () => invalidate(qk.notifications),
+  });
 }
 
 export function useMarkAllNotificationsRead() {
@@ -303,7 +369,8 @@ export function useSetCareSharing() {
 export function useRequestReport() {
   return useMutation({
     mutationFn: (req: ReportRequest) => api.requestReport(req),
-    onSuccess: () => toast.success("Report queued", { description: "We'll email you the download link." }),
+    onSuccess: () =>
+      toast.success("Report queued", { description: "We'll email you the download link." }),
     onError: () => toast.error("Report request failed"),
   });
 }
@@ -339,7 +406,8 @@ export function useUpdateConsentSettings() {
 export function useUpdateNotificationPreferences() {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: (patch: Partial<NotificationPreferences>) => api.updateNotificationPreferences(patch),
+    mutationFn: (patch: Partial<NotificationPreferences>) =>
+      api.updateNotificationPreferences(patch),
     onSuccess: () => invalidate(qk.notificationPrefs),
     onError: () => toast.error("Couldn't save that setting"),
   });
@@ -362,7 +430,8 @@ export function useDeleteAccount() {
 export function useSendChatMessage() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ content, onDelta }: { content: string; onDelta?: (delta: string) => void }) => api.sendChatMessage(content, onDelta),
+    mutationFn: ({ content, onDelta }: { content: string; onDelta?: (delta: string) => void }) =>
+      api.sendChatMessage(content, onDelta),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.chat }),
     onError: () => toast.error("The assistant is unavailable right now"),
   });

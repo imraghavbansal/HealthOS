@@ -13,7 +13,7 @@
 import type { RaagApi } from "./contract";
 import type { ChatMessage } from "../types";
 
-const BASE = import.meta.env['VITE_API_BASE_URL'] ?? "/api";
+const BASE = import.meta.env["VITE_API_BASE_URL"] ?? "/api";
 
 let accessToken: string | null = null;
 /** Call this after login so every subsequent request is authenticated. */
@@ -40,7 +40,10 @@ export class ApiError extends Error {
 }
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { ...init, headers: { ...authHeaders(), ...init?.headers } });
+  const res = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers: { ...authHeaders(), ...init?.headers },
+  });
   if (!res.ok) {
     let detail: unknown;
     try {
@@ -66,6 +69,7 @@ export const httpApi: RaagApi = {
   updateProfile: (p) => patch("/me", p),
   getHealthScore: () => get("/health-score"),
   getInsights: () => get("/insights"),
+  dismissInsight: (id) => post(`/insights/${id}/dismiss`),
   getSleep: (range = "7d") => get(`/metrics/sleep?range=${range}`),
   getActivity: (range = "7d") => get(`/metrics/activity?range=${range}`),
 
@@ -86,7 +90,8 @@ export const httpApi: RaagApi = {
   deleteRecord: (id) => del(`/records/${id}`),
 
   getWearables: () => get("/devices"),
-  toggleWearable: (name, connect) => post(`/devices/${encodeURIComponent(name)}/toggle`, { connect }),
+  toggleWearable: (name, connect) =>
+    post(`/devices/${encodeURIComponent(name)}/toggle`, { connect }),
 
   getMedications: () => get("/medications"),
   logDose: (medicationId, taken) => post(`/medications/${medicationId}/doses`, { taken }),
@@ -144,8 +149,13 @@ export const httpApi: RaagApi = {
    */
   getChatHistory: () => get("/chat/messages"),
   sendChatMessage: async (content, onDelta) => {
-    const res = await fetch(`${BASE}/chat/stream`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }) });
-    if (!res.ok || !res.body) throw new ApiError(`Request failed: ${res.status} /chat/stream`, res.status);
+    const res = await fetch(`${BASE}/chat/stream`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ content }),
+    });
+    if (!res.ok || !res.body)
+      throw new ApiError(`Request failed: ${res.status} /chat/stream`, res.status);
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -170,6 +180,12 @@ export const httpApi: RaagApi = {
       }
     }
     if (!final) throw new Error("Stream ended without a final message");
-    return { id: final.id, role: "assistant", content: accumulated, citations: final.citations, createdAt: final.createdAt };
+    return {
+      id: final.id,
+      role: "assistant",
+      content: accumulated,
+      citations: final.citations,
+      createdAt: final.createdAt,
+    };
   },
 };

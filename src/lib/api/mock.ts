@@ -40,6 +40,7 @@ import type {
   ConsentSettings,
   FamilyMember,
   Goal,
+  Insight,
   LifestyleProfile,
   MedicalRecord,
   Medication,
@@ -82,12 +83,22 @@ const state = {
   nutrition: [...mockNutrition] as NutritionEntry[],
   waterMl: 1450,
   notifications: [...mockNotifications] as AppNotification[],
+  insights: seedInsights.map((i) => ({ ...i, id: String(i.id) })) as Insight[],
   careTeam: [...mockCareTeam] as CareTeamMember[],
   chat: [...seedChat] as ChatMessage[],
   familyHistory: [...familyHistory] as FamilyMember[],
   lifestyle: {} as LifestyleProfile,
-  consent: { shareDeidentified: false, aiUseFamilyHistory: true, shareWithPcp: false } as ConsentSettings,
-  notificationPrefs: { medicationReminders: true, weeklyBrief: true, newLabResults: true, trendAlerts: true } as NotificationPreferences,
+  consent: {
+    shareDeidentified: false,
+    aiUseFamilyHistory: true,
+    shareWithPcp: false,
+  } as ConsentSettings,
+  notificationPrefs: {
+    medicationReminders: true,
+    weeklyBrief: true,
+    newLabResults: true,
+    trendAlerts: true,
+  } as NotificationPreferences,
 };
 
 const TREND_MAP: Record<string, { month: string; value: number }[]> = {
@@ -99,7 +110,11 @@ function scaleSeries<T extends { day: string }>(series: T[], range: "7d" | "30d"
   if (range === "7d") return series;
   const reps = range === "30d" ? 4 : 12;
   return Array.from({ length: reps }, (_, r) =>
-    series.map((p, i) => ({ ...p, day: range === "30d" ? `W${r + 1}·${p.day}` : `${p.day}${r}`, ...jitter(p, r * 7 + i) })),
+    series.map((p, i) => ({
+      ...p,
+      day: range === "30d" ? `W${r + 1}·${p.day}` : `${p.day}${r}`,
+      ...jitter(p, r * 7 + i),
+    })),
   ).flat() as T[];
 }
 function jitter(point: Record<string, unknown>, seed: number) {
@@ -175,15 +190,23 @@ export const mockApi: RaagApi = {
       lastSync: seedUser.lastSync,
       pillars: scorePillars,
     }),
-  getInsights: () => wait(seedInsights.map((i) => ({ ...i, id: String(i.id) }))),
+  getInsights: () => wait(state.insights),
+  dismissInsight: (id) => {
+    state.insights = state.insights.filter((i) => i.id !== id);
+    return wait(undefined, 150);
+  },
   getSleep: (range = "7d") => wait(scaleSeries(sleepData, range)),
   getActivity: (range = "7d") => wait(scaleSeries(activityData, range)),
 
-  getLabMarkers: () => wait(labMarkers.map((m) => ({ ...m, id: m.name, history: TREND_MAP[m.name] }))),
+  getLabMarkers: () =>
+    wait(labMarkers.map((m) => ({ ...m, id: m.name, history: TREND_MAP[m.name] }))),
   getLabTrend: (marker) =>
     wait(
       TREND_MAP[marker] ??
-        labTrend.map((p, i) => ({ month: p.month, value: Number((p.value * (1 + i * 0.02)).toFixed(1)) })),
+        labTrend.map((p, i) => ({
+          month: p.month,
+          value: Number((p.value * (1 + i * 0.02)).toFixed(1)),
+        })),
     ),
   getRecords: () => wait(state.records),
   uploadRecord: (file) => {
@@ -192,7 +215,11 @@ export const mockApi: RaagApi = {
       type: file.type || "Other",
       title: file.name.replace(/\.[a-z0-9]+$/i, ""),
       provider: "Uploaded by you",
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
+      date: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
       tag: "Upload",
       sizeKb: Math.round(file.size / 1024),
       summary: "Queued for AI parsing — markers will appear in Lab Results shortly.",
@@ -210,7 +237,10 @@ export const mockApi: RaagApi = {
     state.wearables = state.wearables.map((w) =>
       w.name === name ? { ...w, connected: connect, last: connect ? "just now" : "—" } : w,
     );
-    return wait(state.wearables.find((w) => w.name === name)!, 600);
+    return wait(
+      state.wearables.find((w) => w.name === name)!,
+      600,
+    );
   },
 
   getMedications: () => wait(state.meds),
@@ -220,7 +250,10 @@ export const mockApi: RaagApi = {
         ? { ...m, adherence: Math.max(0, Math.min(100, m.adherence + (taken ? 1 : -2))) }
         : m,
     );
-    return wait(state.meds.find((m) => m.id === medicationId)!, 240);
+    return wait(
+      state.meds.find((m) => m.id === medicationId)!,
+      240,
+    );
   },
   addMedication: (input) => {
     const med: Medication = { ...input, id: uid("m"), adherence: 100 };
@@ -236,7 +269,10 @@ export const mockApi: RaagApi = {
   },
   updateGoal: (id, patch) => {
     state.goals = state.goals.map((g) => (g.id === id ? { ...g, ...patch } : g));
-    return wait(state.goals.find((g) => g.id === id)!, 220);
+    return wait(
+      state.goals.find((g) => g.id === id)!,
+      220,
+    );
   },
   deleteGoal: (id) => {
     state.goals = state.goals.filter((g) => g.id !== id);
@@ -264,7 +300,9 @@ export const mockApi: RaagApi = {
     return wait(appt, 400);
   },
   cancelAppointment: (id) => {
-    state.appointments = state.appointments.map((a) => (a.id === id ? { ...a, status: "cancelled" } : a));
+    state.appointments = state.appointments.map((a) =>
+      a.id === id ? { ...a, status: "cancelled" } : a,
+    );
     return wait(undefined, 300);
   },
 
@@ -286,7 +324,8 @@ export const mockApi: RaagApi = {
     return wait(undefined, 200);
   },
 
-  getNutrition: () => wait({ entries: state.nutrition, targets: nutritionTargets, waterMl: state.waterMl }),
+  getNutrition: () =>
+    wait({ entries: state.nutrition, targets: nutritionTargets, waterMl: state.waterMl }),
   addNutrition: (input) => {
     const e: NutritionEntry = { ...input, id: uid("n") };
     state.nutrition = [...state.nutrition, e];
@@ -312,7 +351,10 @@ export const mockApi: RaagApi = {
   getCareTeam: () => wait(state.careTeam),
   setCareSharing: (id, sharing) => {
     state.careTeam = state.careTeam.map((c) => (c.id === id ? { ...c, sharing } : c));
-    return wait(state.careTeam.find((c) => c.id === id)!, 250);
+    return wait(
+      state.careTeam.find((c) => c.id === id)!,
+      250,
+    );
   },
 
   requestReport: () => wait({ id: uid("rep"), status: "queued" as const }, 800),
@@ -327,12 +369,24 @@ export const mockApi: RaagApi = {
     state.notificationPrefs = { ...state.notificationPrefs, ...patch };
     return wait(state.notificationPrefs, 250);
   },
-  exportAllData: () => wait({ profile: state.profile, records: state.records, medications: state.meds, goals: state.goals }, 500),
+  exportAllData: () =>
+    wait(
+      {
+        profile: state.profile,
+        records: state.records,
+        medications: state.meds,
+        goals: state.goals,
+      },
+      500,
+    ),
   deleteAccount: () => wait(undefined, 500),
 
   getChatHistory: () => wait(state.chat),
   sendChatMessage: async (content, onDelta) => {
-    state.chat = [...state.chat, { id: uid("c"), role: "user", content, createdAt: new Date().toISOString() }];
+    state.chat = [
+      ...state.chat,
+      { id: uid("c"), role: "user", content, createdAt: new Date().toISOString() },
+    ];
     const reply = await wait(groundedReply(content), 300);
     if (onDelta) {
       const words = reply.content.split(" ");

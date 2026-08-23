@@ -14,6 +14,7 @@ import {
   Pill,
   Sparkles,
   TrendingUp,
+  X,
 } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { useMemo, useState } from "react";
@@ -21,6 +22,7 @@ import {
   useProfile,
   useHealthScore,
   useInsights,
+  useDismissInsight,
   useSleep,
   useActivity,
   useMedications,
@@ -28,8 +30,21 @@ import {
   useAppointments,
   useLogDose,
 } from "@/lib/queries";
-import { AsyncBoundary, EmptyState, LoadingCards, LoadingChart, LoadingRows } from "@/components/data-states";
-import { AnimatedNumber, Lift, ProgressRing, Stagger, StaggerItem, motion } from "@/components/motion";
+import {
+  AsyncBoundary,
+  EmptyState,
+  LoadingCards,
+  LoadingChart,
+  LoadingRows,
+} from "@/components/data-states";
+import {
+  AnimatedNumber,
+  Lift,
+  ProgressRing,
+  Stagger,
+  StaggerItem,
+  motion,
+} from "@/components/motion";
 import type { Appointment, Medication } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
@@ -41,6 +56,7 @@ function Dashboard() {
   const profileQ = useProfile();
   const scoreQ = useHealthScore();
   const insightsQ = useInsights();
+  const dismissInsight = useDismissInsight();
   const medsQ = useMedications();
   const goalsQ = useGoals();
   const apptsQ = useAppointments();
@@ -88,7 +104,9 @@ function Dashboard() {
     <AppShell
       title={`Good morning, ${firstName}.`}
       subtitle="Here's what changed while you slept."
-      actions={<Button className="rounded-full gradient-primary text-white border-0">+ Log entry</Button>}
+      actions={
+        <Button className="rounded-full gradient-primary text-white border-0">+ Log entry</Button>
+      }
     >
       <Stagger className="grid xl:grid-cols-3 gap-4 md:gap-6">
         {/* Health Score */}
@@ -97,19 +115,29 @@ function Dashboard() {
             <Card className="h-full rounded-3xl border-border/60 overflow-hidden relative">
               <div className="absolute inset-0 gradient-hero opacity-70" />
               <CardContent className="relative p-6">
-                <AsyncBoundary query={scoreQ} skeleton={<LoadingCards count={1} className="grid" />}>
+                <AsyncBoundary
+                  query={scoreQ}
+                  skeleton={<LoadingCards count={1} className="grid" />}
+                >
                   {(score) => (
                     <>
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-xs font-medium text-primary uppercase tracking-widest">Health Score</div>
+                          <div className="text-xs font-medium text-primary uppercase tracking-widest">
+                            Health Score
+                          </div>
                           <div className="mt-3 flex items-baseline gap-3">
-                            <AnimatedNumber value={score.score} className="font-display text-7xl leading-none" />
+                            <AnimatedNumber
+                              value={score.score}
+                              className="font-display text-7xl leading-none"
+                            />
                             <div className="text-sm text-success flex items-center gap-1">
                               <TrendingUp className="h-3.5 w-3.5" /> +{score.delta}
                             </div>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-2">Synced {score.lastSync}</div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            Synced {score.lastSync}
+                          </div>
                         </div>
                         <ProgressRing value={score.score} size={90} stroke={8} />
                       </div>
@@ -148,14 +176,19 @@ function Dashboard() {
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Sparkles className="h-4 w-4 text-primary" /> Today's AI insights
                   </div>
-                  <Link to="/assistant" className="text-xs text-primary hover:underline flex items-center gap-1">
+                  <Link
+                    to="/assistant"
+                    className="text-xs text-primary hover:underline flex items-center gap-1"
+                  >
                     Ask Raag <ArrowUpRight className="h-3 w-3" />
                   </Link>
                 </div>
                 <AsyncBoundary
                   query={insightsQ}
                   skeleton={<LoadingCards count={3} className="grid md:grid-cols-3 gap-3" />}
-                  empty={<EmptyState title="No insights yet" body="Check back after your next sync." />}
+                  empty={
+                    <EmptyState title="No insights yet" body="Check back after your next sync." />
+                  }
                 >
                   {(insights) => (
                     <div className="grid md:grid-cols-3 gap-3">
@@ -167,9 +200,20 @@ function Dashboard() {
                               ? "bg-success/15 text-success-foreground border-success/30"
                               : "bg-primary/10 text-foreground border-primary/20";
                         return (
-                          <div key={i.id} className={`rounded-2xl border p-4 ${tone}`}>
-                            <div className="text-xs font-semibold uppercase tracking-wider opacity-70">{i.severity}</div>
-                            <div className="mt-2 font-semibold text-sm">{i.title}</div>
+                          <div key={i.id} className={`relative rounded-2xl border p-4 ${tone}`}>
+                            <button
+                              type="button"
+                              aria-label="Dismiss insight"
+                              className="absolute right-3 top-3 opacity-50 hover:opacity-100 cursor-pointer"
+                              disabled={dismissInsight.isPending}
+                              onClick={() => dismissInsight.mutate(i.id)}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                            <div className="text-xs font-semibold uppercase tracking-wider opacity-70 pr-4">
+                              {i.severity}
+                            </div>
+                            <div className="mt-2 font-semibold text-sm pr-4">{i.title}</div>
                             <p className="mt-1 text-xs opacity-90 leading-relaxed">{i.body}</p>
                           </div>
                         );
@@ -191,7 +235,9 @@ function Dashboard() {
                 key={r}
                 onClick={() => setRange(r)}
                 className={`text-xs rounded-full px-3 py-1.5 transition ${
-                  range === r ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-accent text-muted-foreground"
+                  range === r
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-accent text-muted-foreground"
                 }`}
               >
                 {r}
@@ -209,11 +255,15 @@ function Dashboard() {
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Moon className="h-4 w-4 text-primary" /> Sleep
                   </div>
-                  <Badge variant="secondary" className="rounded-full text-[10px]">{range}</Badge>
+                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                    {range}
+                  </Badge>
                 </div>
                 <AsyncBoundary query={sleepQ} skeleton={<LoadingChart height={190} />}>
                   {(sleep) => {
-                    const avg = sleep.length ? sleep.reduce((a, s) => a + s.hours, 0) / sleep.length : 0;
+                    const avg = sleep.length
+                      ? sleep.reduce((a, s) => a + s.hours, 0) / sleep.length
+                      : 0;
                     const h = Math.floor(avg);
                     const m = Math.round((avg - h) * 60);
                     return (
@@ -223,10 +273,17 @@ function Dashboard() {
                             {h}h {m}m
                           </div>
                         </div>
-                        <div className={`h-36 mt-4 transition-opacity ${sleepQ.isFetching ? "opacity-50" : "opacity-100"}`}>
+                        <div
+                          className={`h-36 mt-4 transition-opacity ${sleepQ.isFetching ? "opacity-50" : "opacity-100"}`}
+                        >
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={sleep}>
-                              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                              <XAxis
+                                dataKey="day"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 10 }}
+                              />
                               <Tooltip
                                 contentStyle={{
                                   borderRadius: 12,
@@ -235,8 +292,16 @@ function Dashboard() {
                                   fontSize: 12,
                                 }}
                               />
-                              <Bar dataKey="hours" fill="var(--color-chart-1)" radius={[8, 8, 0, 0]} />
-                              <Bar dataKey="deep" fill="var(--color-chart-2)" radius={[8, 8, 0, 0]} />
+                              <Bar
+                                dataKey="hours"
+                                fill="var(--color-chart-1)"
+                                radius={[8, 8, 0, 0]}
+                              />
+                              <Bar
+                                dataKey="deep"
+                                fill="var(--color-chart-2)"
+                                radius={[8, 8, 0, 0]}
+                              />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -258,7 +323,9 @@ function Dashboard() {
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <Activity className="h-4 w-4 text-primary" /> Activity
                   </div>
-                  <Badge variant="secondary" className="rounded-full text-[10px]">{range}</Badge>
+                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                    {range}
+                  </Badge>
                 </div>
                 <AsyncBoundary query={activityQ} skeleton={<LoadingChart height={190} />}>
                   {(activity) => {
@@ -271,16 +338,31 @@ function Dashboard() {
                           <AnimatedNumber value={avgSteps} className="font-display text-4xl" />
                           <div className="text-xs text-muted-foreground">avg steps/day</div>
                         </div>
-                        <div className={`h-36 mt-4 transition-opacity ${activityQ.isFetching ? "opacity-50" : "opacity-100"}`}>
+                        <div
+                          className={`h-36 mt-4 transition-opacity ${activityQ.isFetching ? "opacity-50" : "opacity-100"}`}
+                        >
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={activity}>
                               <defs>
                                 <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stopColor="var(--color-chart-2)" stopOpacity={0.5} />
-                                  <stop offset="100%" stopColor="var(--color-chart-2)" stopOpacity={0} />
+                                  <stop
+                                    offset="0%"
+                                    stopColor="var(--color-chart-2)"
+                                    stopOpacity={0.5}
+                                  />
+                                  <stop
+                                    offset="100%"
+                                    stopColor="var(--color-chart-2)"
+                                    stopOpacity={0}
+                                  />
                                 </linearGradient>
                               </defs>
-                              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+                              <XAxis
+                                dataKey="day"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 10 }}
+                              />
                               <Tooltip
                                 contentStyle={{
                                   borderRadius: 12,
@@ -289,7 +371,13 @@ function Dashboard() {
                                   fontSize: 12,
                                 }}
                               />
-                              <Area type="monotone" dataKey="steps" stroke="var(--color-chart-2)" strokeWidth={2} fill="url(#grad1)" />
+                              <Area
+                                type="monotone"
+                                dataKey="steps"
+                                stroke="var(--color-chart-2)"
+                                strokeWidth={2}
+                                fill="url(#grad1)"
+                              />
                             </AreaChart>
                           </ResponsiveContainer>
                         </div>
@@ -310,13 +398,8 @@ function Dashboard() {
                 <div className="text-sm font-semibold flex items-center gap-2 mb-4">
                   <CalendarClock className="h-4 w-4 text-primary" /> Next up
                 </div>
-                <AsyncBoundary
-                  query={apptsQ}
-                  skeleton={<LoadingRows count={2} />}
-                >
-                  {(appts) => (
-                    <NextUp appointments={appts} medsQuery={medsQ} />
-                  )}
+                <AsyncBoundary query={apptsQ} skeleton={<LoadingRows count={2} />}>
+                  {(appts) => <NextUp appointments={appts} medsQuery={medsQ} />}
                 </AsyncBoundary>
               </CardContent>
             </Card>
@@ -330,9 +413,13 @@ function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm font-semibold flex items-center gap-2">
                   Today's focus
-                  <Badge variant="secondary" className="rounded-full text-[10px]">{doneCount}/{tasks.length} done</Badge>
+                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                    {doneCount}/{tasks.length} done
+                  </Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">Personalized by Raag from your goals & trends</span>
+                <span className="text-xs text-muted-foreground">
+                  Personalized by Raag from your goals & trends
+                </span>
               </div>
               <div className="grid md:grid-cols-2 gap-2">
                 {tasks.length === 0 && (
@@ -354,7 +441,11 @@ function Dashboard() {
                     ) : (
                       <Circle className="h-5 w-5 text-muted-foreground shrink-0" />
                     )}
-                    <span className={`text-sm ${t.done ? "line-through text-muted-foreground" : ""}`}>{t.label}</span>
+                    <span
+                      className={`text-sm ${t.done ? "line-through text-muted-foreground" : ""}`}
+                    >
+                      {t.label}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -368,17 +459,24 @@ function Dashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="text-sm font-semibold">Top goals</div>
-                <Link to="/goals" className="text-xs text-primary hover:underline">Manage goals</Link>
+                <Link to="/goals" className="text-xs text-primary hover:underline">
+                  Manage goals
+                </Link>
               </div>
               <AsyncBoundary
                 query={goalsQ}
                 skeleton={<LoadingCards count={3} className="grid md:grid-cols-3 gap-3" />}
-                empty={<EmptyState title="No goals yet" body="Create a goal to track progress here." />}
+                empty={
+                  <EmptyState title="No goals yet" body="Create a goal to track progress here." />
+                }
               >
                 {(goals) => (
                   <div className="grid md:grid-cols-3 gap-3">
                     {goals.slice(0, 3).map((g) => (
-                      <div key={g.id} className="rounded-2xl border border-border/60 p-4 bg-card/60">
+                      <div
+                        key={g.id}
+                        className="rounded-2xl border border-border/60 p-4 bg-card/60"
+                      >
                         <div className="text-sm font-medium">{g.title}</div>
                         <div className="mt-3 flex items-center gap-3">
                           <Progress value={g.progress} className="h-2" />
@@ -414,12 +512,20 @@ function NextUp({
   return (
     <div className="space-y-3">
       <div className="rounded-2xl border border-border/60 bg-card/60 p-3">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Next appointment</div>
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Next appointment
+        </div>
         {nextAppt ? (
           <>
             <div className="text-sm font-medium mt-1">{nextAppt.title}</div>
             <div className="text-xs text-muted-foreground">
-              {nextAppt.provider} · {new Date(nextAppt.start).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+              {nextAppt.provider} ·{" "}
+              {new Date(nextAppt.start).toLocaleString(undefined, {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}
             </div>
           </>
         ) : (
@@ -435,7 +541,9 @@ function NextUp({
             const next = meds[0];
             return next ? (
               <>
-                <div className="text-sm font-medium mt-1">{next.name} · {next.dose}</div>
+                <div className="text-sm font-medium mt-1">
+                  {next.name} · {next.dose}
+                </div>
                 <div className="text-xs text-muted-foreground">{next.next}</div>
               </>
             ) : (
