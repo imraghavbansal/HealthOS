@@ -146,7 +146,25 @@ status changes, don't let this drift from reality.)
   protection at the `AppShell` level (every authenticated page redirects
   to `/login` without a session). Cross-user RLS attack actually attempted
   and blocked, not assumed. 2FA/session-management UI not built (stubbed
-  "coming soon", honestly disabled).
+  "coming soon", honestly disabled). **Google sign-in added** —
+  `signInWithGoogle()` in `src/lib/auth.ts`, wired into `/login` and
+  `/signup` via the shared `GoogleButton` component, landing on
+  `/auth/callback` which exchanges the OAuth code for a session (same
+  PKCE auto-detection `reset-password.tsx` already relied on) then routes
+  to onboarding or dashboard. Built specifically to route around the
+  production email-confirmation problem below — Google's already-verified
+  email means no confirmation email is needed for that path at all. **Not
+  yet functional until the user creates a Google OAuth client and pastes
+  the client ID/secret into Supabase Auth → Providers → Google** — code
+  is real and typechecked, but untested end-to-end pending that dashboard
+  step (same "code is done, dashboard step is the user's job" pattern as
+  everything else in this project). Email/password confirmation was found
+  broken in production (`raag-health.vercel.app`): the code was already
+  correct (dynamic redirect, sends to whatever email the user enters) —
+  root cause is Supabase's default built-in email service, which isn't
+  meant for production and in practice only reliably delivers to the
+  project owner's own inbox. Fix is custom SMTP (Resend recommended) via
+  Auth → Settings → SMTP Settings, not yet done — see Pending decisions.
 - **Stage 2 (Contract implementation): Done.** `src/lib/api/supabase.ts`
   implements the full `RaagApi` contract. A few surfaces are honest empty
   states pending later stages: `getSleep`/`getActivity` (wait on
@@ -260,9 +278,19 @@ status changes, don't let this drift from reality.)
 
 ## Pending decisions (ask the user, don't assume)
 
-- **Deploy V1-web to Vercel now, or keep building V2 features first?**
-  Explicitly unresolved as of the last session — the user wants this
-  decided before further work.
+- **Resolved: deployed to Vercel** at `raag-health.vercel.app`. V2 work is
+  now in progress against the live deployment.
+- **Two dashboard steps needed to finish the auth fix, both the user's to
+  do (never Claude's — no credentials handed over):**
+  1. Google Cloud Console → OAuth client (type: Web application) →
+     authorized redirect URI `https://<supabase-project-ref>.supabase.co/auth/v1/callback`
+     → paste the resulting client ID + secret into Supabase Auth →
+     Providers → Google, toggle it on.
+  2. Auth → Settings → SMTP Settings → enable custom SMTP with Resend (or
+     similar) so email/password signup confirmation actually delivers to
+     real users, not just the project owner. Also set Auth → URL
+     Configuration → Site URL to `https://raag-health.vercel.app` and add
+     it to Redirect URLs.
 - Embeddings provider for semantic document search (Voyage vs OpenAI vs
   defer further) — needed to close the last Stage 4 gap.
 - Capacitor mobile packaging — deliberately deferred until "V1-web" is

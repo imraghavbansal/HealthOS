@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { signUpWithEmail, describeAuthError } from "@/lib/auth";
+import { signUpWithEmail, signInWithGoogle, describeAuthError } from "@/lib/auth";
+import { GoogleButton } from "@/components/google-button";
+import { api, IS_DEMO } from "@/lib/api";
 
 export const Route = createFileRoute("/signup")({ component: Signup });
 
@@ -23,10 +25,34 @@ function validate(form: FormState): FormErrors {
 
 function Signup() {
   const nav = useNavigate();
-  const [form, setForm] = useState<FormState>({ name: "", email: "", password: "", confirmPassword: "" });
+  const [form, setForm] = useState<FormState>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState<string | undefined>();
+
+  async function onGoogleClick() {
+    setGoogleError(undefined);
+    setGoogleSubmitting(true);
+    try {
+      await signInWithGoogle();
+      // Real mode: browser has already redirected to Google by now. Demo
+      // mode has no OAuth provider to redirect to, so nav explicitly.
+      if (IS_DEMO) {
+        const profile = await api.getProfile();
+        nav({ to: profile.onboardingCompleted === false ? "/onboarding" : "/dashboard" });
+      }
+    } catch (err) {
+      setGoogleError(describeAuthError(err));
+      setGoogleSubmitting(false);
+    }
+  }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -41,7 +67,11 @@ function Signup() {
 
     setSubmitting(true);
     try {
-      const { needsEmailConfirmation } = await signUpWithEmail(form.email, form.password, form.name.trim());
+      const { needsEmailConfirmation } = await signUpWithEmail(
+        form.email,
+        form.password,
+        form.name.trim(),
+      );
       if (needsEmailConfirmation) {
         setAwaitingConfirmation(true);
       } else {
@@ -74,45 +104,109 @@ function Signup() {
               </div>
               <h2 className="font-display text-2xl">Check your inbox.</h2>
               <p className="text-sm text-muted-foreground">
-                We sent a confirmation link to <span className="font-medium text-foreground">{form.email}</span>.
-                Click it to activate your account — you'll land straight in onboarding.
+                We sent a confirmation link to{" "}
+                <span className="font-medium text-foreground">{form.email}</span>. Click it to
+                activate your account — you'll land straight in onboarding.
               </p>
               <p className="text-xs text-muted-foreground pt-2">
-                Wrong email? <button type="button" className="underline" onClick={() => setAwaitingConfirmation(false)}>Go back</button>
+                Wrong email?{" "}
+                <button
+                  type="button"
+                  className="underline"
+                  onClick={() => setAwaitingConfirmation(false)}
+                >
+                  Go back
+                </button>
               </p>
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-6">
               <h2 className="font-display text-3xl">Create your Raag.</h2>
+
+              <GoogleButton
+                onClick={onGoogleClick}
+                loading={googleSubmitting}
+                label="Continue with Google"
+              />
+              {googleError && <p className="text-xs text-destructive">{googleError}</p>}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="h-px flex-1 bg-border" />
+                or
+                <div className="h-px flex-1 bg-border" />
+              </div>
+
               <div className="grid gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-sm" htmlFor="name">Full name</Label>
-                  <Input id="name" placeholder="Alex Morgan" value={form.name} onChange={(e) => set("name", e.target.value)} aria-invalid={!!errors.name} />
+                  <Label className="text-sm" htmlFor="name">
+                    Full name
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="Alex Morgan"
+                    value={form.name}
+                    onChange={(e) => set("name", e.target.value)}
+                    aria-invalid={!!errors.name}
+                  />
                   {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-sm" htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="alex@example.com" value={form.email} onChange={(e) => set("email", e.target.value)} aria-invalid={!!errors.email} />
+                  <Label className="text-sm" htmlFor="email">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="alex@example.com"
+                    value={form.email}
+                    onChange={(e) => set("email", e.target.value)}
+                    aria-invalid={!!errors.email}
+                  />
                   {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-sm" htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={form.password} onChange={(e) => set("password", e.target.value)} aria-invalid={!!errors.password} />
+                  <Label className="text-sm" htmlFor="password">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => set("password", e.target.value)}
+                    aria-invalid={!!errors.password}
+                  />
                   {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-sm" htmlFor="confirmPassword">Confirm password</Label>
-                  <Input id="confirmPassword" type="password" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} aria-invalid={!!errors.confirmPassword} />
-                  {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
+                  <Label className="text-sm" htmlFor="confirmPassword">
+                    Confirm password
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={form.confirmPassword}
+                    onChange={(e) => set("confirmPassword", e.target.value)}
+                    aria-invalid={!!errors.confirmPassword}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                  )}
                 </div>
               </div>
 
-              <Button type="submit" disabled={submitting} className="w-full rounded-full gradient-primary text-white border-0 shadow-soft">
-                {submitting ? "Creating your Raag…" : "Continue"} <ArrowRight className="ml-1 h-4 w-4" />
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full rounded-full gradient-primary text-white border-0 shadow-soft"
+              >
+                {submitting ? "Creating your Raag…" : "Continue"}{" "}
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                Already have an account? <Link to="/login" className="text-primary font-medium">Sign in</Link>
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary font-medium">
+                  Sign in
+                </Link>
               </p>
             </form>
           )}

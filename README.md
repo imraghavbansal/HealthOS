@@ -5,14 +5,6 @@ and family history unified into one calm, AI-guided view. Raag remembers
 your health over time and helps you understand the bigger picture, rather
 than treating every visit as a blank slate.
 
-## Read this first
-
-**`CLAUDE.md`** is the single source of truth for current project status —
-what's built, what's verified, what's still open, and known gotchas. Start
-there. Deeper context lives in `docs/`: `PRODUCT-VISION.md` (product
-philosophy), `MASTER-BUILD-SPEC.md` (governing execution spec and build
-order), `BUSINESS-MODEL.md` (pricing/tiers), `AGENT-BRIEF.md` (coding
-conventions), `HANDOFF.md` (original architecture notes).
 
 ## Stack
 

@@ -9,7 +9,11 @@ import { getSupabaseBrowserClient } from "./supabase/client";
 
 export type SignUpResult = { needsEmailConfirmation: boolean };
 
-export async function signUpWithEmail(email: string, password: string, name: string): Promise<SignUpResult> {
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  name: string,
+): Promise<SignUpResult> {
   if (IS_DEMO) return { needsEmailConfirmation: false };
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase.auth.signUp({
@@ -17,11 +21,33 @@ export async function signUpWithEmail(email: string, password: string, name: str
     password,
     options: {
       data: { name },
-      emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/onboarding` : undefined,
+      emailRedirectTo:
+        typeof window !== "undefined" ? `${window.location.origin}/onboarding` : undefined,
     },
   });
   if (error) throw error;
   return { needsEmailConfirmation: !data.session };
+}
+
+/**
+ * Google skips the confirm-email step entirely — Google has already
+ * verified the address, so Supabase trusts it and grants a session
+ * straight off the OAuth redirect. This is the primary signup/login path;
+ * email/password (above) is the fallback for people who'd rather not use
+ * Google, and still needs a working SMTP provider to actually deliver its
+ * confirmation email.
+ */
+export async function signInWithGoogle(): Promise<void> {
+  if (IS_DEMO) return;
+  const supabase = getSupabaseBrowserClient();
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo:
+        typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+    },
+  });
+  if (error) throw error;
 }
 
 export async function signInWithEmail(email: string, password: string): Promise<void> {
@@ -41,7 +67,8 @@ export async function requestPasswordReset(email: string): Promise<void> {
   if (IS_DEMO) return;
   const supabase = getSupabaseBrowserClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined,
+    redirectTo:
+      typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined,
   });
   if (error) throw error;
 }
@@ -63,10 +90,12 @@ export async function hasActiveSession(): Promise<boolean> {
 /** Maps Supabase's auth error messages to plain, actionable copy. */
 export function describeAuthError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
-  if (/already registered|already exists/i.test(message)) return "An account with that email already exists — try signing in instead.";
+  if (/already registered|already exists/i.test(message))
+    return "An account with that email already exists — try signing in instead.";
   if (/invalid login credentials/i.test(message)) return "That email or password isn't right.";
   if (/email.*invalid/i.test(message)) return "That doesn't look like a valid email address.";
-  if (/password.*(least|short|weak)/i.test(message)) return "Password is too short — use at least 6 characters.";
+  if (/password.*(least|short|weak)/i.test(message))
+    return "Password is too short — use at least 6 characters.";
   if (/rate limit/i.test(message)) return "Too many attempts — wait a moment and try again.";
   return message;
 }
