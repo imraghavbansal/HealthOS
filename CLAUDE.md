@@ -290,6 +290,33 @@ status changes, don't let this drift from reality.)
   counted → bogus/revoked/expired tokens all correctly rejected →
   another user can't read this subject's `share_links` rows via RLS. All
   checks passed against the live project.
+- **Medication interactions (V2, not in the original numbered stages):
+  Built, not yet applied/verified.** NLM discontinued RxNav's Drug-Drug
+  Interaction API on 2024-01-02 — confirmed by reading NLM's own docs and
+  independent coverage, it's permanent, not an outage, and the rest of
+  RxNav (name normalization) staying alive doesn't help since that's not
+  the part that was needed. openFDA's label text is unstructured and
+  unreliable to parse; DrugBank's free API needs signup approval and is
+  itself retiring in 2026. Built instead as a curated, static table —
+  `drug_interaction_rules` in `0011_medication_interactions.sql`, ~24
+  well-documented major pairs (warfarin+NSAIDs, SSRI+MAOI, statins+
+  certain antibiotics, benzodiazepines+opioids, etc.), each with a real
+  source citation. Deliberately **not exhaustive** — framed that way
+  everywhere it surfaces. `computeMedicationInteractions()` in
+  `src/lib/supabase/mappers.ts` matches each active medication's
+  free-text name against the rule aliases (case-insensitive substring —
+  medication names are user-entered or AI-extracted, never guaranteed to
+  equal a canonical drug name) and is wired into the existing
+  `getMedications()` call, populating the `Medication.interactions`
+  field the medications page UI was already built to render (the "needs
+  attention" panel's copy — "Raag checks your active meds against a
+  curated interaction database on every update" — predates this work and
+  was literally describing this exact feature before it existed). No new
+  UI needed. **User still needs to**: run `0011_medication_interactions.sql`,
+  then run `npm run verify:medication-interactions` (confirms the rule
+  table seeds correctly, RLS blocks writes, and a known pair — warfarin +
+  ibuprofen — is correctly detected against real inserted medications)
+  before trusting this live.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

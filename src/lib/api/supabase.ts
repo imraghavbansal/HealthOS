@@ -18,7 +18,9 @@ import {
   summarizeLabMarkers,
   computeAdherence,
   computeRiskFactors,
+  computeMedicationInteractions,
   resolveContentType,
+  type InteractionRuleRow,
 } from "../supabase/mappers";
 import type { RaagApi } from "./contract";
 import type {
@@ -380,9 +382,12 @@ export const supabaseApi: RaagApi = {
   async getMedications() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
-    const [medsRes, dosesRes] = await Promise.all([
+    const [medsRes, dosesRes, rulesRes] = await Promise.all([
       sb.from("medications").select("*").eq("subject_id", subjectId).eq("active", true),
       sb.from("dose_logs").select("medication_id, taken_at, skipped").eq("subject_id", subjectId),
+      sb
+        .from("drug_interaction_rules")
+        .select("drug_a_aliases, drug_b_aliases, severity, description, recommendation"),
     ]);
     const meds = unwrap(medsRes) as {
       id: string;
@@ -391,13 +396,16 @@ export const supabaseApi: RaagApi = {
       schedule: string | null;
       type: string;
       refills_left: number | null;
-      interactions: string[] | null;
     }[];
     const doses = unwrap(dosesRes) as {
       medication_id: string;
       taken_at: string;
       skipped: boolean;
     }[];
+    // Reference table read failing shouldn't break the medications page —
+    // degrade to "no interaction data" rather than throw.
+    const rules = (rulesRes.error ? [] : rulesRes.data) as InteractionRuleRow[];
+    const interactionsByMedId = computeMedicationInteractions(meds, rules);
     return meds.map((m): Medication => ({
       id: m.id,
       name: m.name,
@@ -407,7 +415,7 @@ export const supabaseApi: RaagApi = {
       next: "—",
       type: m.type,
       refillsLeft: m.refills_left ?? undefined,
-      interactions: m.interactions ?? undefined,
+      interactions: interactionsByMedId.get(m.id),
     }));
   },
 

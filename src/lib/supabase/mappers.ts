@@ -383,3 +383,55 @@ export function computeRiskFactors(input: RiskEngineInput): RiskFactor[] {
 
   return results;
 }
+
+/* ---------- medication interaction checker (V2) ---------- */
+
+export type InteractionRuleRow = {
+  drug_a_aliases: string[];
+  drug_b_aliases: string[];
+  severity: "moderate" | "major" | "contraindicated";
+  description: string;
+  recommendation: string;
+};
+
+const SEVERITY_PREFIX: Record<InteractionRuleRow["severity"], string> = {
+  contraindicated: "⚠ Do not combine",
+  major: "Major interaction",
+  moderate: "Moderate interaction",
+};
+
+/**
+ * Matches each active medication's free-text name (user-entered or
+ * AI-extracted, so never guaranteed to equal a canonical drug name)
+ * against the curated drug_interaction_rules aliases via case-insensitive
+ * substring match. Returns a map of medication id -> human-readable
+ * interaction strings, one per matched pair the medication is on either
+ * side of. Deliberately a curated list, not a live medical database — see
+ * 0011_medication_interactions.sql for why (RxNav's interaction API was
+ * discontinued by NLM in Jan 2024, no free equivalent replaced it).
+ */
+export function computeMedicationInteractions(
+  meds: { id: string; name: string }[],
+  rules: InteractionRuleRow[],
+): Map<string, string[]> {
+  const result = new Map<string, string[]>();
+  const add = (id: string, note: string) => result.set(id, [...(result.get(id) ?? []), note]);
+  const matches = (name: string, aliases: string[]) => {
+    const lower = name.toLowerCase();
+    return aliases.some((a) => lower.includes(a.toLowerCase()));
+  };
+
+  for (const rule of rules) {
+    const aMeds = meds.filter((m) => matches(m.name, rule.drug_a_aliases));
+    const bMeds = meds.filter((m) => matches(m.name, rule.drug_b_aliases));
+    for (const a of aMeds) {
+      for (const b of bMeds) {
+        if (a.id === b.id) continue;
+        const prefix = SEVERITY_PREFIX[rule.severity];
+        add(a.id, `${prefix} with ${b.name} — ${rule.description} ${rule.recommendation}`);
+        add(b.id, `${prefix} with ${a.name} — ${rule.description} ${rule.recommendation}`);
+      }
+    }
+  }
+  return result;
+}
