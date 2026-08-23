@@ -389,8 +389,8 @@ status changes, don't let this drift from reality.)
   clean; not covered by an automated script itself (pure client-side
   aggregation of already-verified endpoints), so worth one manual look
   once there's enough real data logged to populate every section.
-- **Push notifications (V2, not in the original numbered stages): Built,
-  not yet deployed/verified.** Two gaps closed together, since push is
+- **Push notifications (V2, not in the original numbered stages):
+  Deployed, DB/RLS side verified live.** Two gaps closed together, since push is
   meaningless without something to notify about: (1) **nothing had ever
   written to `notifications`** — the in-app bell was reading a table
   nobody inserted into since `0001_init.sql`, discovered while scoping
@@ -418,15 +418,16 @@ status changes, don't let this drift from reality.)
   dropped. VAPID key pair already generated (public key committed to
   `.env`/`.env.example` since it's genuinely public by design; private
   key and a generated `PUSH_TRIGGER_SECRET` were handed to the user in
-  chat, never written to the repo). Typechecked, linted, and production-
-  built clean. **User still needs to**: run `0013_push_notifications.sql`,
-  create the `push_trigger_secret` Vault entry, paste-and-deploy
-  `send-push` with its four secrets, add `VITE_VAPID_PUBLIC_KEY` to
-  Vercel, then run `npm run verify:push-notifications` (push_subscriptions
-  CRUD + RLS, confirms `generate_insights()` now writes a real
-  notification) — that script can't verify actual delivery (needs a real
-  browser-issued subscription), so a manual check via Settings → "Send
-  test notification" is the real final step.
+  chat, never written to the repo). Typechecked, linted, production-built
+  clean, and migration run + `send-push` deployed with its four secrets +
+  `VITE_VAPID_PUBLIC_KEY` added to Vercel. **Verified via
+  `npm run verify:push-notifications`**: push_subscriptions CRUD + RLS
+  isolation, and confirmed `generate_insights()` now writes a real
+  notification row (title/kind match the insight) — all checks passed
+  against the live project. That script can't verify actual delivery
+  (needs a real browser-issued subscription) — **still needs one manual
+  check**: Settings → enable push → "Send test notification" → confirm a
+  real browser/OS notification appears.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/
