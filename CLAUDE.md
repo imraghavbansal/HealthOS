@@ -275,6 +275,18 @@ status changes, don't let this drift from reality.)
   "built around the principles of" HIPAA/GDPR/DPDP with honest
   non-certification disclosure, since a global (not just US) audience is
   the goal.
+- **Remote git history was rewritten once already** (2026-08-18): a
+  hardcoded Razorpay webhook secret + the internal queue secret leaked
+  into two commits, GitGuardian flagged it, both secrets were rotated at
+  the source and the old values scrubbed from every past commit via
+  history rewrite, plus a pre-commit secret scanner
+  (`scripts/scan-secrets.mjs` via `.githooks/pre-commit`) added to catch
+  a repeat. **Any local clone from before that rewrite will diverge from
+  origin/main and a plain `git push` will be rejected** — the fix is to
+  `git fetch`, reset local `main` to `origin/main`, and cherry-pick only
+  the genuinely new commits on top; never force-push an old, pre-rewrite
+  branch over origin, since that would resurrect the leaked secrets in
+  history.
 
 ## Pending decisions (ask the user, don't assume)
 
