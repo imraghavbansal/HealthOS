@@ -291,7 +291,7 @@ status changes, don't let this drift from reality.)
   another user can't read this subject's `share_links` rows via RLS. All
   checks passed against the live project.
 - **Medication interactions (V2, not in the original numbered stages):
-  Built, not yet applied/verified.** NLM discontinued RxNav's Drug-Drug
+  Done, verified live.** NLM discontinued RxNav's Drug-Drug
   Interaction API on 2024-01-02 — confirmed by reading NLM's own docs and
   independent coverage, it's permanent, not an outage, and the rest of
   RxNav (name normalization) staying alive doesn't help since that's not
@@ -312,11 +312,12 @@ status changes, don't let this drift from reality.)
   attention" panel's copy — "Raag checks your active meds against a
   curated interaction database on every update" — predates this work and
   was literally describing this exact feature before it existed). No new
-  UI needed. **User still needs to**: run `0011_medication_interactions.sql`,
-  then run `npm run verify:medication-interactions` (confirms the rule
-  table seeds correctly, RLS blocks writes, and a known pair — warfarin +
-  ibuprofen — is correctly detected against real inserted medications)
-  before trusting this live.
+  UI needed. **Verified via `npm run verify:medication-interactions`**
+  against the live project: rule table seeded (24 rows), RLS blocks
+  writes to it from a regular user, and a known pair (warfarin +
+  ibuprofen) is correctly detected as severity `major` against real
+  inserted medications, with no false positive on an unrelated
+  medication (Vitamin D3). All checks passed.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/
