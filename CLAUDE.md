@@ -242,9 +242,15 @@ status changes, don't let this drift from reality.)
   every `getRisks()` call, not stored, so always current. Deliberately
   doesn't attempt cancer-type risk categories — those need real clinical
   scoring models (e.g. Gail score) this heuristic can't responsibly
-  approximate. Not yet manually verified in-browser against a real
-  account with enough logged data to trigger each rule — only typechecked
-  and built.
+  approximate. **Insights verified live** via `npm run verify:insights`
+  (`scripts/verify-insights-engine.mjs`) — signs up a real test user,
+  seeds data crafted to trip each of the 3 rules, confirms all 3 fire,
+  confirms re-running doesn't duplicate rows, confirms a second user's
+  RPC call against this subject is rejected. Risk scoring
+  (`computeRiskFactors()`) is pure client-side logic with no DB round
+  trip — typechecked and built, not covered by that script; still needs
+  a real manual check that a signed-in account with real data renders
+  sane-looking risk cards, not just that the function doesn't throw.
 - **Stage 9 (share links): Not started.**
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
