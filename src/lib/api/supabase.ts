@@ -1314,27 +1314,56 @@ export const supabaseApi: RaagApi = {
   // Cross-domain feed. v1: union the tables that already carry a date; a
   // dedicated `timeline` materialized view is a straightforward follow-up
   // once this shape is validated against real usage.
+  // Was missing vitals, goals, symptoms, conditions, and insights as event
+  // types — the UI (KIND_META in routes/timeline.tsx) already had icons/
+  // labels ready for "vital" and "goal" but nothing ever populated them.
+  // "device" stays unpopulated on purpose: wearables are honestly "coming
+  // soon" (see 0014_wearables_architecture.sql), and a timeline entry for
+  // a fake connection would contradict that.
   async getTimeline() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
-    const [labs, records, meds, appts] = await Promise.all([
-      sb
-        .from("lab_markers")
-        .select("id, name, value, unit, collected_at")
-        .eq("subject_id", subjectId),
-      sb
-        .from("source_documents")
-        .select("id, title, document_type, document_date")
-        .eq("subject_id", subjectId),
-      sb.from("medications").select("id, name, dose, created_at").eq("subject_id", subjectId),
-      sb.from("appointments").select("id, title, provider, start_at").eq("subject_id", subjectId),
-    ]);
+    const [labs, records, meds, appts, vitals, goals, symptoms, conditions, insightsRes] =
+      await Promise.all([
+        sb
+          .from("lab_markers")
+          .select("id, name, value, unit, collected_at")
+          .eq("subject_id", subjectId),
+        sb
+          .from("source_documents")
+          .select("id, title, document_type, document_date")
+          .eq("subject_id", subjectId),
+        sb.from("medications").select("id, name, dose, created_at").eq("subject_id", subjectId),
+        sb.from("appointments").select("id, title, provider, start_at").eq("subject_id", subjectId),
+        sb
+          .from("vitals")
+          .select("id, kind, value, secondary, unit, recorded_at")
+          .eq("subject_id", subjectId),
+        sb.from("goals").select("id, title, category, created_at").eq("subject_id", subjectId),
+        sb.from("symptoms").select("id, label, severity, started_at").eq("subject_id", subjectId),
+        sb
+          .from("conditions")
+          .select("id, name, status, diagnosed_at, created_at")
+          .eq("subject_id", subjectId),
+        sb.from("insights").select("id, title, severity, created_at").eq("subject_id", subjectId),
+      ]);
     type TimelineEventRow = {
       id: string;
       date: string;
-      kind: "lab" | "visit" | "med" | "vital" | "goal" | "device" | "note";
+      kind:
+        | "lab"
+        | "visit"
+        | "med"
+        | "vital"
+        | "goal"
+        | "device"
+        | "note"
+        | "symptom"
+        | "condition"
+        | "insight";
       title: string;
       detail: string;
+      severity?: "info" | "success" | "warning" | "critical";
     };
     const events: TimelineEventRow[] = [
       ...(
@@ -1383,6 +1412,67 @@ export const supabaseApi: RaagApi = {
         kind: "visit" as const,
         title: a.title,
         detail: a.provider ?? "",
+      })),
+      ...(
+        unwrap(vitals) as {
+          id: string;
+          kind: string;
+          value: number;
+          secondary: number | null;
+          unit: string;
+          recorded_at: string;
+        }[]
+      ).map((v) => ({
+        id: v.id,
+        date: v.recorded_at,
+        kind: "vital" as const,
+        title: v.kind.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase()),
+        detail: `${v.value}${v.secondary ? `/${v.secondary}` : ""} ${v.unit}`,
+      })),
+      ...(
+        unwrap(goals) as { id: string; title: string; category: string; created_at: string }[]
+      ).map((g) => ({
+        id: g.id,
+        date: g.created_at,
+        kind: "goal" as const,
+        title: g.title,
+        detail: g.category,
+      })),
+      ...(
+        unwrap(symptoms) as { id: string; label: string; severity: number; started_at: string }[]
+      ).map((s) => ({
+        id: s.id,
+        date: s.started_at,
+        kind: "symptom" as const,
+        title: s.label,
+        detail: `Severity ${s.severity}/10`,
+        severity: (s.severity >= 7 ? "critical" : s.severity >= 4 ? "warning" : "info") as
+          "critical" | "warning" | "info",
+      })),
+      ...(
+        unwrap(conditions) as {
+          id: string;
+          name: string;
+          status: string;
+          diagnosed_at: string | null;
+          created_at: string;
+        }[]
+      ).map((c) => ({
+        id: c.id,
+        date: c.diagnosed_at ?? c.created_at,
+        kind: "condition" as const,
+        title: c.name,
+        detail: c.status,
+      })),
+      ...(
+        unwrap(insightsRes) as { id: string; title: string; severity: string; created_at: string }[]
+      ).map((i) => ({
+        id: i.id,
+        date: i.created_at,
+        kind: "insight" as const,
+        title: i.title,
+        detail: "Raag insight",
+        severity: i.severity as "info" | "success" | "warning" | "critical",
       })),
     ];
     return events

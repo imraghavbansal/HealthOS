@@ -2,9 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Activity,
+  AlertTriangle,
   FileText,
   FlaskConical,
+  HeartPulse,
   Pill,
+  Sparkles,
   Stethoscope,
   Target,
   Watch,
@@ -24,24 +27,43 @@ export const Route = createFileRoute("/timeline")({
   head: () => ({
     meta: [
       { title: "Health Timeline · Raag" },
-      { name: "description", content: "Every lab, visit, medication change, vital, goal, and device event in one chronological view." },
+      {
+        name: "description",
+        content:
+          "Every lab, visit, medication change, vital, goal, and device event in one chronological view.",
+      },
       { property: "og:title", content: "Health Timeline · Raag" },
-      { property: "og:description", content: "A single unified timeline of your entire health history." },
+      {
+        property: "og:description",
+        content: "A single unified timeline of your entire health history.",
+      },
     ],
   }),
 });
 
 type FilterKind = "all" | TimelineEvent["kind"];
 
-const KIND_META: Record<TimelineEvent["kind"], { label: string; icon: LucideIcon; color: string }> = {
-  lab: { label: "Labs", icon: FlaskConical, color: "bg-chart-1/20 text-chart-1" },
-  visit: { label: "Visits", icon: Stethoscope, color: "bg-chart-2/20 text-chart-2" },
-  med: { label: "Meds", icon: Pill, color: "bg-chart-3/20 text-chart-3" },
-  vital: { label: "Vitals", icon: Activity, color: "bg-chart-4/20 text-chart-4" },
-  goal: { label: "Goals", icon: Target, color: "bg-success/20 text-success-foreground" },
-  device: { label: "Devices", icon: Watch, color: "bg-chart-5/20 text-chart-5" },
-  note: { label: "Notes", icon: FileText, color: "bg-muted text-muted-foreground" },
-};
+const KIND_META: Record<TimelineEvent["kind"], { label: string; icon: LucideIcon; color: string }> =
+  {
+    lab: { label: "Labs", icon: FlaskConical, color: "bg-chart-1/20 text-chart-1" },
+    visit: { label: "Visits", icon: Stethoscope, color: "bg-chart-2/20 text-chart-2" },
+    med: { label: "Meds", icon: Pill, color: "bg-chart-3/20 text-chart-3" },
+    vital: { label: "Vitals", icon: Activity, color: "bg-chart-4/20 text-chart-4" },
+    goal: { label: "Goals", icon: Target, color: "bg-success/20 text-success-foreground" },
+    device: { label: "Devices", icon: Watch, color: "bg-chart-5/20 text-chart-5" },
+    note: { label: "Notes", icon: FileText, color: "bg-muted text-muted-foreground" },
+    symptom: {
+      label: "Symptoms",
+      icon: AlertTriangle,
+      color: "bg-warning/20 text-warning-foreground",
+    },
+    condition: {
+      label: "Conditions",
+      icon: HeartPulse,
+      color: "bg-destructive/15 text-destructive",
+    },
+    insight: { label: "Insights", icon: Sparkles, color: "bg-primary/15 text-primary" },
+  };
 
 const FILTERS: { key: FilterKind; label: string }[] = [
   { key: "all", label: "All" },
@@ -50,6 +72,9 @@ const FILTERS: { key: FilterKind; label: string }[] = [
   { key: "med", label: "Meds" },
   { key: "vital", label: "Vitals" },
   { key: "goal", label: "Goals" },
+  { key: "symptom", label: "Symptoms" },
+  { key: "condition", label: "Conditions" },
+  { key: "insight", label: "Insights" },
   { key: "device", label: "Devices" },
 ];
 
@@ -69,7 +94,12 @@ function TimelinePage() {
       <AsyncBoundary
         query={query}
         skeleton={<LoadingRows count={6} />}
-        empty={<EmptyState title="No events yet" body="Once you log data, your timeline will appear here." />}
+        empty={
+          <EmptyState
+            title="No events yet"
+            body="Once you log data, your timeline will appear here."
+          />
+        }
       >
         {(events) => <TimelineBody events={events} filter={filter} setFilter={setFilter} />}
       </AsyncBoundary>
@@ -95,7 +125,9 @@ function TimelineBody({
     [sorted, filter],
   );
 
-  const flagged = sorted.filter((e) => e.severity === "warning" || e.severity === "critical").length;
+  const flagged = sorted.filter(
+    (e) => e.severity === "warning" || e.severity === "critical",
+  ).length;
   const dates = sorted.map((e) => new Date(e.date).getTime());
   const min = dates.length ? new Date(Math.min(...dates)) : null;
   const max = dates.length ? new Date(Math.max(...dates)) : null;
@@ -136,7 +168,9 @@ function TimelineBody({
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`relative rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
-              filter === f.key ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              filter === f.key
+                ? "text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {filter === f.key && (
@@ -190,7 +224,9 @@ function TimelineRow({ event, index }: { event: TimelineEvent; index: number }) 
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
       className={`relative pl-14 lg:pl-0 lg:grid lg:grid-cols-2 lg:gap-8 ${isRight ? "" : ""}`}
     >
-      <div className={`absolute left-5 lg:left-1/2 top-1 -translate-x-1/2 grid h-8 w-8 place-items-center rounded-full ${meta.color} ring-4 ring-background z-10`}>
+      <div
+        className={`absolute left-5 lg:left-1/2 top-1 -translate-x-1/2 grid h-8 w-8 place-items-center rounded-full ${meta.color} ring-4 ring-background z-10`}
+      >
         <Icon className="h-4 w-4" />
       </div>
       <div className={`hidden lg:block ${isRight ? "" : "order-2"}`} />

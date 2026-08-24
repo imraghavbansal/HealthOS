@@ -223,7 +223,17 @@ export interface NutritionTargets {
 export interface TimelineEvent {
   id: ID;
   date: ISODate;
-  kind: "lab" | "visit" | "med" | "vital" | "goal" | "device" | "note";
+  kind:
+    | "lab"
+    | "visit"
+    | "med"
+    | "vital"
+    | "goal"
+    | "device"
+    | "note"
+    | "symptom"
+    | "condition"
+    | "insight";
   title: string;
   detail: string;
   severity?: Severity;
