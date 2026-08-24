@@ -496,6 +496,43 @@ ios` requires Xcode, which only runs on macOS — this dev environment
   needs an Apple Developer Program membership ($99/yr) and a Google Play
   Console account ($25 one-time) — business/account steps only the user
   can do, not buildable by Claude.
+- **Real security headers (not in original numbered stages): Done,
+  verified locally.** There were none at all before this — no CSP,
+  X-Frame-Options, X-Content-Type-Options, Referrer-Policy,
+  Permissions-Policy, or HSTS anywhere. Added in `src/server.ts`, applied
+  to every response (including the 500 error path). CSP allowlist is
+  scoped to exactly what the app loads (Supabase for data/auth, Razorpay
+  for checkout, Google Fonts), not a generic wildcard policy. Verified
+  via `vite preview` + `curl -I`: all headers present, page still returns 200. **Not click-tested against the live Razorpay checkout flow or
+  Google sign-in redirect** — a CSP that's subtly wrong fails silently in
+  the browser console, not in a build. Worth a manual smoke test
+  (complete a real checkout, sign in with Google) after this deploys.
+- **Timeline completeness (not in original numbered stages): Done.** The
+  timeline UI (`KIND_META` in `routes/timeline.tsx`) already had icons
+  and filter chips ready for "vital" and "goal" event kinds, but
+  `getTimeline()` never populated them — only labs, records, meds, and
+  appointments ever showed up. Added those two plus three new kinds
+  (`symptom`, `condition`, `insight`) so the timeline is the actual
+  unified "everything about my health, chronologically" view. `device`
+  stays deliberately unpopulated — wearables are honestly "coming soon,"
+  and a timeline entry for a fake connection would contradict that.
+- **Report comparison (not in original numbered stages): Done, verified
+  live.** Was completely missing — the labs page only showed a
+  latest-vs-prior delta per marker, no way to pick two specific draws
+  and see what changed. Added `getLabReports()` (groups every
+  `lab_markers` row by its collection date — a "report" is every marker
+  from the same draw, regardless of which uploaded document(s) they came
+  from) and `getLabReportMarkers(date)`. New "Compare reports" section
+  on `/labs`: pick two dates, see a diff table per marker — value
+  change, %, newly-flagged status, "not retested" for a marker missing
+  from one side, "new" for a marker missing from the other. All computed
+  client-side from data already fetched, no new table or RLS needed
+  (`lab_markers`' existing RLS already covers it). **Verified via
+  `npm run verify:report-comparison`**: date-grouping correctness
+  (including that an adjacent day's decoy marker doesn't leak into a
+  date-range query), and the three diff cases (comparable, not-retested,
+  newly-added) all resolve correctly. All checks passed against the live
+  project.
 - **Stage 10 (compliance): Partial.** Real `/privacy` and `/terms` pages
   built and linked from the landing footer (grounded in actual product
   behavior, not boilerplate — genuinely describes what's real: export/

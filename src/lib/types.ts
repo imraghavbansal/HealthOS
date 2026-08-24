@@ -393,3 +393,34 @@ export interface AddConditionInput {
   diagnosedBy?: string;
   notes?: string;
 }
+
+/* ---------- report comparison (V2) ---------- */
+
+/** One draw/panel — every lab_markers row sharing the same collection
+ * date, grouped together so the whole panel can be picked as a unit to
+ * compare against another date's panel. */
+export interface LabReport {
+  date: ISODate; // YYYY-MM-DD
+  markerCount: number;
+}
+
+export interface LabReportMarker {
+  name: string;
+  value: number;
+  unit: string;
+  rangeLow: number | null;
+  rangeHigh: number | null;
+}
+
+export interface LabComparisonRow {
+  name: string;
+  unit: string;
+  valueA: number | null; // null if this marker wasn't in report A
+  valueB: number | null; // null if this marker wasn't in report B
+  delta: number | null; // B - A, null if either side is missing
+  deltaPct: number | null;
+  rangeLow: number | null;
+  rangeHigh: number | null;
+  statusA: MarkerStatus | null;
+  statusB: MarkerStatus | null;
+}

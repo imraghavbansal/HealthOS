@@ -24,6 +24,8 @@ import type {
   ID,
   Insight,
   LabMarker,
+  LabReport,
+  LabReportMarker,
   LifestyleProfile,
   MedicalRecord,
   Medication,
@@ -55,6 +57,10 @@ export interface RaagApi {
   /* labs + records */
   getLabMarkers(): Promise<LabMarker[]>;
   getLabTrend(marker: string): Promise<{ month: string; value: number }[]>;
+
+  /* report comparison — "what changed between these two draws" */
+  getLabReports(): Promise<LabReport[]>;
+  getLabReportMarkers(date: string): Promise<LabReportMarker[]>;
   getRecords(): Promise<MedicalRecord[]>;
   uploadRecord(file: File): Promise<MedicalRecord>;
   deleteRecord(id: ID): Promise<void>;

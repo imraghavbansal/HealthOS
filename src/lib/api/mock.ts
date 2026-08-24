@@ -220,6 +220,32 @@ export const mockApi: RaagApi = {
           value: Number((p.value * (1 + i * 0.02)).toFixed(1)),
         })),
     ),
+  getLabReports: () => {
+    const withHistory =
+      labMarkers.map((m) => TREND_MAP[m.name] ?? []).find((h) => h.length > 0) ?? [];
+    return wait(withHistory.map((h) => ({ date: h.month, markerCount: labMarkers.length })));
+  },
+  getLabReportMarkers: (date) =>
+    wait(
+      labMarkers
+        .map((m) => {
+          const point = (TREND_MAP[m.name] ?? []).find((h) => h.month === date);
+          if (!point) return null;
+          const [low, high] = m.range
+            .split(/[-–]/)
+            .map((n) => Number(n.trim()))
+            .filter((n) => !Number.isNaN(n));
+          return {
+            name: m.name,
+            value: point.value,
+            unit: m.unit,
+            rangeLow: low ?? null,
+            rangeHigh: high ?? null,
+          };
+        })
+        .filter((m): m is NonNullable<typeof m> => m !== null),
+    ),
+
   getRecords: () => wait(state.records),
   uploadRecord: (file) => {
     const rec: MedicalRecord = {

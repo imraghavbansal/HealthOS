@@ -21,6 +21,7 @@
     "verify:conditions": "node --env-file=.env scripts/verify-conditions.mjs",
     "verify:push-notifications": "node --env-file=.env scripts/verify-push-notifications.mjs",
     "verify:wearables-architecture": "node --env-file=.env scripts/verify-wearables-architecture.mjs",
+    "verify:report-comparison": "node --env-file=.env scripts/verify-report-comparison.mjs",
     "cap:prepare": "node -e \"require('fs').mkdirSync('dist',{recursive:true});require('fs').writeFileSync('dist/index.html','<!doctype html><title>Raag</title>')\"",
     "cap:sync": "npm run cap:prepare && npx cap sync",
     "cap:open:ios": "npm run cap:sync && npx cap open ios",

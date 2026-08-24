@@ -33,6 +33,8 @@ export const qk = {
   activity: (r: string) => ["activity", r] as const,
   labMarkers: ["lab-markers"] as const,
   labTrend: (m: string) => ["lab-trend", m] as const,
+  labReports: ["lab-reports"] as const,
+  labReportMarkers: (date: string) => ["lab-report-markers", date] as const,
   records: ["records"] as const,
   wearables: ["wearables"] as const,
   medications: ["medications"] as const,
@@ -156,6 +158,14 @@ export const useLabTrend = (marker: string) =>
     queryKey: qk.labTrend(marker),
     queryFn: () => api.getLabTrend(marker),
     enabled: !!marker,
+  });
+export const useLabReports = () =>
+  useQuery({ queryKey: qk.labReports, queryFn: () => api.getLabReports() });
+export const useLabReportMarkers = (date: string) =>
+  useQuery({
+    queryKey: qk.labReportMarkers(date),
+    queryFn: () => api.getLabReportMarkers(date),
+    enabled: !!date,
   });
 export const useRecords = () => useQuery(recordsQuery);
 export const useWearables = () => useQuery(wearablesQuery);

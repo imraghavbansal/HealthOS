@@ -342,6 +342,51 @@ export const supabaseApi: RaagApi = {
     return markers.find((m) => m.name === marker)?.history ?? [];
   },
 
+  // "Report" = every lab_markers row sharing the same collection date —
+  // matches how a single blood draw naturally produces one panel of
+  // results, regardless of which uploaded document(s) they came from.
+  async getLabReports() {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const rows = unwrap(
+      await sb.from("lab_markers").select("collected_at").eq("subject_id", subjectId),
+    ) as { collected_at: string }[];
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      const date = r.collected_at.slice(0, 10);
+      counts.set(date, (counts.get(date) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([date, markerCount]) => ({ date, markerCount }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+  },
+  async getLabReportMarkers(date) {
+    const sb = getSupabaseBrowserClient();
+    const subjectId = await getMySubjectId();
+    const rows = unwrap(
+      await sb
+        .from("lab_markers")
+        .select("name, value, unit, range_low, range_high, collected_at")
+        .eq("subject_id", subjectId)
+        .gte("collected_at", `${date}T00:00:00`)
+        .lt("collected_at", `${date}T23:59:59.999`),
+    ) as {
+      name: string;
+      value: number;
+      unit: string;
+      range_low: number | null;
+      range_high: number | null;
+      collected_at: string;
+    }[];
+    return rows.map((r) => ({
+      name: r.name,
+      value: r.value,
+      unit: r.unit,
+      rangeLow: r.range_low,
+      rangeHigh: r.range_high,
+    }));
+  },
+
   async getRecords() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();

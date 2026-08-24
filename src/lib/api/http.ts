@@ -75,6 +75,8 @@ export const httpApi: RaagApi = {
 
   getLabMarkers: () => get("/labs/markers"),
   getLabTrend: (marker) => get(`/labs/trend?marker=${encodeURIComponent(marker)}`),
+  getLabReports: () => get("/labs/reports"),
+  getLabReportMarkers: (date) => get(`/labs/reports/${date}`),
   getRecords: () => get("/records"),
   uploadRecord: async (file) => {
     const form = new FormData();
