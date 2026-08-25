@@ -113,7 +113,7 @@ function Onboarding() {
     dateOfBirth: "",
     heightCm: "",
     weightKg: "",
-    sex: "female",
+    sex: "",
   });
   const [selectedGoals, setSelectedGoals] = useState<Set<string>>(
     new Set(GOAL_OPTIONS.slice(0, 3)),
@@ -134,6 +134,10 @@ function Onboarding() {
   async function finishStepAndAdvance() {
     try {
       if (step === 0) {
+        if (!about.dateOfBirth || !about.sex) {
+          toast.error("Date of birth and sex at birth are required to continue.");
+          return;
+        }
         await updateProfile.mutateAsync({
           dateOfBirth: about.dateOfBirth || undefined,
           heightCm: about.heightCm ? Number(about.heightCm) : undefined,
@@ -243,9 +247,12 @@ function Onboarding() {
               <h2 className="font-display text-3xl">A little about you.</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-sm">Date of birth</Label>
+                  <Label className="text-sm">
+                    Date of birth <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     type="date"
+                    required
                     value={about.dateOfBirth}
                     onChange={(e) => setAbout((a) => ({ ...a, dateOfBirth: e.target.value }))}
                   />
@@ -267,7 +274,9 @@ function Onboarding() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-sm">Sex at birth</Label>
+                  <Label className="text-sm">
+                    Sex at birth <span className="text-destructive">*</span>
+                  </Label>
                   <RadioGroup
                     value={about.sex}
                     onValueChange={(v) => setAbout((a) => ({ ...a, sex: v }))}
@@ -474,7 +483,7 @@ function Onboarding() {
             </Button>
             <Button
               onClick={finishStepAndAdvance}
-              disabled={saving}
+              disabled={saving || (step === 0 && (!about.dateOfBirth || !about.sex))}
               className="rounded-full gradient-primary text-white border-0 shadow-soft"
             >
               {saving ? "Saving…" : step === STEPS.length - 1 ? "Finish & enter Raag" : "Continue"}{" "}

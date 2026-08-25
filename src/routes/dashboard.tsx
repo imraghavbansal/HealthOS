@@ -136,7 +136,7 @@ function Dashboard() {
                             </div>
                           </div>
                           <div className="text-xs text-muted-foreground mt-2">
-                            Synced {score.lastSync}
+                            Updated just now from your labs & medications
                           </div>
                         </div>
                         <ProgressRing value={score.score} size={90} stroke={8} />
@@ -187,7 +187,10 @@ function Dashboard() {
                   query={insightsQ}
                   skeleton={<LoadingCards count={3} className="grid md:grid-cols-3 gap-3" />}
                   empty={
-                    <EmptyState title="No insights yet" body="Check back after your next sync." />
+                    <EmptyState
+                      title="No insights yet"
+                      body="Log a lab result, vital, or medication - Raag checks trends and flags anything worth knowing."
+                    />
                   }
                 >
                   {(insights) => (
@@ -259,7 +262,16 @@ function Dashboard() {
                     {range}
                   </Badge>
                 </div>
-                <AsyncBoundary query={sleepQ} skeleton={<LoadingChart height={190} />}>
+                <AsyncBoundary
+                  query={sleepQ}
+                  skeleton={<LoadingChart height={190} />}
+                  empty={
+                    <EmptyState
+                      title="No sleep data yet"
+                      body="Sleep tracking needs a connected wearable - there's no way to log it by hand. Connect a device from Settings once wearable sync is live."
+                    />
+                  }
+                >
                   {(sleep) => {
                     const avg = sleep.length
                       ? sleep.reduce((a, s) => a + s.hours, 0) / sleep.length
@@ -327,7 +339,16 @@ function Dashboard() {
                     {range}
                   </Badge>
                 </div>
-                <AsyncBoundary query={activityQ} skeleton={<LoadingChart height={190} />}>
+                <AsyncBoundary
+                  query={activityQ}
+                  skeleton={<LoadingChart height={190} />}
+                  empty={
+                    <EmptyState
+                      title="No activity data yet"
+                      body="Steps and workouts need a connected wearable - there's no way to log it by hand. Connect a device from Settings once wearable sync is live."
+                    />
+                  }
+                >
                   {(activity) => {
                     const avgSteps = activity.length
                       ? Math.round(activity.reduce((a, s) => a + s.steps, 0) / activity.length)

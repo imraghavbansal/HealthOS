@@ -90,14 +90,17 @@ function TimelinePage() {
   const [filter, setFilter] = useState<FilterKind>("all");
 
   return (
-    <AppShell title="Health Timeline" subtitle="Every event, in one chronological thread.">
+    <AppShell
+      title="Health Timeline"
+      subtitle="Every lab, visit, medication change, vital, symptom, and AI insight - in one chronological thread. This is the story your doctor never gets to see."
+    >
       <AsyncBoundary
         query={query}
         skeleton={<LoadingRows count={6} />}
         empty={
           <EmptyState
             title="No events yet"
-            body="Once you log data, your timeline will appear here."
+            body="Log a lab, vital, symptom, or medication anywhere in Raag and it shows up here automatically, in order, so you can see how things connect over time."
           />
         }
       >
@@ -116,14 +119,17 @@ function TimelineBody({
   filter: FilterKind;
   setFilter: (f: FilterKind) => void;
 }) {
+  const [flaggedOnly, setFlaggedOnly] = useState(false);
   const sorted = useMemo(
     () => [...events].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [events],
   );
-  const filtered = useMemo(
-    () => (filter === "all" ? sorted : sorted.filter((e) => e.kind === filter)),
-    [sorted, filter],
-  );
+  const filtered = useMemo(() => {
+    const byKind = filter === "all" ? sorted : sorted.filter((e) => e.kind === filter);
+    return flaggedOnly
+      ? byKind.filter((e) => e.severity === "warning" || e.severity === "critical")
+      : byKind;
+  }, [sorted, filter, flaggedOnly]);
 
   const flagged = sorted.filter(
     (e) => e.severity === "warning" || e.severity === "critical",
@@ -142,19 +148,39 @@ function TimelineBody({
             <CardContent className="p-5">
               <div className="text-xs text-muted-foreground">Total events</div>
               <div className="font-display text-3xl mt-1">{sorted.length}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground">
+                Every lab, visit, med change, vital, symptom, goal, and insight - combined
+              </div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-border/60">
-            <CardContent className="p-5">
-              <div className="text-xs text-muted-foreground">Flagged</div>
-              <div className="font-display text-3xl mt-1 text-warning">{flagged}</div>
-            </CardContent>
-          </Card>
+          <button
+            type="button"
+            onClick={() => setFlaggedOnly((v) => !v)}
+            className="text-left"
+            aria-pressed={flaggedOnly}
+          >
+            <Card
+              className={`rounded-3xl transition-colors ${flaggedOnly ? "border-warning bg-warning/5" : "border-border/60 hover:border-warning/40"}`}
+            >
+              <CardContent className="p-5">
+                <div className="text-xs text-muted-foreground">Flagged</div>
+                <div className="font-display text-3xl mt-1 text-warning">{flagged}</div>
+                <div className="mt-1 text-[11px] text-muted-foreground">
+                  {flaggedOnly
+                    ? "Showing only flagged events - tap to clear"
+                    : "Out-of-range labs, symptoms & warnings - tap to filter"}
+                </div>
+              </CardContent>
+            </Card>
+          </button>
           <Card className="rounded-3xl border-border/60">
             <CardContent className="p-5">
               <div className="text-xs text-muted-foreground">Date range</div>
               <div className="font-display text-lg mt-1">
                 {min && max ? `${fmt(min)} - ${fmt(max)}` : "-"}
+              </div>
+              <div className="mt-1 text-[11px] text-muted-foreground">
+                How far back your Raag history goes
               </div>
             </CardContent>
           </Card>
@@ -197,7 +223,14 @@ function TimelineBody({
         </ul>
         {filtered.length === 0 && (
           <div className="pl-14 lg:pl-0">
-            <EmptyState title="No events for this filter" body="Try a different category." />
+            <EmptyState
+              title={flaggedOnly ? "Nothing flagged here" : "No events for this filter"}
+              body={
+                flaggedOnly
+                  ? "No out-of-range or warning events in this category. That's a good thing."
+                  : "Try a different category."
+              }
+            />
           </div>
         )}
       </div>
