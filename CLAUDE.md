@@ -555,6 +555,51 @@ ios` requires Xcode, which only runs on macOS — this dev environment
   logging (a dashboard setting, not app code) — flagged to the user,
   not yet decided.
 
+## Critical fix: account deletion was broken for real users (2026-08-25)
+
+`npm run verify:functions` (previously only ever run when Stage 1 first
+shipped) was re-run as part of a full live-verification pass across
+every V2 feature, and **delete-account failed** - "Database error
+deleting user" - a regression from a genuine bug that predates this
+session, just never caught because the script wasn't re-run after later
+migrations added more tables. Root cause: two foreign keys recording
+"who did this" (`audit_log.actor_user_id`, `audit_log.subject_id`, plus
+five more likely-affected columns fixed preemptively:
+`chat_messages.user_id`, `access_grants.granted_by`,
+`source_documents.uploaded_by`, `dose_logs.logged_by`,
+`vitals.logged_by`, `symptoms.logged_by`) had no `ON DELETE` behavior
+specified, defaulting to `NO ACTION` - Postgres refuses to delete a
+`auth.users` row still referenced anywhere. A fresh test account that
+had sent exactly one `ai-chat` message (which writes an `audit_log` row
+before it even reaches the failing Anthropic call) could not delete
+itself. This is a DPDP/GDPR right-to-erasure violation for a health
+app, and it was silently broken for exactly the accounts most likely to
+have real data (anyone who'd asked the AI a question, logged a vital,
+etc.) - self-only, data-free test accounts were the one case that
+happened to work, which is presumably why it went unnoticed.
+
+Fixed in `0015_fix_account_deletion_fk.sql` + `0016_fix_audit_log_subject_fk.sql`
+(two migrations because the first fix - `actor_user_id` - wasn't
+sufficient; re-running the verify script after applying it caught a
+second blocker - `subject_id` - one level up the cascade chain).
+Deliberately `ON DELETE SET NULL`, not `CASCADE`: the audit trail must
+survive the deleted user/subject to remain a real audit trail; the
+underlying data (a vital, a chat message) belongs to the subject, not
+to whoever happened to log it, and must survive if a family member can
+still see that subject. **Both migrations run and verified live** -
+`npm run verify:functions` now passes delete-account end to end,
+including confirming the account can no longer sign in afterward.
+
+While re-verifying everything end to end, also ran every other existing
+verify script live for the first time in a while:
+`verify:insights`, `verify:share-links`, `verify:medication-interactions`,
+`verify:conditions`, `verify:push-notifications`,
+`verify:report-comparison`, `verify:household`,
+`verify:wearables-architecture` - all pass. `0014_wearables_architecture.sql`
+has been applied (previously documented as not yet run - it now is).
+The only verify failure anywhere is the long-documented Anthropic
+billing gap in `ai-chat`, which is expected, not a regression.
+
 ## Recent honesty/UX pass (2026-08-25)
 
 Six fixes shipped together, prompted by real user testing that the app
