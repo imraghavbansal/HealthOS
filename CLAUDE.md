@@ -555,6 +555,45 @@ ios` requires Xcode, which only runs on macOS — this dev environment
   logging (a dashboard setting, not app code) — flagged to the user,
   not yet decided.
 
+## Recent honesty/UX pass (2026-08-25)
+
+Six fixes shipped together, prompted by real user testing that the app
+"looks made but isn't functional yet":
+
+- **Session persistence**: `/`, `/login`, `/signup` never checked for an
+  existing session - cookies persist 400 days by default, the session
+  was never actually lost, users just kept seeing the login form again.
+  Fixed via `useRedirectIfAuthenticated()` (`src/lib/use-redirect-if-authenticated.ts`).
+- **"JWT issued at future" / reload-required after signup**: `hasActiveSession()`
+  ignored `getSession()`'s `error` field, so a transient clock-skew
+  failure right after signup was silently read as "not signed in." Now
+  retries once after 800ms.
+- **Duplicate signup**: `signUpWithEmail()` now detects Supabase's
+  anti-enumeration response (200 status, empty `identities`) and throws
+  a clear "account already exists" error instead of silently no-oping.
+- **Em-dashes replaced app-wide** (327 instances, 57 files) with regular
+  hyphens - a known AI-writing tell, product needs to read human-written.
+- **Onboarding**: date of birth and sex at birth are now required on
+  step 1 (feed risk scoring/insights directly) - fixed a real bug where
+  sex silently defaulted to "female" if a user tabbed through without
+  looking. Everything else stays skippable by design.
+- **Misleading empty-state copy**: dashboard said "check back after your
+  next sync" for insights and "Synced {time}" on the health score - both
+  implied wearable sync that doesn't exist. Insights and the score's
+  Labs/Adherence pillars are real from day one (manually logged
+  labs/meds); Sleep/Activity pillars are honestly 0 until wearables, and
+  the Sleep/Activity dashboard cards now say so explicitly instead of
+  rendering an empty chart with no explanation.
+- **Timeline**: added explanatory subtitle/empty-state copy, and made
+  the "Flagged" summary stat an actual filter toggle instead of a static
+  number - it didn't do anything before, which was part of why the page
+  felt confusing.
+- **Cookie consent banner** (`src/components/cookie-consent.tsx`):
+  audited, no change needed - it's already honest (no non-essential
+  cookies exist yet, both buttons behave identically today, the choice
+  is stored for when `hasAnalyticsConsent()` actually gates something).
+  Working as designed, not a bug.
+
 ## Known gotchas (things that already bit us once)
 
 - **Migrations must include explicit GRANTs**, not just RLS policies —
