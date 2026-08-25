@@ -1,5 +1,5 @@
 /**
- * HTTP adapter — the real backend implementation.
+ * HTTP adapter - the real backend implementation.
  *
  * ┌──────────────────────────────────────────────────────────────────────┐
  * │ CLAUDE / BACKEND DEV: THIS IS THE ONLY FILE YOU NEED TO IMPLEMENT.   │

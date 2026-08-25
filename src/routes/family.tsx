@@ -48,9 +48,9 @@ function initials(name: string): string {
 export const Route = createFileRoute("/family")({
   head: () => ({
     meta: [
-      { title: "Family History & Risk — Raag" },
+      { title: "Family History & Risk - Raag" },
       { name: "description", content: "Understand inherited risk. Act early." },
-      { property: "og:title", content: "Family History & Risk — Raag" },
+      { property: "og:title", content: "Family History & Risk - Raag" },
       { property: "og:description", content: "Understand inherited risk. Act early." },
     ],
   }),
@@ -128,7 +128,7 @@ function Family() {
           </AsyncBoundary>
           <p className="text-[11px] text-muted-foreground text-center">
             Risk levels are directional estimates based on your inputs, not diagnoses. Informational
-            only — not medical advice.
+            only - not medical advice.
           </p>
         </div>
       </div>
@@ -146,7 +146,7 @@ const RISK_DOT: Record<HouseholdMember["riskLevel"], string> = {
 
 /**
  * Pure-CSS org-chart layout (vertical/horizontal connector divs, no SVG
- * measurement or graph library needed) — "you" as the root, dependents as
+ * measurement or graph library needed) - "you" as the root, dependents as
  * children. A real graph over the actual access_grants/health_subjects
  * permission system, not a decorative mockup: clicking a node opens who
  * actually has access to that person's records.

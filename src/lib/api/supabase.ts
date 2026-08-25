@@ -1,14 +1,14 @@
 /**
- * Supabase adapter — real, persisted data. Schema + RLS: see
+ * Supabase adapter - real, persisted data. Schema + RLS: see
  * supabase/migrations/0001_init.sql. Product context: docs/PRODUCT-VISION.md.
  *
  * Scope note: one RaagApi surface still doesn't have a real data source
- * and is called out inline — honest empty results, not fabricated demo
+ * and is called out inline - honest empty results, not fabricated demo
  * data:
  *   - getSleep / getActivity: wait on wearable ingestion (V2, not started)
- * Everything else — profile, records, labs, meds, vitals, symptoms, goals,
+ * Everything else - profile, records, labs, meds, vitals, symptoms, goals,
  * appointments, nutrition, family history, notifications, care team,
- * insights, risks, share links, ai-chat — is fully real today.
+ * insights, risks, share links, ai-chat - is fully real today.
  */
 import { getSupabaseBrowserClient } from "../supabase/client";
 import { getMySubjectId, getCurrentUserId } from "../supabase/subject";
@@ -51,7 +51,7 @@ function unwrap<T>({ data, error }: { data: T | null; error: { message: string }
 /**
  * Extracted from getRisks() so the same rule-based scoring (see
  * computeRiskFactors() in supabase/mappers.ts) works for any subject, not
- * just "self" — needed by getHouseholdMembers() to show a risk badge per
+ * just "self" - needed by getHouseholdMembers() to show a risk badge per
  * dependent in the family graph. RLS still governs what's actually
  * readable: this throws if the caller can't view the given subjectId.
  */
@@ -220,7 +220,7 @@ export const supabaseApi: RaagApi = {
     const labsPillar = labRows.length ? Math.round((inRange / labRows.length) * 100) : 0;
     const adherencePillar = computeAdherence(doseRows);
 
-    // Sleep/Activity pillars wait on wearable ingestion (V2) — 0 is honest
+    // Sleep/Activity pillars wait on wearable ingestion (V2) - 0 is honest
     // for "no data yet", not a placeholder demo value.
     const pillars = [
       { label: "Sleep", value: 0, weight: 0.25 },
@@ -234,7 +234,7 @@ export const supabaseApi: RaagApi = {
 
   // Rule-based insight engine (0009_insights_engine.sql): deterministic
   // trend/out-of-range/adherence checks, no AI call, dedupes against
-  // existing rows itself — safe to invoke on every read.
+  // existing rows itself - safe to invoke on every read.
   async getInsights() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
@@ -261,7 +261,7 @@ export const supabaseApi: RaagApi = {
     unwrap(await sb.from("insights").update({ dismissed: true }).eq("id", id));
   },
 
-  // Real tables (0014_wearables_architecture.sql) — genuinely empty
+  // Real tables (0014_wearables_architecture.sql) - genuinely empty
   // until a wearable aggregator account exists and wearable-webhook is
   // wired up (see CLAUDE.md), not hardcoded. Whatever's actually in
   // sleep_entries/activity_entries renders, including anything inserted
@@ -342,7 +342,7 @@ export const supabaseApi: RaagApi = {
     return markers.find((m) => m.name === marker)?.history ?? [];
   },
 
-  // "Report" = every lab_markers row sharing the same collection date —
+  // "Report" = every lab_markers row sharing the same collection date -
   // matches how a single blood draw naturally produces one panel of
   // results, regardless of which uploaded document(s) they came from.
   async getLabReports() {
@@ -420,7 +420,7 @@ export const supabaseApi: RaagApi = {
       id: r.id,
       type: r.document_type,
       title: r.title,
-      provider: r.provider ?? "—",
+      provider: r.provider ?? "-",
       date: r.document_date ?? "",
       tag: r.document_type,
       fileUrl: urlByPath.get(r.storage_path) ?? null,
@@ -434,7 +434,7 @@ export const supabaseApi: RaagApi = {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
     const userId = await getCurrentUserId();
-    // Path convention `<subject_id>/...` is load-bearing — the Storage RLS
+    // Path convention `<subject_id>/...` is load-bearing - the Storage RLS
     // policies (0004_storage.sql) key off the leading folder segment.
     const path = `${subjectId}/${Date.now()}-${file.name}`;
 
@@ -506,7 +506,7 @@ export const supabaseApi: RaagApi = {
   },
 
   // Real per-provider connect state; the OAuth handshake itself is a V2
-  // Edge Function (Vital/Terra) — this table already tracks the outcome.
+  // Edge Function (Vital/Terra) - this table already tracks the outcome.
   async getWearables() {
     const sb = getSupabaseBrowserClient();
     const subjectId = await getMySubjectId();
@@ -517,7 +517,7 @@ export const supabaseApi: RaagApi = {
       name: r.provider,
       desc: "",
       connected: r.connected,
-      last: r.last_sync_at ?? "—",
+      last: r.last_sync_at ?? "-",
       color: "",
     }));
   },
@@ -543,7 +543,7 @@ export const supabaseApi: RaagApi = {
       name: row.provider,
       desc: "",
       connected: row.connected,
-      last: row.last_sync_at ?? "—",
+      last: row.last_sync_at ?? "-",
       color: "",
     };
   },
@@ -571,7 +571,7 @@ export const supabaseApi: RaagApi = {
       taken_at: string;
       skipped: boolean;
     }[];
-    // Reference table read failing shouldn't break the medications page —
+    // Reference table read failing shouldn't break the medications page -
     // degrade to "no interaction data" rather than throw.
     const rules = (rulesRes.error ? [] : rulesRes.data) as InteractionRuleRow[];
     const interactionsByMedId = computeMedicationInteractions(meds, rules);
@@ -581,7 +581,7 @@ export const supabaseApi: RaagApi = {
       dose: m.dose ?? "",
       schedule: m.schedule ?? "",
       adherence: computeAdherence(doses.filter((d) => d.medication_id === m.id)),
-      next: "—",
+      next: "-",
       type: m.type,
       refillsLeft: m.refills_left ?? undefined,
       interactions: interactionsByMedId.get(m.id),
@@ -622,7 +622,7 @@ export const supabaseApi: RaagApi = {
       dose: row.dose ?? "",
       schedule: row.schedule ?? "",
       adherence: 100,
-      next: "—",
+      next: "-",
       type: row.type,
     };
   },
@@ -719,7 +719,7 @@ export const supabaseApi: RaagApi = {
     unwrap(await sb.from("goals").delete().eq("id", id));
   },
 
-  // Previously write-only via AI document parsing (parse-record) — no way
+  // Previously write-only via AI document parsing (parse-record) - no way
   // to view or manually add a condition existed until now.
   async getConditions() {
     const sb = getSupabaseBrowserClient();
@@ -827,7 +827,7 @@ export const supabaseApi: RaagApi = {
   },
 
   // Rule-based risk engine (V2): additive point scoring over real lifestyle/
-  // vitals/conditions/family-history data — see computeRiskFactors() in
+  // vitals/conditions/family-history data - see computeRiskFactors() in
   // supabase/mappers.ts for the scoring itself. Computed live on every
   // read, not stored, so it's always current with the latest data.
   async getRisks() {
@@ -836,7 +836,7 @@ export const supabaseApi: RaagApi = {
   },
 
   // "My household" = subjects I own (myself + any dependents I've added),
-  // not subjects shared with me by someone else — the schema's own
+  // not subjects shared with me by someone else - the schema's own
   // comment on health_subjects.owner_user_id: "the adult account
   // responsible for this subject". Risk is computed per member with the
   // same rule engine as getRisks(), just scoped to each subject id.
@@ -919,7 +919,7 @@ export const supabaseApi: RaagApi = {
 
   // profiles RLS only allows self-reads, and access_grants.grantee_user_id
   // references auth.users (not profiles), so there's no RLS-permitted way
-  // to join to the grantee's profile here — grantee_name/email are
+  // to join to the grantee's profile here - grantee_name/email are
   // snapshotted onto the row at grant time instead (see grantAccess()
   // below and 0012_access_grant_denorm.sql).
   async getAccessGrants(subjectId) {
@@ -961,7 +961,7 @@ export const supabaseApi: RaagApi = {
     });
     if (lookupErr) throw new Error(lookupErr.message);
     if (!lookup?.found) {
-      throw new Error("No Raag account found for that email — they'll need to sign up first.");
+      throw new Error("No Raag account found for that email - they'll need to sign up first.");
     }
     const row = unwrap(
       await sb
@@ -1360,7 +1360,7 @@ export const supabaseApi: RaagApi = {
   // dedicated `timeline` materialized view is a straightforward follow-up
   // once this shape is validated against real usage.
   // Was missing vitals, goals, symptoms, conditions, and insights as event
-  // types — the UI (KIND_META in routes/timeline.tsx) already had icons/
+  // types - the UI (KIND_META in routes/timeline.tsx) already had icons/
   // labels ready for "vital" and "goal" but nothing ever populated them.
   // "device" stays unpopulated on purpose: wearables are honestly "coming
   // soon" (see 0014_wearables_architecture.sql), and a timeline entry for
@@ -1563,7 +1563,7 @@ export const supabaseApi: RaagApi = {
 
   // Care-team-as-contact-list. Note: cross-household clinician *access*
   // (a doctor logging in and seeing shared records) is the access_grants
-  // system in the schema, not this table — this is the visible contact +
+  // system in the schema, not this table - this is the visible contact +
   // "am I sharing with them" toggle in Settings.
   async getCareTeam() {
     const sb = getSupabaseBrowserClient();
@@ -1821,7 +1821,7 @@ export const supabaseApi: RaagApi = {
   },
 
   // The actual grounding (structured-data queries + document retrieval +
-  // Claude) lives in the `ai-chat` Edge Function — see docs/raag-architecture
+  // Claude) lives in the `ai-chat` Edge Function - see docs/raag-architecture
   // for the two-path retrieval design. This just persists + invokes it.
   async sendChatMessage(content, onDelta) {
     const sb = getSupabaseBrowserClient();
@@ -1833,7 +1833,7 @@ export const supabaseApi: RaagApi = {
         .insert({ subject_id: subjectId, user_id: userId, role: "user", content }),
     );
 
-    // functions.invoke() buffers the whole response — a real token stream
+    // functions.invoke() buffers the whole response - a real token stream
     // needs a raw fetch against the function URL so the reader sees bytes
     // as they arrive.
     const { data: sessionData } = await sb.auth.getSession();

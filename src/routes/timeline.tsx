@@ -154,7 +154,7 @@ function TimelineBody({
             <CardContent className="p-5">
               <div className="text-xs text-muted-foreground">Date range</div>
               <div className="font-display text-lg mt-1">
-                {min && max ? `${fmt(min)} — ${fmt(max)}` : "—"}
+                {min && max ? `${fmt(min)} - ${fmt(max)}` : "-"}
               </div>
             </CardContent>
           </Card>

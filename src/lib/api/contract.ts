@@ -58,7 +58,7 @@ export interface RaagApi {
   getLabMarkers(): Promise<LabMarker[]>;
   getLabTrend(marker: string): Promise<{ month: string; value: number }[]>;
 
-  /* report comparison — "what changed between these two draws" */
+  /* report comparison - "what changed between these two draws" */
   getLabReports(): Promise<LabReport[]>;
   getLabReportMarkers(date: string): Promise<LabReportMarker[]>;
   getRecords(): Promise<MedicalRecord[]>;
@@ -80,7 +80,7 @@ export interface RaagApi {
   updateGoal(id: ID, patch: Partial<Goal>): Promise<Goal>;
   deleteGoal(id: ID): Promise<void>;
 
-  /* conditions — was previously write-only via AI document parsing, no
+  /* conditions - was previously write-only via AI document parsing, no
      way to view or manually add one; needed both standalone and for the
      doctor-visit prep pack's "active conditions" section */
   getConditions(): Promise<Condition[]>;
@@ -92,7 +92,7 @@ export interface RaagApi {
   addFamilyMember(input: FamilyMember): Promise<FamilyMember>;
   getRisks(): Promise<RiskFactor[]>;
 
-  /* household / family risk graph — dependents you manage + who has
+  /* household / family risk graph - dependents you manage + who has
      access to whom, built on the access_grants permission system */
   getHouseholdMembers(): Promise<HouseholdMember[]>;
   addDependent(input: AddDependentInput): Promise<HouseholdMember>;
@@ -139,7 +139,7 @@ export interface RaagApi {
   requestReport(req: ReportRequest): Promise<{ id: ID; status: "queued" }>;
 
   /* share links (owner-side management; the public viewer side never goes
-     through this contract — no session exists for it, see src/lib/share.ts) */
+     through this contract - no session exists for it, see src/lib/share.ts) */
   getShareLinks(): Promise<ShareLink[]>;
   createShareLink(input: CreateShareLinkInput): Promise<ShareLink>;
   revokeShareLink(id: ID): Promise<void>;

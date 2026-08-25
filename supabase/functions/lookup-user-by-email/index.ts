@@ -1,12 +1,12 @@
-// Raag — lookup-user-by-email
+// Raag - lookup-user-by-email
 //
 // Granting a family member access to a health_subject needs their user
 // id, but `profiles` RLS (profiles_self: id = auth.uid()) deliberately
-// only lets a user read their own profile — nobody can otherwise look up
+// only lets a user read their own profile - nobody can otherwise look up
 // another account by email, which is the right default (prevents user
 // enumeration). This function is the one narrow, server-only exception:
 // it takes an email, uses service-role to check if a Raag account exists
-// for it, and returns only { found, userId, name } — never anything else
+// for it, and returns only { found, userId, name } - never anything else
 // about that account. Requires the CALLER to be signed in (so this can't
 // be used for anonymous enumeration either), but doesn't use the
 // caller's identity for anything beyond that gate.

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { signUpWithEmail, signInWithGoogle, describeAuthError } from "@/lib/auth";
 import { GoogleButton } from "@/components/google-button";
 import { api, IS_DEMO } from "@/lib/api";
+import { useRedirectIfAuthenticated } from "@/lib/use-redirect-if-authenticated";
 
 export const Route = createFileRoute("/signup")({ component: Signup });
 
@@ -25,6 +26,7 @@ function validate(form: FormState): FormErrors {
 
 function Signup() {
   const nav = useNavigate();
+  const { checking: checkingExistingSession } = useRedirectIfAuthenticated();
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
@@ -85,6 +87,14 @@ function Signup() {
     }
   }
 
+  if (checkingExistingSession) {
+    return (
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
+        Checking your session…
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="fixed inset-0 -z-10 gradient-glow pointer-events-none opacity-70" />
@@ -106,7 +116,7 @@ function Signup() {
               <p className="text-sm text-muted-foreground">
                 We sent a confirmation link to{" "}
                 <span className="font-medium text-foreground">{form.email}</span>. Click it to
-                activate your account — you'll land straight in onboarding.
+                activate your account - you'll land straight in onboarding.
               </p>
               <p className="text-xs text-muted-foreground pt-2">
                 Wrong email?{" "}
@@ -213,7 +223,7 @@ function Signup() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          By continuing you accept the informational nature of Raag — not medical advice.
+          By continuing you accept the informational nature of Raag - not medical advice.
         </p>
       </div>
     </div>

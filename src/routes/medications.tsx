@@ -14,7 +14,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AsyncBoundary, EmptyState } from "@/components/data-states";
 import { AnimatedNumber, ProgressRing, Stagger, StaggerItem, motion } from "@/components/motion";
 import { useAddMedication, useLogDose, useMedications } from "@/lib/queries";
@@ -25,9 +31,9 @@ import { useState } from "react";
 export const Route = createFileRoute("/medications")({
   head: () => ({
     meta: [
-      { title: "Medications & Supplements — Raag" },
+      { title: "Medications & Supplements - Raag" },
       { name: "description", content: "Reminders, adherence, and interaction awareness." },
-      { property: "og:title", content: "Medications & Supplements — Raag" },
+      { property: "og:title", content: "Medications & Supplements - Raag" },
       { property: "og:description", content: "Reminders, adherence, and interaction awareness." },
     ],
   }),
@@ -46,7 +52,13 @@ function Medications() {
     >
       <AsyncBoundary
         query={medsQuery}
-        empty={<EmptyState icon={Pill} title="No medications yet" body="Add a medication or supplement to start tracking." />}
+        empty={
+          <EmptyState
+            icon={Pill}
+            title="No medications yet"
+            body="Add a medication or supplement to start tracking."
+          />
+        }
       >
         {(meds) => <MedicationsBody meds={meds} />}
       </AsyncBoundary>
@@ -54,7 +66,13 @@ function Medications() {
   );
 }
 
-function AddMedicationDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function AddMedicationDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const add = useAddMedication();
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
@@ -84,20 +102,37 @@ function AddMedicationDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         <div className="space-y-3">
           <div>
             <Label htmlFor="med-name">Name</Label>
-            <Input id="med-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Vitamin D3" />
+            <Input
+              id="med-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Vitamin D3"
+            />
           </div>
           <div>
             <Label htmlFor="med-dose">Dose</Label>
-            <Input id="med-dose" value={dose} onChange={(e) => setDose(e.target.value)} placeholder="1000 IU" />
+            <Input
+              id="med-dose"
+              value={dose}
+              onChange={(e) => setDose(e.target.value)}
+              placeholder="1000 IU"
+            />
           </div>
           <div>
             <Label htmlFor="med-schedule">Schedule</Label>
-            <Input id="med-schedule" value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder="Daily, with breakfast" />
+            <Input
+              id="med-schedule"
+              value={schedule}
+              onChange={(e) => setSchedule(e.target.value)}
+              placeholder="Daily, with breakfast"
+            />
           </div>
           <div>
             <Label htmlFor="med-type">Type</Label>
             <Select value={type} onValueChange={(v) => setType(v as "Supplement" | "Prescription")}>
-              <SelectTrigger id="med-type"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="med-type">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Supplement">Supplement</SelectItem>
                 <SelectItem value="Prescription">Prescription</SelectItem>
@@ -106,7 +141,12 @@ function AddMedicationDialog({ open, onOpenChange }: { open: boolean; onOpenChan
           </div>
           <div>
             <Label htmlFor="med-next">Next dose</Label>
-            <Input id="med-next" value={next} onChange={(e) => setNext(e.target.value)} placeholder="Tomorrow, 8:00 AM" />
+            <Input
+              id="med-next"
+              value={next}
+              onChange={(e) => setNext(e.target.value)}
+              placeholder="Tomorrow, 8:00 AM"
+            />
           </div>
         </div>
         <DialogFooter>
@@ -136,8 +176,12 @@ function AddMedicationDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 function MedicationsBody({ meds }: { meds: Medication[] }) {
   const logDose = useLogDose();
   const [takenIds, setTakenIds] = useState<Set<string>>(new Set());
-  const avgAdherence = meds.length ? Math.round(meds.reduce((s, m) => s + m.adherence, 0) / meds.length) : 0;
-  const anyWarnings = meds.filter((m) => (m.interactions?.length ?? 0) > 0 || (m.refillsLeft ?? 99) <= 3);
+  const avgAdherence = meds.length
+    ? Math.round(meds.reduce((s, m) => s + m.adherence, 0) / meds.length)
+    : 0;
+  const anyWarnings = meds.filter(
+    (m) => (m.interactions?.length ?? 0) > 0 || (m.refillsLeft ?? 99) <= 3,
+  );
 
   return (
     <div className="space-y-6">
@@ -156,7 +200,9 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                       </div>
                       <div className="min-w-0">
                         <div className="font-medium text-sm truncate">{m.name}</div>
-                        <div className="text-[11px] text-muted-foreground truncate">{m.dose} · {m.next}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          {m.dose} · {m.next}
+                        </div>
                       </div>
                     </div>
                     {taken ? (
@@ -213,7 +259,9 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className="font-semibold">{m.name}</div>
-                      <Badge variant="secondary" className="rounded-full text-[10px]">{m.type}</Badge>
+                      <Badge variant="secondary" className="rounded-full text-[10px]">
+                        {m.type}
+                      </Badge>
                       {warn && (
                         <Badge className="rounded-full text-[10px] bg-warning/20 text-warning-foreground border-warning/30">
                           <AlertTriangle className="mr-1 h-3 w-3" />
@@ -221,7 +269,9 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                         </Badge>
                       )}
                     </div>
-                    <div className="text-xs text-muted-foreground">{m.dose} · {m.schedule}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {m.dose} · {m.schedule}
+                    </div>
                     <div className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
                       <Bell className="h-3 w-3" /> Next: {m.next}
                       {m.refillsLeft !== undefined && <span> · {m.refillsLeft} refills left</span>}
@@ -252,7 +302,9 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                 <AnimatedNumber value={avgAdherence} />
                 <span className="text-lg text-muted-foreground">%</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">Across {meds.length} tracked medications.</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Across {meds.length} tracked medications.
+              </p>
             </CardContent>
           </Card>
           <Card className="rounded-3xl border-border/60">
@@ -261,7 +313,8 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                 <>
                   <div className="text-sm font-semibold mb-2">No known interactions</div>
                   <p className="text-xs text-muted-foreground">
-                    Raag checks your active meds against a curated interaction database on every update.
+                    Raag checks your active meds against a curated interaction database on every
+                    update.
                   </p>
                 </>
               ) : (
@@ -272,13 +325,18 @@ function MedicationsBody({ meds }: { meds: Medication[] }) {
                   <ul className="text-xs text-muted-foreground space-y-1">
                     {anyWarnings.map((m) => (
                       <li key={m.id}>
-                        {m.name}: {(m.interactions?.length ?? 0) > 0 ? m.interactions?.join(", ") : `${m.refillsLeft} refills left`}
+                        {m.name}:{" "}
+                        {(m.interactions?.length ?? 0) > 0
+                          ? m.interactions?.join(", ")
+                          : `${m.refillsLeft} refills left`}
                       </li>
                     ))}
                   </ul>
                 </>
               )}
-              <p className="mt-3 text-[11px] text-muted-foreground">Informational only — not medical advice.</p>
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                Informational only - not medical advice.
+              </p>
             </CardContent>
           </Card>
         </div>

@@ -9,13 +9,13 @@ const STORAGE_KEY = "raag-cookie-consent";
 type ConsentChoice = { essential: true; analytics: boolean; decidedAt: string };
 
 /**
- * Raag doesn't set any non-essential cookies today — only the Supabase
+ * Raag doesn't set any non-essential cookies today - only the Supabase
  * auth session cookie, which is strictly necessary (no consent required
  * under GDPR/DPDP for that class of cookie). This banner exists anyway so
  * the choice is real and future-proof: if analytics/marketing cookies are
  * ever added, gate them behind hasAnalyticsConsent() rather than assuming
  * consent retroactively. Stored client-side only (localStorage), never
- * sent to the server — there's nothing server-side that needs to know.
+ * sent to the server - there's nothing server-side that needs to know.
  */
 export function hasAnalyticsConsent(): boolean {
   if (typeof window === "undefined") return false;
@@ -35,7 +35,7 @@ export function CookieConsentBanner() {
     try {
       setVisible(!localStorage.getItem(STORAGE_KEY));
     } catch {
-      // localStorage unavailable (private mode, blocked storage) — don't
+      // localStorage unavailable (private mode, blocked storage) - don't
       // nag on every render if we can't remember the choice anyway.
       setVisible(false);
     }
@@ -50,7 +50,7 @@ export function CookieConsentBanner() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(choice));
     } catch {
-      // ignore — banner just won't remember across reloads
+      // ignore - banner just won't remember across reloads
     }
     setVisible(false);
   }
@@ -73,7 +73,7 @@ export function CookieConsentBanner() {
             </div>
             <div className="min-w-0">
               <p className="text-sm">
-                We use only strictly necessary cookies to keep you signed in — no tracking or
+                We use only strictly necessary cookies to keep you signed in - no tracking or
                 advertising cookies today. If that ever changes, we'll ask again.{" "}
                 <Link to="/privacy" className="underline underline-offset-2 hover:text-primary">
                   Read our privacy policy

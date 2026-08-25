@@ -1,18 +1,18 @@
-// Raag — wearable-webhook
+// Raag - wearable-webhook
 //
-// SCAFFOLDING, NOT YET LIVE — there's no Vital/Terra account to receive
+// SCAFFOLDING, NOT YET LIVE - there's no Vital/Terra account to receive
 // real webhooks from yet (deliberate: the user doesn't want that cost
 // right now). This is the provider-agnostic half of wearable sync: shared
 // secret verification, subject resolution from the aggregator's external
 // user id, and idempotent upsert into sleep_entries/activity_entries
 // (see 0014_wearables_architecture.sql). What's genuinely missing is the
-// one function marked TODO below — mapping the real webhook JSON body
+// one function marked TODO below - mapping the real webhook JSON body
 // from whichever provider gets chosen into the normalized rows this
 // function already knows how to store. Both Vital and Terra push
 // sleep/activity as a webhook POST with a shared-secret or HMAC header;
 // exactly which fields live where differs per provider and per data
 // type, and guessing at that now would just be wrong code nobody's
-// tested — better to leave the seam clearly marked than fake it.
+// tested - better to leave the seam clearly marked than fake it.
 //
 // Once an account exists:
 //   1. Set WEARABLE_WEBHOOK_SECRET here (matches whatever the provider's
@@ -71,7 +71,7 @@ function parseProviderPayload(_body: unknown): {
   activity: NormalizedActivity[];
 } {
   throw new Error(
-    "wearable-webhook: parseProviderPayload() is not implemented yet — fill this in against the real Vital/Terra webhook payload docs once an account exists.",
+    "wearable-webhook: parseProviderPayload() is not implemented yet - fill this in against the real Vital/Terra webhook payload docs once an account exists.",
   );
 }
 
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     );
 
     // external_user_id on wearable_connections is how we map the
-    // aggregator's user back to a Raag subject — set when the user
+    // aggregator's user back to a Raag subject - set when the user
     // actually completes the provider's connect flow (not built yet;
     // today toggleWearable() just flips a local flag, see CLAUDE.md).
     async function resolveSubjectId(

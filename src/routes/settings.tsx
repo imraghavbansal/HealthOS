@@ -178,7 +178,7 @@ function BillingSection() {
     try {
       await cancelSubscription();
       toast.success(
-        "Cancellation requested — you'll keep access until the end of your current billing period.",
+        "Cancellation requested - you'll keep access until the end of your current billing period.",
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't cancel your subscription.");
@@ -298,7 +298,7 @@ function SecuritySection() {
     setChanging(true);
     try {
       if (IS_DEMO) {
-        toast.success("Password updated (demo mode — not really changed)");
+        toast.success("Password updated (demo mode - not really changed)");
       } else {
         const supabase = getSupabaseBrowserClient();
         const { error } = await supabase.auth.updateUser({ password: next });
@@ -538,7 +538,7 @@ function PushNotificationToggle() {
   async function test() {
     try {
       await sendTestPush();
-      toast.success("Test push sent — check your notifications");
+      toast.success("Test push sent - check your notifications");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't send test push");
     }

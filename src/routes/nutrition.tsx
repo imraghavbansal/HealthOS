@@ -3,7 +3,15 @@ import { useMemo, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { AppShell } from "@/components/app-shell";
 import { AsyncBoundary, EmptyState, LoadingCards } from "@/components/data-states";
-import { AnimatedNumber, Lift, ProgressRing, Reveal, Stagger, StaggerItem, motion } from "@/components/motion";
+import {
+  AnimatedNumber,
+  Lift,
+  ProgressRing,
+  Reveal,
+  Stagger,
+  StaggerItem,
+  motion,
+} from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +25,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAddNutrition, useAddWater, useNutrition } from "@/lib/queries";
 import type { NutritionEntry } from "@/lib/types";
 import { Droplet, GlassWater, Minus, Plus, UtensilsCrossed } from "lucide-react";
@@ -27,9 +41,9 @@ export const Route = createFileRoute("/nutrition")({
   component: NutritionPage,
   head: () => ({
     meta: [
-      { title: "Nutrition & Hydration — Raag" },
+      { title: "Nutrition & Hydration - Raag" },
       { name: "description", content: "Track meals, macros and hydration in one place." },
-      { property: "og:title", content: "Nutrition & Hydration — Raag" },
+      { property: "og:title", content: "Nutrition & Hydration - Raag" },
       { property: "og:description", content: "Track meals, macros and hydration in one place." },
     ],
   }),
@@ -37,7 +51,9 @@ export const Route = createFileRoute("/nutrition")({
 
 const MEALS: NutritionEntry["meal"][] = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
-const COMMON_FOODS: Array<Pick<NutritionEntry, "meal" | "name" | "kcal" | "protein" | "carbs" | "fat">> = [
+const COMMON_FOODS: Array<
+  Pick<NutritionEntry, "meal" | "name" | "kcal" | "protein" | "carbs" | "fat">
+> = [
   { meal: "Breakfast", name: "Greek yogurt & berries", kcal: 220, protein: 18, carbs: 26, fat: 5 },
   { meal: "Lunch", name: "Grilled chicken bowl", kcal: 540, protein: 42, carbs: 48, fat: 16 },
   { meal: "Snack", name: "Almonds (1 oz)", kcal: 160, protein: 6, carbs: 6, fat: 14 },
@@ -57,7 +73,7 @@ function NutritionPage() {
         <AsyncBoundary query={nutrition} skeleton={<LoadingCards count={4} />}>
           {(data) => <NutritionContent data={data} />}
         </AsyncBoundary>
-        <p className="text-xs text-muted-foreground">Informational only — not medical advice.</p>
+        <p className="text-xs text-muted-foreground">Informational only - not medical advice.</p>
       </div>
     </AppShell>
   );
@@ -66,7 +82,11 @@ function NutritionPage() {
 function NutritionContent({
   data,
 }: {
-  data: { entries: NutritionEntry[]; targets: import("@/lib/types").NutritionTargets; waterMl: number };
+  data: {
+    entries: NutritionEntry[];
+    targets: import("@/lib/types").NutritionTargets;
+    waterMl: number;
+  };
 }) {
   const { entries, targets, waterMl } = data;
 
@@ -87,8 +107,20 @@ function NutritionContent({
   const kcalPct = Math.min(100, Math.round((consumed.kcal / Math.max(1, targets.kcal)) * 100));
 
   const macros = [
-    { key: "protein", label: "Protein", value: consumed.protein, target: targets.protein, color: "var(--chart-1)" },
-    { key: "carbs", label: "Carbs", value: consumed.carbs, target: targets.carbs, color: "var(--chart-2)" },
+    {
+      key: "protein",
+      label: "Protein",
+      value: consumed.protein,
+      target: targets.protein,
+      color: "var(--chart-1)",
+    },
+    {
+      key: "carbs",
+      label: "Carbs",
+      value: consumed.carbs,
+      target: targets.carbs,
+      color: "var(--chart-2)",
+    },
     { key: "fat", label: "Fat", value: consumed.fat, target: targets.fat, color: "var(--chart-3)" },
   ];
 
@@ -119,11 +151,15 @@ function NutritionContent({
                       <div className="font-display text-2xl">
                         <AnimatedNumber value={consumed.kcal} />
                       </div>
-                      <div className="text-[10px] text-muted-foreground">of {targets.kcal} kcal</div>
+                      <div className="text-[10px] text-muted-foreground">
+                        of {targets.kcal} kcal
+                      </div>
                     </div>
                   }
                 />
-                <div className="text-xs text-muted-foreground">{kcalPct}% of daily calorie target</div>
+                <div className="text-xs text-muted-foreground">
+                  {kcalPct}% of daily calorie target
+                </div>
               </CardContent>
             </Card>
           </Lift>
@@ -169,12 +205,21 @@ function NutritionContent({
             <CardContent className="p-5">
               <div className="font-display text-base mb-2">Macro split</div>
               {pieData.length === 0 ? (
-                <div className="py-10 text-center text-xs text-muted-foreground">Log a meal to see your split.</div>
+                <div className="py-10 text-center text-xs text-muted-foreground">
+                  Log a meal to see your split.
+                </div>
               ) : (
                 <div className="h-52">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={3}>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={3}
+                      >
                         {pieData.map((d) => (
                           <Cell key={d.name} fill={d.color} stroke="none" />
                         ))}
@@ -193,7 +238,10 @@ function NutritionContent({
               )}
               <div className="mt-2 flex flex-wrap gap-2 justify-center">
                 {pieData.map((d) => (
-                  <span key={d.name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span
+                    key={d.name}
+                    className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+                  >
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: d.color }} />
                     {d.name}
                   </span>
@@ -207,7 +255,11 @@ function NutritionContent({
       <Reveal delay={0.1}>
         <div className="font-display text-lg mb-3">Today's log</div>
         {entries.length === 0 ? (
-          <EmptyState icon={UtensilsCrossed} title="No meals logged yet" body="Use “Log a meal” to add your first entry." />
+          <EmptyState
+            icon={UtensilsCrossed}
+            title="No meals logged yet"
+            body="Use “Log a meal” to add your first entry."
+          />
         ) : (
           <div className="space-y-5">
             {MEALS.map((meal) => {
@@ -215,7 +267,9 @@ function NutritionContent({
               if (items.length === 0) return null;
               return (
                 <div key={meal}>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{meal}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                    {meal}
+                  </div>
                   <Stagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <AnimatePresence>
                       {items.map((e) => (
@@ -228,9 +282,15 @@ function NutritionContent({
                                   <div className="text-sm font-semibold">{e.kcal} kcal</div>
                                 </div>
                                 <div className="mt-2 flex flex-wrap gap-1.5">
-                                  <Badge variant="secondary" className="rounded-full text-[10px]">P {e.protein}g</Badge>
-                                  <Badge variant="secondary" className="rounded-full text-[10px]">C {e.carbs}g</Badge>
-                                  <Badge variant="secondary" className="rounded-full text-[10px]">F {e.fat}g</Badge>
+                                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                                    P {e.protein}g
+                                  </Badge>
+                                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                                    C {e.carbs}g
+                                  </Badge>
+                                  <Badge variant="secondary" className="rounded-full text-[10px]">
+                                    F {e.fat}g
+                                  </Badge>
                                 </div>
                               </CardContent>
                             </Card>
@@ -275,10 +335,13 @@ function HydrationCard({ waterMl, targetMl }: { waterMl: number; targetMl: numbe
                 <AnimatedNumber value={waterMl} /> ml
               </div>
               <div className="text-xs text-muted-foreground">
-                {remaining > 0 ? `${remaining} ml remaining` : "Goal reached — nice work!"} · target {targetMl} ml
+                {remaining > 0 ? `${remaining} ml remaining` : "Goal reached - nice work!"} · target{" "}
+                {targetMl} ml
               </div>
             </div>
-            <Badge variant="secondary" className="rounded-full">{pct}%</Badge>
+            <Badge variant="secondary" className="rounded-full">
+              {pct}%
+            </Badge>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -421,24 +484,53 @@ function LogMealDialog() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="meal-name">Food name</Label>
-            <Input id="meal-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Chicken salad" />
+            <Input
+              id="meal-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Chicken salad"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
               <Label htmlFor="meal-kcal">Calories (kcal)</Label>
-              <Input id="meal-kcal" type="number" min={0} value={kcal} onChange={(e) => setKcal(e.target.value)} />
+              <Input
+                id="meal-kcal"
+                type="number"
+                min={0}
+                value={kcal}
+                onChange={(e) => setKcal(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="meal-protein">Protein (g)</Label>
-              <Input id="meal-protein" type="number" min={0} value={protein} onChange={(e) => setProtein(e.target.value)} />
+              <Input
+                id="meal-protein"
+                type="number"
+                min={0}
+                value={protein}
+                onChange={(e) => setProtein(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="meal-carbs">Carbs (g)</Label>
-              <Input id="meal-carbs" type="number" min={0} value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+              <Input
+                id="meal-carbs"
+                type="number"
+                min={0}
+                value={carbs}
+                onChange={(e) => setCarbs(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="meal-fat">Fat (g)</Label>
-              <Input id="meal-fat" type="number" min={0} value={fat} onChange={(e) => setFat(e.target.value)} />
+              <Input
+                id="meal-fat"
+                type="number"
+                min={0}
+                value={fat}
+                onChange={(e) => setFat(e.target.value)}
+              />
             </div>
           </div>
         </div>

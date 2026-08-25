@@ -25,7 +25,17 @@ import { AsyncBoundary, EmptyState } from "@/components/data-states";
 import { AnimatePresence, Stagger, StaggerItem, motion } from "@/components/motion";
 import { useDeleteRecord, useUploadRecord, recordsQuery } from "@/lib/queries";
 import type { MedicalRecord } from "@/lib/types";
-import { Download, Eye, FileText, LayoutGrid, List, Search, Trash2, Upload, UploadCloud } from "lucide-react";
+import {
+  Download,
+  Eye,
+  FileText,
+  LayoutGrid,
+  List,
+  Search,
+  Trash2,
+  Upload,
+  UploadCloud,
+} from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -34,17 +44,20 @@ const PARSING_STATUSES = new Set(["pending", "processing"]);
 export const Route = createFileRoute("/records")({
   head: () => ({
     meta: [
-      { title: "Medical Records — Raag" },
-      { name: "description", content: "Every PDF, scan, and prescription — searchable and yours." },
-      { property: "og:title", content: "Medical Records — Raag" },
-      { property: "og:description", content: "Every PDF, scan, and prescription — searchable and yours." },
+      { title: "Medical Records - Raag" },
+      { name: "description", content: "Every PDF, scan, and prescription - searchable and yours." },
+      { property: "og:title", content: "Medical Records - Raag" },
+      {
+        property: "og:description",
+        content: "Every PDF, scan, and prescription - searchable and yours.",
+      },
     ],
   }),
   component: Records,
 });
 
 // Signed Storage URLs are cross-origin, so a plain <a download> is ignored
-// by most browsers — fetch the bytes and save via an object URL instead.
+// by most browsers - fetch the bytes and save via an object URL instead.
 async function downloadFile(url: string, filename: string) {
   const res = await fetch(url);
   const blob = await res.blob();
@@ -61,24 +74,35 @@ async function downloadFile(url: string, filename: string) {
 function ParseStatusBadge({ status }: { status?: MedicalRecord["parseStatus"] }) {
   if (status === "pending" || status === "processing") {
     return (
-      <Badge variant="outline" className="rounded-full text-[10px] gap-1 border-primary/40 text-primary">
+      <Badge
+        variant="outline"
+        className="rounded-full text-[10px] gap-1 border-primary/40 text-primary"
+      >
         <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Reading document…
       </Badge>
     );
   }
   if (status === "failed") {
-    return <Badge variant="outline" className="rounded-full text-[10px] border-destructive/40 text-destructive">Parsing failed</Badge>;
+    return (
+      <Badge
+        variant="outline"
+        className="rounded-full text-[10px] border-destructive/40 text-destructive"
+      >
+        Parsing failed
+      </Badge>
+    );
   }
   return null;
 }
 
 function Records() {
   // Same query key/cache as everywhere else, but polls while any record is
-  // still being parsed — otherwise you'd have no way to know parse-record
+  // still being parsed - otherwise you'd have no way to know parse-record
   // finished short of manually reloading the page.
   const recordsQ = useQuery({
     ...recordsQuery,
-    refetchInterval: (query) => (query.state.data?.some((r) => PARSING_STATUSES.has(r.parseStatus ?? "")) ? 4000 : false),
+    refetchInterval: (query) =>
+      query.state.data?.some((r) => PARSING_STATUSES.has(r.parseStatus ?? "")) ? 4000 : false,
   });
   const upload = useUploadRecord();
   const [q, setQ] = useState("");
@@ -92,16 +116,21 @@ function Records() {
     if (!files) return;
     Array.from(files).forEach((file) => {
       setPendingFiles((p) => [...p, file.name]);
-      upload.mutate(file, { onSettled: () => setPendingFiles((p) => p.filter((n) => n !== file.name)) });
+      upload.mutate(file, {
+        onSettled: () => setPendingFiles((p) => p.filter((n) => n !== file.name)),
+      });
     });
   };
 
   return (
     <AppShell
       title="Medical Records"
-      subtitle="Every PDF, scan, and prescription — searchable and yours."
+      subtitle="Every PDF, scan, and prescription - searchable and yours."
       actions={
-        <Button className="rounded-full gradient-primary text-white border-0" onClick={() => inputRef.current?.click()}>
+        <Button
+          className="rounded-full gradient-primary text-white border-0"
+          onClick={() => inputRef.current?.click()}
+        >
           <Upload className="mr-1.5 h-4 w-4" /> Upload
         </Button>
       }
@@ -132,10 +161,16 @@ function Records() {
           dragActive ? "border-primary bg-primary/5" : "border-border/60 bg-muted/10"
         }`}
       >
-        <UploadCloud className={`mx-auto h-8 w-8 ${dragActive ? "text-primary" : "text-muted-foreground"}`} />
+        <UploadCloud
+          className={`mx-auto h-8 w-8 ${dragActive ? "text-primary" : "text-muted-foreground"}`}
+        />
         <p className="mt-2 text-sm font-medium">Drag & drop files here</p>
         <p className="text-xs text-muted-foreground">or</p>
-        <Button variant="outline" className="rounded-full mt-2" onClick={() => inputRef.current?.click()}>
+        <Button
+          variant="outline"
+          className="rounded-full mt-2"
+          onClick={() => inputRef.current?.click()}
+        >
           Browse files
         </Button>
       </div>
@@ -169,10 +204,20 @@ function Records() {
 
       <AsyncBoundary
         query={recordsQ}
-        empty={<EmptyState icon={FileText} title="No records yet" body="Upload a file to get started." />}
+        empty={
+          <EmptyState icon={FileText} title="No records yet" body="Upload a file to get started." />
+        }
       >
         {(records) => (
-          <RecordsBody records={records} q={q} setQ={setQ} activeTag={activeTag} setActiveTag={setActiveTag} view={view} setView={setView} />
+          <RecordsBody
+            records={records}
+            q={q}
+            setQ={setQ}
+            activeTag={activeTag}
+            setActiveTag={setActiveTag}
+            view={view}
+            setView={setView}
+          />
         )}
       </AsyncBoundary>
     </AppShell>
@@ -210,7 +255,12 @@ function RecordsBody({
         <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search records, providers, tags…" className="pl-10 rounded-full h-11" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search records, providers, tags…"
+              className="pl-10 rounded-full h-11"
+            />
           </div>
           <div className="flex rounded-full border border-border/60 p-1">
             <Button
@@ -256,42 +306,70 @@ function RecordsBody({
 
         <Card className="rounded-3xl border-border/60">
           <CardContent className="p-3">
-            <div className="text-xs uppercase text-muted-foreground tracking-wider px-3 py-2">Timeline</div>
+            <div className="text-xs uppercase text-muted-foreground tracking-wider px-3 py-2">
+              Timeline
+            </div>
             <AnimatePresence>
               <Stagger className={view === "grid" ? "grid gap-3 sm:grid-cols-2" : "space-y-1"}>
                 {filtered.map((r) => (
                   <StaggerItem key={r.id}>
-                    <motion.div layout exit={{ opacity: 0, scale: 0.96 }} className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-2xl px-3 py-3 hover:bg-accent/50 transition">
+                    <motion.div
+                      layout
+                      exit={{ opacity: 0, scale: 0.96 }}
+                      className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-2xl px-3 py-3 hover:bg-accent/50 transition"
+                    >
                       <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary grid place-items-center">
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <div className="font-medium text-sm truncate">{r.title}</div>
-                          <Badge variant="secondary" className="rounded-full text-[10px]">{r.tag}</Badge>
+                          <Badge variant="secondary" className="rounded-full text-[10px]">
+                            {r.tag}
+                          </Badge>
                           <ParseStatusBadge status={r.parseStatus} />
                         </div>
-                        <div className="text-xs text-muted-foreground truncate">{r.provider} · {r.type}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {r.provider} · {r.type}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="text-xs text-muted-foreground hidden sm:block">{r.date}</div>
+                        <div className="text-xs text-muted-foreground hidden sm:block">
+                          {r.date}
+                        </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" aria-label="Record actions">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="rounded-full h-8 w-8"
+                              aria-label="Record actions"
+                            >
                               <span className="sr-only">Open menu</span>
                               <MoreDots />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem disabled={!r.fileUrl} onClick={() => r.fileUrl && window.open(r.fileUrl, "_blank", "noopener,noreferrer")}>
+                            <DropdownMenuItem
+                              disabled={!r.fileUrl}
+                              onClick={() =>
+                                r.fileUrl && window.open(r.fileUrl, "_blank", "noopener,noreferrer")
+                              }
+                            >
                               <Eye className="mr-2 h-4 w-4" /> View
                             </DropdownMenuItem>
-                            <DropdownMenuItem disabled={!r.fileUrl} onClick={() => r.fileUrl && downloadFile(r.fileUrl, r.title)}>
+                            <DropdownMenuItem
+                              disabled={!r.fileUrl}
+                              onClick={() => r.fileUrl && downloadFile(r.fileUrl, r.title)}
+                            >
                               <Download className="mr-2 h-4 w-4" /> Download
                             </DropdownMenuItem>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
+                                <DropdownMenuItem
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="text-destructive focus:text-destructive"
+                                >
                                   <Trash2 className="mr-2 h-4 w-4" /> Delete
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
@@ -304,7 +382,9 @@ function RecordsBody({
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => del.mutate(r.id)}>Delete</AlertDialogAction>
+                                  <AlertDialogAction onClick={() => del.mutate(r.id)}>
+                                    Delete
+                                  </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
@@ -316,7 +396,9 @@ function RecordsBody({
                 ))}
               </Stagger>
             </AnimatePresence>
-            {filtered.length === 0 && <div className="p-8 text-center text-sm text-muted-foreground">No records match.</div>}
+            {filtered.length === 0 && (
+              <div className="p-8 text-center text-sm text-muted-foreground">No records match.</div>
+            )}
           </CardContent>
         </Card>
       </div>

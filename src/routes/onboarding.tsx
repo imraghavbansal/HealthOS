@@ -66,7 +66,7 @@ function PushNotificationPrompt() {
           {state === "subscribed" ? "Notifications enabled" : "Turn on notifications"}
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Get notified about medication reminders, new insights, and out-of-range lab results — even
+          Get notified about medication reminders, new insights, and out-of-range lab results - even
           when Raag isn't open. You can change this anytime in Settings.
         </p>
       </div>
@@ -167,7 +167,7 @@ function Onboarding() {
               dose: m.dose.trim(),
               schedule: m.schedule.trim(),
               type: "Supplement",
-              next: "—",
+              next: "-",
             }),
           ),
         );
@@ -322,7 +322,7 @@ function Onboarding() {
             <div className="space-y-6">
               <h2 className="font-display text-3xl">Family history.</h2>
               <p className="text-sm text-muted-foreground">
-                Optional but powerful — helps Raag surface inherited risk factors. Comma-separate
+                Optional but powerful - helps Raag surface inherited risk factors. Comma-separate
                 multiple conditions.
               </p>
               {family.map((f, i) => (
@@ -457,7 +457,7 @@ function Onboarding() {
               <h2 className="font-display text-3xl">Connect your devices.</h2>
               <p className="text-sm text-muted-foreground">
                 Wearable sync (Apple Health, Google Health Connect, Garmin, Fitbit, WHOOP, Oura) is
-                arriving soon — you'll be able to connect them from Settings the moment it's live.
+                arriving soon - you'll be able to connect them from Settings the moment it's live.
               </p>
               <PushNotificationPrompt />
             </div>
@@ -484,7 +484,7 @@ function Onboarding() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Each step saves the moment you hit Continue — only the step you're actively filling in is
+          Each step saves the moment you hit Continue - only the step you're actively filling in is
           unsaved.
         </p>
       </div>

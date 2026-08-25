@@ -124,7 +124,7 @@ function ReportsPage() {
         <DoctorSummarySection />
         <PortabilitySection />
         <p className="text-xs text-muted-foreground">
-          Informational only — not medical advice. Reports summarize the data you've entered or
+          Informational only - not medical advice. Reports summarize the data you've entered or
           connected and may not be complete or clinically validated.
         </p>
       </div>
@@ -270,7 +270,7 @@ function BuildReportSection() {
 }
 
 /**
- * Doctor-visit prep pack (V2) — deterministic, template-assembled from
+ * Doctor-visit prep pack (V2) - deterministic, template-assembled from
  * data already on file (conditions, meds, vitals, flagged labs, recent
  * symptoms, active insights/risks). No AI call, so it works today
  * without Anthropic billing; upgradeable to an AI-written narrative
@@ -303,7 +303,7 @@ function DoctorSummarySection() {
           <div>
             <h2 className="font-display text-xl">Doctor visit prep pack</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              A one-page snapshot assembled from your data — conditions, meds, flagged results, and
+              A one-page snapshot assembled from your data - conditions, meds, flagged results, and
               questions worth asking. Bring it to your next appointment.
             </p>
           </div>
@@ -421,7 +421,7 @@ function SummaryPreview({
                   className="flex justify-between border-b border-border/40 py-1 last:border-0"
                 >
                   <span>
-                    {m.name} {m.dose ? `— ${m.dose}` : ""}
+                    {m.name} {m.dose ? `- ${m.dose}` : ""}
                   </span>
                   <span className="text-muted-foreground">{m.adherence}% adherence</span>
                 </li>
@@ -465,7 +465,7 @@ function SummaryPreview({
           )}
         </SummarySection>
 
-        <SummarySection title={`Recent symptoms (last 30 days) — ${recentSymptoms.length}`}>
+        <SummarySection title={`Recent symptoms (last 30 days) - ${recentSymptoms.length}`}>
           {recentSymptoms.length === 0 ? (
             <p className="text-muted-foreground">None logged.</p>
           ) : (
@@ -645,7 +645,7 @@ function buildSummaryText({
     `Current medications (${medications.length}):`,
     ...(medications.length
       ? medications.map(
-          (m) => `- ${m.name}${m.dose ? ` — ${m.dose}` : ""} (${m.adherence}% adherence)`,
+          (m) => `- ${m.name}${m.dose ? ` - ${m.dose}` : ""} (${m.adherence}% adherence)`,
         )
       : ["- None"]),
     "",

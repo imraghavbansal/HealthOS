@@ -1,4 +1,4 @@
-// Raag — send-push
+// Raag - send-push
 //
 // Delivers a real Web Push notification to every device a user has
 // subscribed from. Two callers, mirroring parse-record's auth pattern:
@@ -8,18 +8,18 @@
 //     authenticated via their own JWT
 // Either way, service-role is used internally to read push_subscriptions
 // (RLS would otherwise scope it to whoever's JWT is on the request, which
-// is wrong for the trigger path — the trigger runs as the DB, not as the
+// is wrong for the trigger path - the trigger runs as the DB, not as the
 // notification's recipient).
 //
 // Uses npm:web-push for VAPID signing + aes128gcm payload encryption
-// (RFC 8291) rather than hand-rolling Web Push crypto — same reasoning
+// (RFC 8291) rather than hand-rolling Web Push crypto - same reasoning
 // as using npm:@supabase/supabase-js elsewhere instead of reimplementing
 // its client.
 //
 // Deploy: Supabase Dashboard → Edge Functions → New Function →
 // "send-push" → paste this file → Deploy. Secrets needed:
 // VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT (mailto:you@yourdomain.com),
-// and PUSH_TRIGGER_SECRET — same value as the 'push_trigger_secret' Vault
+// and PUSH_TRIGGER_SECRET - same value as the 'push_trigger_secret' Vault
 // entry from 0013_push_notifications.sql (same two-places-same-value
 // pattern as INTERNAL_QUEUE_SECRET in parse-record).
 
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const vapidPrivate = Deno.env.get("VAPID_PRIVATE_KEY");
     const vapidSubject = Deno.env.get("VAPID_SUBJECT");
     if (!vapidPublic || !vapidPrivate || !vapidSubject) {
-      return json({ error: "Push not configured — missing VAPID secrets" }, 500);
+      return json({ error: "Push not configured - missing VAPID secrets" }, 500);
     }
     webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
 
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     );
 
     // Authorize: either the trigger's shared secret (same value as the
-    // 'push_trigger_secret' Vault entry the DB trigger reads — compared
+    // 'push_trigger_secret' Vault entry the DB trigger reads - compared
     // here against this function's own env var, not queried from Vault,
     // since Vault's tables aren't exposed via PostgREST), or a caller who
     // IS the target user (self-test push from Settings).
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     );
 
     // A 404/410 from the push service means the subscription is dead
-    // (browser uninstalled, permission revoked) — clean those up so they
+    // (browser uninstalled, permission revoked) - clean those up so they
     // stop being retried forever.
     const deadIds: string[] = [];
     results.forEach((r, i) => {

@@ -1,7 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Sparkles, Trash2 } from "lucide-react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { AnimatePresence } from "motion/react";
 import { AppShell } from "@/components/app-shell";
 import { Lift, motion, Reveal, Stagger, StaggerItem } from "@/components/motion";
@@ -27,16 +35,32 @@ export const Route = createFileRoute("/symptoms")({
   head: () => ({
     meta: [
       { title: "Symptom Journal · Raag" },
-      { name: "description", content: "Log symptoms, track severity over time, and spot patterns." },
+      {
+        name: "description",
+        content: "Log symptoms, track severity over time, and spot patterns.",
+      },
       { property: "og:title", content: "Symptom Journal · Raag" },
-      { property: "og:description", content: "Log symptoms, track severity over time, and spot patterns." },
+      {
+        property: "og:description",
+        content: "Log symptoms, track severity over time, and spot patterns.",
+      },
     ],
   }),
   component: SymptomsPage,
 });
 
 const BODY_AREAS = ["Head", "Chest", "Abdomen", "Back", "Hands", "Legs", "Skin", "Whole body"];
-const QUICK_TAGS = ["energy", "digestion", "pain", "sleep", "skin", "mood", "thyroid", "circulation", "screen time"];
+const QUICK_TAGS = [
+  "energy",
+  "digestion",
+  "pain",
+  "sleep",
+  "skin",
+  "mood",
+  "thyroid",
+  "circulation",
+  "screen time",
+];
 
 function severityColor(sev: number) {
   if (sev <= 3) return "text-success";
@@ -100,7 +124,12 @@ function LogSymptomCard() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="symptom-label">What are you feeling?</Label>
-            <Input id="symptom-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Headache" />
+            <Input
+              id="symptom-label"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="e.g. Headache"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="symptom-area">Body area</Label>
@@ -121,7 +150,8 @@ function LogSymptomCard() {
 
         <div className="space-y-1.5">
           <Label>
-            Severity — <span className={`font-semibold ${severityColor(severity[0])}`}>{severity[0]}/10</span>
+            Severity -{" "}
+            <span className={`font-semibold ${severityColor(severity[0])}`}>{severity[0]}/10</span>
           </Label>
           <Slider value={severity} onValueChange={setSeverity} min={1} max={10} step={1} />
         </div>
@@ -135,7 +165,9 @@ function LogSymptomCard() {
                 type="button"
                 onClick={() => toggleTag(tag)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  tags.includes(tag) ? "gradient-primary text-white" : "bg-muted text-muted-foreground hover:bg-accent"
+                  tags.includes(tag)
+                    ? "gradient-primary text-white"
+                    : "bg-muted text-muted-foreground hover:bg-accent"
                 }`}
               >
                 {tag}
@@ -146,7 +178,12 @@ function LogSymptomCard() {
 
         <div className="space-y-1.5">
           <Label htmlFor="symptom-note">Note (optional)</Label>
-          <Textarea id="symptom-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Any context worth remembering" />
+          <Textarea
+            id="symptom-note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Any context worth remembering"
+          />
         </div>
 
         <div className="flex justify-end">
@@ -179,8 +216,19 @@ function SeverityChart({ entries }: { entries: SymptomEntry[] }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ left: -20, right: 10, top: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="x" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 10]} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} width={30} />
+              <XAxis
+                dataKey="x"
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                domain={[0, 10]}
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                axisLine={false}
+                tickLine={false}
+                width={30}
+              />
               <Tooltip
                 contentStyle={{
                   background: "var(--card)",
@@ -190,7 +238,13 @@ function SeverityChart({ entries }: { entries: SymptomEntry[] }) {
                   color: "var(--foreground)",
                 }}
               />
-              <Line type="monotone" dataKey="severity" stroke="var(--chart-1)" strokeWidth={2.5} dot={{ r: 3 }} />
+              <Line
+                type="monotone"
+                dataKey="severity"
+                stroke="var(--chart-1)"
+                strokeWidth={2.5}
+                dot={{ r: 3 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -214,8 +268,8 @@ function PatternsCard({ entries }: { entries: SymptomEntry[] }) {
     const topArea = [...areaCounts.entries()].sort((a, b) => b[1] - a[1])[0];
     const avgSeverity = totalSeverity / entries.length;
     return {
-      topTag: topTag ? topTag[0] : "—",
-      topArea: topArea ? topArea[0] : "—",
+      topTag: topTag ? topTag[0] : "-",
+      topArea: topArea ? topArea[0] : "-",
       avgSeverity,
     };
   }, [entries]);
@@ -244,11 +298,13 @@ function PatternsCard({ entries }: { entries: SymptomEntry[] }) {
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          Your entries most often mention <span className="font-medium text-foreground">{stats.topTag}</span>, centered on{" "}
-          <span className="font-medium text-foreground">{stats.topArea.toLowerCase()}</span>, with average severity{" "}
+          Your entries most often mention{" "}
+          <span className="font-medium text-foreground">{stats.topTag}</span>, centered on{" "}
+          <span className="font-medium text-foreground">{stats.topArea.toLowerCase()}</span>, with
+          average severity{" "}
           <span className="font-medium text-foreground">{stats.avgSeverity.toFixed(1)}/10</span>.
         </p>
-        <p className="text-xs text-muted-foreground">Informational only — not medical advice.</p>
+        <p className="text-xs text-muted-foreground">Informational only - not medical advice.</p>
       </CardContent>
     </Card>
   );
@@ -274,7 +330,9 @@ function SymptomCard({ entry }: { entry: SymptomEntry }) {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className={`text-sm font-semibold ${severityColor(entry.severity)}`}>{entry.severity}/10</span>
+                <span className={`text-sm font-semibold ${severityColor(entry.severity)}`}>
+                  {entry.severity}/10
+                </span>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -287,12 +345,19 @@ function SymptomCard({ entry }: { entry: SymptomEntry }) {
               </div>
             </div>
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className={`h-full rounded-full ${severityBg(entry.severity)}`} style={{ width: `${entry.severity * 10}%` }} />
+              <div
+                className={`h-full rounded-full ${severityBg(entry.severity)}`}
+                style={{ width: `${entry.severity * 10}%` }}
+              />
             </div>
             {entry.tags.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {entry.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="rounded-full text-[10px] capitalize">
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="rounded-full text-[10px] capitalize"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -310,7 +375,10 @@ function SymptomsPage() {
   const symptomsQuery = useSymptoms();
 
   return (
-    <AppShell title="Symptom Journal" subtitle="Log how you feel and let patterns surface over time.">
+    <AppShell
+      title="Symptom Journal"
+      subtitle="Log how you feel and let patterns surface over time."
+    >
       <div className="space-y-6">
         <Reveal>
           <LogSymptomCard />
@@ -319,10 +387,17 @@ function SymptomsPage() {
         <AsyncBoundary
           query={symptomsQuery}
           skeleton={<LoadingRows count={4} />}
-          empty={<EmptyState title="No symptoms logged yet" body="Use the form above to start your journal." />}
+          empty={
+            <EmptyState
+              title="No symptoms logged yet"
+              body="Use the form above to start your journal."
+            />
+          }
         >
           {(entries) => {
-            const sorted = [...entries].sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+            const sorted = [...entries].sort(
+              (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+            );
             return (
               <div className="space-y-6">
                 <div className="grid gap-4 lg:grid-cols-2">

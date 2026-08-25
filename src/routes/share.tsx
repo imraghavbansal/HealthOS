@@ -43,7 +43,7 @@ export const Route = createFileRoute("/share")({
   component: SharePage,
   head: () => ({
     meta: [
-      { title: "Share Links — Raag" },
+      { title: "Share Links - Raag" },
       {
         name: "description",
         content: "Give a doctor or family member a scoped, expiring view of your records.",
@@ -72,14 +72,14 @@ function SharePage() {
   return (
     <AppShell
       title="Share Links"
-      subtitle="Hand a doctor or family member a scoped, expiring view — no account needed on their end."
+      subtitle="Hand a doctor or family member a scoped, expiring view - no account needed on their end."
       actions={<CreateLinkDialog />}
     >
       <div className="space-y-4">
         <div className="flex items-start gap-2 rounded-2xl border border-border/60 bg-muted/40 p-4 text-xs text-muted-foreground">
           <ShieldCheck className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
           <p>
-            Links never include your uploaded documents/files — only structured data (labs,
+            Links never include your uploaded documents/files - only structured data (labs,
             medications, vitals) within the scope you pick. Revoke a link any time; every view is
             logged.
           </p>
@@ -122,7 +122,7 @@ function LinkCard({ link }: { link: ShareLink }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      toast.error("Couldn't copy — copy the URL manually");
+      toast.error("Couldn't copy - copy the URL manually");
     }
   }
 
@@ -179,7 +179,7 @@ function LinkCard({ link }: { link: ShareLink }) {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Revoke this link?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Anyone with this URL will immediately lose access. This can't be undone —
+                      Anyone with this URL will immediately lose access. This can't be undone -
                       you'd need to create a new link.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -248,11 +248,11 @@ function CreateLinkDialog() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="summary">
-                  Summary — conditions, current meds, latest vitals
+                  Summary - conditions, current meds, latest vitals
                 </SelectItem>
                 <SelectItem value="labs">Summary + Labs</SelectItem>
                 <SelectItem value="medications">Summary + Medications (with adherence)</SelectItem>
-                <SelectItem value="full">Full record — + symptoms, family history</SelectItem>
+                <SelectItem value="full">Full record - + symptoms, family history</SelectItem>
               </SelectContent>
             </Select>
           </div>

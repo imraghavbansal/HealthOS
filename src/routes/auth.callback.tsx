@@ -11,13 +11,13 @@ export const Route = createFileRoute("/auth/callback")({ component: AuthCallback
 /**
  * Landing point for the Google OAuth redirect. The browser client's own
  * initialization already auto-detects and exchanges the ?code= in the URL
- * for a session (GoTrueClient's default detectSessionInUrl behavior) —
+ * for a session (GoTrueClient's default detectSessionInUrl behavior) -
  * that exchange is single-use, since it deletes the PKCE code_verifier
  * once consumed. An earlier version of this page also called
  * exchangeCodeForSession(code) manually on top of that, which raced the
  * automatic exchange: whichever ran second found the verifier already
  * gone and failed with "PKCE code verifier not found in storage". Fix:
- * never call it manually — just await getSession(), which itself awaits
+ * never call it manually - just await getSession(), which itself awaits
  * the client's internal init promise, so by the time it resolves the
  * automatic exchange has already happened.
  */
@@ -36,7 +36,7 @@ function AuthCallback() {
         if (sessionError) throw sessionError;
         if (!sessionData.session) {
           throw new Error(
-            "No session after Google sign-in — the link may have expired. Try signing in again.",
+            "No session after Google sign-in - the link may have expired. Try signing in again.",
           );
         }
 

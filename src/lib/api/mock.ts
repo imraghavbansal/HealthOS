@@ -1,5 +1,5 @@
 /**
- * Mock adapter — implements RaagApi entirely in memory with realistic latency
+ * Mock adapter - implements RaagApi entirely in memory with realistic latency
  * so every loading/empty/error state in the UI is exercised for real.
  *
  * REPLACE-ME: delete this file once http.ts is wired to your backend.
@@ -145,35 +145,35 @@ function groundedReply(question: string): ChatMessage {
   const match =
     pick(["ldl", "cholesterol", "lipid"], {
       content:
-        "Your LDL is 118 mg/dL, up ~9% from January (108). Two things in your own data line up with that: weekly cardio dropped from 4.1 to 2.8 sessions between Q2 and Q3, and saturated fat intake rose during your July–August travel. Paternal coronary artery disease adds baseline risk.\n\nInformational only — please review with your PCP.",
+        "Your LDL is 118 mg/dL, up ~9% from January (108). Two things in your own data line up with that: weekly cardio dropped from 4.1 to 2.8 sessions between Q2 and Q3, and saturated fat intake rose during your July–August travel. Paternal coronary artery disease adds baseline risk.\n\nInformational only - please review with your PCP.",
       citations: [
-        { title: "Lipid Panel — LabCorp", date: "Aug 15, 2026" },
-        { title: "Complete Blood Panel — Quest", date: "Nov 12, 2026" },
-        { title: "Family History — Paternal", date: "Onboarding" },
+        { title: "Lipid Panel - LabCorp", date: "Aug 15, 2026" },
+        { title: "Complete Blood Panel - Quest", date: "Nov 12, 2026" },
+        { title: "Family History - Paternal", date: "Onboarding" },
       ],
     }) ??
     pick(["vitamin d", "vit d"], {
       content:
-        "Vitamin D is 24 ng/mL — below the 30–100 reference range, and trending down across your last three panels (32 → 29 → 24). You're already on D3 5000 IU with 94% adherence, so absorption or sun exposure is the more likely lever.\n\nInformational only — discuss dosing with your clinician.",
+        "Vitamin D is 24 ng/mL - below the 30–100 reference range, and trending down across your last three panels (32 → 29 → 24). You're already on D3 5000 IU with 94% adherence, so absorption or sun exposure is the more likely lever.\n\nInformational only - discuss dosing with your clinician.",
       citations: [
-        { title: "Complete Blood Panel — Quest", date: "Nov 12, 2026" },
-        { title: "Medication — Vitamin D3 5000 IU", date: "Sep 28, 2026" },
+        { title: "Complete Blood Panel - Quest", date: "Nov 12, 2026" },
+        { title: "Medication - Vitamin D3 5000 IU", date: "Sep 28, 2026" },
       ],
     }) ??
     pick(["sleep", "tired", "fatigue", "energy"], {
       content:
-        "You averaged 7.4h over the last 7 nights against an 8h goal — a ~3h 20m deficit for the week. Deep sleep held at 1.5h, which is solid. Your logged afternoon fatigue (severity 6) clusters on the days after nights under 7h.\n\nInformational only.",
+        "You averaged 7.4h over the last 7 nights against an 8h goal - a ~3h 20m deficit for the week. Deep sleep held at 1.5h, which is solid. Your logged afternoon fatigue (severity 6) clusters on the days after nights under 7h.\n\nInformational only.",
       citations: [
-        { title: "Sleep — Apple Health", date: "Last 7 days" },
-        { title: "Symptom log — Afternoon fatigue", date: "Yesterday" },
+        { title: "Sleep - Apple Health", date: "Last 7 days" },
+        { title: "Symptom log - Afternoon fatigue", date: "Yesterday" },
       ],
     }) ??
     pick(["risk", "family", "heart", "diabetes"], {
       content:
-        "Your highest adjusted risk right now is cardiovascular (42%, moderate) — driven by rising LDL plus paternal CAD. Type 2 diabetes sits low at 18% with a normal HbA1c of 5.2%. Hypothyroid risk is moderate given maternal history and your current levothyroxine.\n\nInformational only — not a diagnosis.",
+        "Your highest adjusted risk right now is cardiovascular (42%, moderate) - driven by rising LDL plus paternal CAD. Type 2 diabetes sits low at 18% with a normal HbA1c of 5.2%. Hypothyroid risk is moderate given maternal history and your current levothyroxine.\n\nInformational only - not a diagnosis.",
       citations: [
-        { title: "Family History — Paternal & Maternal", date: "Onboarding" },
-        { title: "Complete Blood Panel — Quest", date: "Nov 12, 2026" },
+        { title: "Family History - Paternal & Maternal", date: "Onboarding" },
+        { title: "Complete Blood Panel - Quest", date: "Nov 12, 2026" },
       ],
     });
 
@@ -183,7 +183,7 @@ function groundedReply(question: string): ChatMessage {
     createdAt: new Date().toISOString(),
     ...(match ?? {
       content:
-        "I pulled from your 6 most recent records and 18 months of wearable history. Nothing in your data directly answers that yet — try asking about your LDL trend, vitamin D, sleep debt, medication adherence, or inherited risk and I'll cite the exact reports.\n\nInformational only, not medical advice.",
+        "I pulled from your 6 most recent records and 18 months of wearable history. Nothing in your data directly answers that yet - try asking about your LDL trend, vitamin D, sleep debt, medication adherence, or inherited risk and I'll cite the exact reports.\n\nInformational only, not medical advice.",
       citations: [{ title: "Raag record index", date: "6 documents" }],
     }),
   };
@@ -260,7 +260,7 @@ export const mockApi: RaagApi = {
       }),
       tag: "Upload",
       sizeKb: Math.round(file.size / 1024),
-      summary: "Queued for AI parsing — markers will appear in Lab Results shortly.",
+      summary: "Queued for AI parsing - markers will appear in Lab Results shortly.",
     };
     state.records = [rec, ...state.records];
     return wait(rec, 700);
@@ -273,7 +273,7 @@ export const mockApi: RaagApi = {
   getWearables: () => wait(state.wearables),
   toggleWearable: (name, connect) => {
     state.wearables = state.wearables.map((w) =>
-      w.name === name ? { ...w, connected: connect, last: connect ? "just now" : "—" } : w,
+      w.name === name ? { ...w, connected: connect, last: connect ? "just now" : "-" } : w,
     );
     return wait(
       state.wearables.find((w) => w.name === name)!,

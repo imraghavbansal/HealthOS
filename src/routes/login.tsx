@@ -8,11 +8,13 @@ import { toast } from "sonner";
 import { signInWithEmail, signInWithGoogle, describeAuthError } from "@/lib/auth";
 import { api, IS_DEMO } from "@/lib/api";
 import { GoogleButton } from "@/components/google-button";
+import { useRedirectIfAuthenticated } from "@/lib/use-redirect-if-authenticated";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
 function Login() {
   const nav = useNavigate();
+  const { checking: checkingExistingSession } = useRedirectIfAuthenticated();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | undefined>();
@@ -55,6 +57,14 @@ function Login() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (checkingExistingSession) {
+    return (
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
+        Checking your session…
+      </div>
+    );
   }
 
   return (

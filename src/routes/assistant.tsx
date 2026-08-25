@@ -22,7 +22,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useChatHistory, useSendChatMessage, useRecords, useLabMarkers, useWearables, useFamilyHistory, useMedications } from "@/lib/queries";
+import {
+  useChatHistory,
+  useSendChatMessage,
+  useRecords,
+  useLabMarkers,
+  useWearables,
+  useFamilyHistory,
+  useMedications,
+} from "@/lib/queries";
 import { AsyncBoundary, LoadingRows } from "@/components/data-states";
 import { Stagger, StaggerItem, motion } from "@/components/motion";
 import type { ChatMessage, Citation } from "@/lib/types";
@@ -89,12 +97,16 @@ function Assistant() {
   const hasUserMessages = history.some((m) => m.role === "user") || !!optimisticUser;
 
   return (
-    <AppShell title="Raag Assistant" subtitle="Ask anything about your health. I'll cite the reports I use.">
+    <AppShell
+      title="Raag Assistant"
+      subtitle="Ask anything about your health. I'll cite the reports I use."
+    >
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
         <Card className="rounded-3xl border-border/60 flex flex-col h-[calc(100vh-14rem)]">
           <CardContent className="p-0 flex flex-col flex-1 min-h-0">
             <div className="rounded-t-3xl bg-warning/10 border-b border-warning/20 px-4 md:px-8 py-2 flex items-center gap-2 text-[11px] text-warning-foreground">
-              <ShieldAlert className="h-3.5 w-3.5 shrink-0" /> Informational only — not medical advice.
+              <ShieldAlert className="h-3.5 w-3.5 shrink-0" /> Informational only - not medical
+              advice.
             </div>
             <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 space-y-6">
               <AsyncBoundary query={historyQ} skeleton={<LoadingRows count={4} />}>
@@ -103,7 +115,14 @@ function Assistant() {
                     {displayMessages.map((m) => (
                       <Message key={m.id} m={m} />
                     ))}
-                    {sendMutation.isPending && (streamingText ? <Message m={{ id: "streaming", role: "assistant", content: streamingText }} /> : <ThinkingBubble />)}
+                    {sendMutation.isPending &&
+                      (streamingText ? (
+                        <Message
+                          m={{ id: "streaming", role: "assistant", content: streamingText }}
+                        />
+                      ) : (
+                        <ThinkingBubble />
+                      ))}
                   </>
                 )}
               </AsyncBoundary>
@@ -139,7 +158,12 @@ function Assistant() {
                   }}
                 />
                 <div className="absolute right-2 bottom-2 flex items-center gap-1">
-                  <Button size="icon" variant="ghost" className="rounded-full h-8 w-8" aria-label="Attach file">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full h-8 w-8"
+                    aria-label="Attach file"
+                  >
                     <Paperclip className="h-4 w-4" />
                   </Button>
                   <Button
@@ -154,7 +178,8 @@ function Assistant() {
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground mt-2 text-center">
-                Raag provides informational insights and can make mistakes. Not a substitute for medical advice.
+                Raag provides informational insights and can make mistakes. Not a substitute for
+                medical advice.
               </p>
             </div>
           </CardContent>
@@ -167,16 +192,20 @@ function Assistant() {
                 <div className="text-sm font-semibold mb-3">Grounded in your data</div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2 text-muted-foreground">
-                    <FileText className="h-3.5 w-3.5 text-primary" /> {recordsQ.data?.length ?? 0} medical records
+                    <FileText className="h-3.5 w-3.5 text-primary" /> {recordsQ.data?.length ?? 0}{" "}
+                    medical records
                   </li>
                   <li className="flex items-center gap-2 text-muted-foreground">
-                    <FileText className="h-3.5 w-3.5 text-primary" /> {labMarkersQ.data?.length ?? 0} lab markers tracked
+                    <FileText className="h-3.5 w-3.5 text-primary" />{" "}
+                    {labMarkersQ.data?.length ?? 0} lab markers tracked
                   </li>
                   <li className="flex items-center gap-2 text-muted-foreground">
-                    <FileText className="h-3.5 w-3.5 text-primary" /> {wearablesQ.data?.filter((w) => w.connected).length ?? 0} connected wearables
+                    <FileText className="h-3.5 w-3.5 text-primary" />{" "}
+                    {wearablesQ.data?.filter((w) => w.connected).length ?? 0} connected wearables
                   </li>
                   <li className="flex items-center gap-2 text-muted-foreground">
-                    <FileText className="h-3.5 w-3.5 text-primary" /> {familyQ.data?.length ?? 0} family history entries, {medsQ.data?.length ?? 0} medications
+                    <FileText className="h-3.5 w-3.5 text-primary" /> {familyQ.data?.length ?? 0}{" "}
+                    family history entries, {medsQ.data?.length ?? 0} medications
                   </li>
                 </ul>
               </CardContent>
@@ -225,7 +254,9 @@ function Message({ m }: { m: ChatMessage }) {
   if (m.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl gradient-primary text-white px-4 py-3 text-sm shadow-soft">{m.content}</div>
+        <div className="max-w-[80%] rounded-2xl gradient-primary text-white px-4 py-3 text-sm shadow-soft">
+          {m.content}
+        </div>
       </div>
     );
   }
@@ -260,7 +291,7 @@ function CitationChip({ c }: { c: Citation }) {
         <div className="text-sm font-medium">{c.title}</div>
         <div className="text-xs text-muted-foreground mt-0.5">{c.date}</div>
         <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">
-          This answer is grounded in your own uploaded records — Raag doesn't invent sources.
+          This answer is grounded in your own uploaded records - Raag doesn't invent sources.
         </p>
       </PopoverContent>
     </Popover>

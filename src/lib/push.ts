@@ -1,5 +1,5 @@
 /**
- * Web Push subscription management — kept separate from lib/queries.ts
+ * Web Push subscription management - kept separate from lib/queries.ts
  * and lib/api/* the same way lib/auth.ts and lib/share.ts are, since this
  * is a browser capability (Notification/PushManager/ServiceWorker), not
  * domain data with a mock/http/supabase adapter split. Meaningless in
@@ -108,5 +108,5 @@ export async function sendTestPush(): Promise<void> {
   });
   if (error) throw new Error(error.message);
   if (data?.status === "no_subscriptions")
-    throw new Error("No active push subscription — enable push first.");
+    throw new Error("No active push subscription - enable push first.");
 }

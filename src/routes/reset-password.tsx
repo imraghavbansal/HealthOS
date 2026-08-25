@@ -24,10 +24,10 @@ function ResetPassword() {
     setSubmitting(true);
     try {
       await setNewPassword(password);
-      toast.success("Password updated — you're signed in.");
+      toast.success("Password updated - you're signed in.");
       nav({ to: "/dashboard" });
     } catch (err) {
-      // A missing/expired recovery session lands here too — the link may
+      // A missing/expired recovery session lands here too - the link may
       // have already been used or timed out.
       setError(describeAuthError(err));
     } finally {
@@ -51,20 +51,44 @@ function ResetPassword() {
             <h2 className="font-display text-3xl">Set a new password.</h2>
             <div className="grid gap-4">
               <div className="space-y-1.5">
-                <Label className="text-sm" htmlFor="password">New password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+                <Label className="text-sm" htmlFor="password">
+                  New password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm" htmlFor="confirm">Confirm password</Label>
-                <Input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
+                <Label className="text-sm" htmlFor="confirm">
+                  Confirm password
+                </Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  autoComplete="new-password"
+                />
               </div>
               {error && (
                 <p className="text-xs text-destructive">
-                  {error} If your link expired, <Link to="/forgot-password" className="underline">request a new one</Link>.
+                  {error} If your link expired,{" "}
+                  <Link to="/forgot-password" className="underline">
+                    request a new one
+                  </Link>
+                  .
                 </p>
               )}
             </div>
-            <Button type="submit" disabled={submitting} className="w-full rounded-full gradient-primary text-white border-0 shadow-soft">
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-full gradient-primary text-white border-0 shadow-soft"
+            >
               {submitting ? "Updating…" : "Update password"} <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </form>

@@ -109,7 +109,7 @@ export function AppShell({
   // Every authenticated screen renders through AppShell, so this is the one
   // place a signed-out visitor gets redirected instead of every page
   // individually throwing on RLS-empty data. Mock mode has no real
-  // sessions, so it's exempt — the demo stays browsable without signing in.
+  // sessions, so it's exempt - the demo stays browsable without signing in.
   const [checkingSession, setCheckingSession] = useState(!IS_DEMO);
   useEffect(() => {
     if (IS_DEMO) return;

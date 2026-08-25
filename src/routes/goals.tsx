@@ -25,7 +25,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AsyncBoundary, EmptyState } from "@/components/data-states";
 import { AnimatePresence, ProgressRing, Stagger, StaggerItem, motion } from "@/components/motion";
 import { useAddGoal, useDeleteGoal, useGoals, useUpdateGoal } from "@/lib/queries";
@@ -36,9 +42,9 @@ import { useMemo, useState } from "react";
 export const Route = createFileRoute("/goals")({
   head: () => ({
     meta: [
-      { title: "Health Goals — Raag" },
+      { title: "Health Goals - Raag" },
       { name: "description", content: "Outcomes worth tracking, not just steps." },
-      { property: "og:title", content: "Health Goals — Raag" },
+      { property: "og:title", content: "Health Goals - Raag" },
       { property: "og:description", content: "Outcomes worth tracking, not just steps." },
     ],
   }),
@@ -59,7 +65,13 @@ function Goals() {
     >
       <AsyncBoundary
         query={goalsQuery}
-        empty={<EmptyState icon={Target} title="No goals yet" body="Create your first goal to start tracking progress." />}
+        empty={
+          <EmptyState
+            icon={Target}
+            title="No goals yet"
+            body="Create your first goal to start tracking progress."
+          />
+        }
       >
         {(goals) => <GoalsBody goals={goals} />}
       </AsyncBoundary>
@@ -67,7 +79,13 @@ function Goals() {
   );
 }
 
-function AddGoalDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function AddGoalDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const add = useAddGoal();
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -95,26 +113,45 @@ function AddGoalDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v
         <div className="space-y-3">
           <div>
             <Label htmlFor="goal-title">Title</Label>
-            <Input id="goal-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Sleep 8 hours nightly" />
+            <Input
+              id="goal-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Sleep 8 hours nightly"
+            />
           </div>
           <div>
             <Label htmlFor="goal-category">Category</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger id="goal-category"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="goal-category">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label htmlFor="goal-target">Target</Label>
-            <Input id="goal-target" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="8 hrs/night" />
+            <Input
+              id="goal-target"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              placeholder="8 hrs/night"
+            />
           </div>
           <div>
             <Label htmlFor="goal-due">Due date</Label>
-            <Input id="goal-due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Input
+              id="goal-due"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
           </div>
         </div>
         <DialogFooter>
@@ -164,7 +201,9 @@ function GoalsBody({ goals }: { goals: Goal[] }) {
             />
             <div>
               <div className="text-sm font-semibold">Goals on track</div>
-              <div className="text-xs text-muted-foreground">{onTrack} of {goals.length} at 70%+ progress</div>
+              <div className="text-xs text-muted-foreground">
+                {onTrack} of {goals.length} at 70%+ progress
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -206,7 +245,15 @@ function GoalsBody({ goals }: { goals: Goal[] }) {
   );
 }
 
-function GoalCard({ goal, onCommit, onDelete }: { goal: Goal; onCommit: (v: number) => void; onDelete: () => void }) {
+function GoalCard({
+  goal,
+  onCommit,
+  onDelete,
+}: {
+  goal: Goal;
+  onCommit: (v: number) => void;
+  onDelete: () => void;
+}) {
   const [value, setValue] = useState(goal.progress);
   const complete = value >= 100;
 
@@ -219,17 +266,26 @@ function GoalCard({ goal, onCommit, onDelete }: { goal: Goal; onCommit: (v: numb
               <Target className="h-5 w-5" />
             </div>
             <div className="flex items-center gap-1.5">
-              <Badge variant="secondary" className="rounded-full text-[10px]">{goal.category}</Badge>
+              <Badge variant="secondary" className="rounded-full text-[10px]">
+                {goal.category}
+              </Badge>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button size="icon" variant="ghost" className="rounded-full h-7 w-7 text-muted-foreground" aria-label="Delete goal">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full h-7 w-7 text-muted-foreground"
+                    aria-label="Delete goal"
+                  >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete this goal?</AlertDialogTitle>
-                    <AlertDialogDescription>This will remove "{goal.title}" permanently.</AlertDialogDescription>
+                    <AlertDialogDescription>
+                      This will remove "{goal.title}" permanently.
+                    </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -240,7 +296,9 @@ function GoalCard({ goal, onCommit, onDelete }: { goal: Goal; onCommit: (v: numb
             </div>
           </div>
           <div className="mt-4 font-semibold">{goal.title}</div>
-          {goal.target && <div className="text-xs text-muted-foreground">Target: {goal.target}</div>}
+          {goal.target && (
+            <div className="text-xs text-muted-foreground">Target: {goal.target}</div>
+          )}
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
               <span>Progress</span>

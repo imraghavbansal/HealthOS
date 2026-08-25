@@ -1,6 +1,6 @@
 /**
  * The public share-link viewer has no Raag account and no Supabase
- * session — kept separate from lib/queries.ts and lib/api/* on purpose,
+ * session - kept separate from lib/queries.ts and lib/api/* on purpose,
  * same reasoning as lib/auth.ts. supabase-js still attaches the anon key
  * as a bearer token automatically (the anon key is itself a valid signed
  * JWT for the `anon` role), so functions.invoke() works with no signed-in

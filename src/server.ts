@@ -19,7 +19,7 @@ async function getServerEntry(): Promise<ServerEntry> {
 }
 
 // h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
+// {"unhandled":true,"message":"HTTPError"} - try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -44,12 +44,12 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
-// Health data warrants real security headers — there were none at all
+// Health data warrants real security headers - there were none at all
 // before this. CSP allowlist is deliberately scoped to exactly what the
 // app loads today (Supabase for data/auth, Razorpay for checkout, Google
 // Fonts for type) rather than a generic wildcard-heavy policy. Flagged
 // for the user to manually verify after deploy (checkout flow, Google
-// sign-in, fonts) since this can't be click-tested from here — a CSP
+// sign-in, fonts) since this can't be click-tested from here - a CSP
 // that's subtly wrong fails silently in the browser console, not in a
 // build or typecheck.
 const SUPABASE_ORIGIN = "https://tntznncjqexgktuuadep.supabase.co";

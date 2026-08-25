@@ -12,9 +12,9 @@ import { Watch } from "lucide-react";
 export const Route = createFileRoute("/wearables")({
   head: () => ({
     meta: [
-      { title: "Wearables & Devices — Raag" },
+      { title: "Wearables & Devices - Raag" },
       { name: "description", content: "One dashboard for every ecosystem." },
-      { property: "og:title", content: "Wearables & Devices — Raag" },
+      { property: "og:title", content: "Wearables & Devices - Raag" },
       { property: "og:description", content: "One dashboard for every ecosystem." },
     ],
   }),
@@ -26,7 +26,7 @@ function Wearables() {
   return (
     <AppShell title="Wearables & Devices" subtitle="One dashboard for every ecosystem.">
       <div className="mb-5 rounded-2xl border border-warning/30 bg-warning/10 p-4 text-xs text-warning-foreground">
-        Wearable sync isn't live yet — connecting a provider here doesn't pull in real data until a
+        Wearable sync isn't live yet - connecting a provider here doesn't pull in real data until a
         wearable aggregator account (Vital or Terra) is set up. The schema and sync pipeline are
         already built and ready; this is genuinely "coming soon," not a working feature in disguise.
       </div>

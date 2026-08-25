@@ -8,14 +8,16 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // supabase/migrations/0001_init.sql.
 let browserClient: SupabaseClient | undefined;
 
-// Browser-side client. Uses the public URL + publishable (anon) key — safe
+// Browser-side client. Uses the public URL + publishable (anon) key - safe
 // to ship, RLS does the actual authorization. Never import the secret/
-// service-role key here. Cookie-based session storage (not localStorage) —
+// service-role key here. Cookie-based session storage (not localStorage) -
 // carries over cleanly to the Capacitor WebView later and lets the SSR
 // server client (./server.ts) read the same session.
 export function getSupabaseBrowserClient(): SupabaseClient {
   if (typeof window === "undefined") {
-    throw new Error("getSupabaseBrowserClient() called on the server — use getSupabaseServerClient() instead.");
+    throw new Error(
+      "getSupabaseBrowserClient() called on the server - use getSupabaseServerClient() instead.",
+    );
   }
   if (!browserClient) {
     const url = import.meta.env["VITE_SUPABASE_URL"];

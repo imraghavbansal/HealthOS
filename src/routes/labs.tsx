@@ -46,7 +46,7 @@ export const Route = createFileRoute("/labs")({ component: Labs });
 
 type StatusFilter = "all" | "flagged" | "normal";
 
-/** Mirrors statusFor() in src/lib/supabase/mappers.ts — kept as its own
+/** Mirrors statusFor() in src/lib/supabase/mappers.ts - kept as its own
  * local copy rather than imported, since that module is the Supabase
  * adapter's internals and route files shouldn't reach into it directly. */
 function statusFor(value: number, low: number | null, high: number | null): MarkerStatus {
@@ -279,7 +279,7 @@ function Labs() {
                   </div>
                   <p className="text-sm leading-relaxed">{explainMarker(marker.name)}</p>
                   <p className="text-[11px] text-muted-foreground mt-4">
-                    Informational only — not medical advice.
+                    Informational only - not medical advice.
                   </p>
                 </CardContent>
               </Card>
@@ -458,7 +458,7 @@ function ReportComparison() {
           </div>
         )}
         <p className="text-[11px] text-muted-foreground mt-4">
-          Shows what changed between your own recorded results — not a diagnosis. Discuss
+          Shows what changed between your own recorded results - not a diagnosis. Discuss
           significant changes with your doctor.
         </p>
       </CardContent>
@@ -508,7 +508,7 @@ function explainMarker(name: string) {
     case "Vitamin D":
       return "Vitamin D helps your body absorb calcium and supports immune, mood, and bone health. A downward trend often reflects less sun exposure and inconsistent supplementation. A conversation with your PCP about a short-term higher-dose regimen may be helpful.";
     case "LDL Cholesterol":
-      return 'LDL ("low-density lipoprotein") carries cholesterol through your bloodstream. Higher LDL is associated with cardiovascular risk, especially with a family history. Diet (soluble fiber, unsaturated fats), consistent aerobic exercise, and — if warranted — medication can bring this down.';
+      return 'LDL ("low-density lipoprotein") carries cholesterol through your bloodstream. Higher LDL is associated with cardiovascular risk, especially with a family history. Diet (soluble fiber, unsaturated fats), consistent aerobic exercise, and - if warranted - medication can bring this down.';
     case "HbA1c":
       return "HbA1c reflects your average blood sugar over the last ~3 months. Staying within the healthy range and trending stable is a good sign.";
     case "HDL":

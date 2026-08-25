@@ -1,5 +1,5 @@
 /**
- * Raag — canonical domain models.
+ * Raag - canonical domain models.
  *
  * These are the ONLY shapes the UI knows about. The data source (mock today,
  * real API tomorrow) must return exactly these. See docs/HANDOFF.md.
@@ -18,7 +18,7 @@ export interface UserProfile {
   initials: string;
   email: string;
   age: number;
-  /** Canonical, writable — `age` above is derived from this where available. */
+  /** Canonical, writable - `age` above is derived from this where available. */
   dateOfBirth?: ISODate;
   sex: string;
   heightCm?: number;
@@ -84,7 +84,7 @@ export interface MedicalRecord {
   fileUrl?: string | null;
   sizeKb?: number;
   summary?: string;
-  /** Document-parsing progress — see docs/raag-architecture "parse-record". */
+  /** Document-parsing progress - see docs/raag-architecture "parse-record". */
   parseStatus?: "pending" | "processing" | "done" | "failed" | "skipped";
 }
 
@@ -302,7 +302,7 @@ export interface CreateShareLinkInput {
   expiresInDays: number;
 }
 
-/** The read-only view a share-link visitor sees — assembled server-side
+/** The read-only view a share-link visitor sees - assembled server-side
  * by the get-shared-record Edge Function, never fetched through RaagApi
  * (the visitor has no session at all). See src/lib/share.ts. */
 export interface SharedRecordView {
@@ -344,12 +344,12 @@ export interface SharedRecordView {
 /* ---------- household / family risk graph (V2) ---------- */
 
 export interface HouseholdMember {
-  id: ID; // health_subjects.id — same as the user id for kind="self"
+  id: ID; // health_subjects.id - same as the user id for kind="self"
   name: string;
   kind: "self" | "dependent";
   relation?: string;
   age?: number;
-  /** Highest risk level across computeRiskFactors() for this subject —
+  /** Highest risk level across computeRiskFactors() for this subject -
    * "None" means either no elevated factors or not enough data yet, not
    * a diagnosis either way. */
   riskLevel: "None" | "Low" | "Moderate" | "Elevated" | "High";
@@ -396,7 +396,7 @@ export interface AddConditionInput {
 
 /* ---------- report comparison (V2) ---------- */
 
-/** One draw/panel — every lab_markers row sharing the same collection
+/** One draw/panel - every lab_markers row sharing the same collection
  * date, grouped together so the whole panel can be picked as a unit to
  * compare against another date's panel. */
 export interface LabReport {

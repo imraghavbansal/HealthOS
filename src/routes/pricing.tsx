@@ -29,7 +29,10 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing · Raag" },
-      { name: "description", content: "Simple, transparent pricing for individuals, families, and clinics." },
+      {
+        name: "description",
+        content: "Simple, transparent pricing for individuals, families, and clinics.",
+      },
       { property: "og:title", content: "Pricing · Raag" },
       { property: "og:description", content: "Choose the Raag plan that fits you or your family." },
     ],
@@ -118,11 +121,35 @@ const PLANS: Plan[] = [
   },
 ];
 
-const COMPARISON: { capability: string; free: boolean | string; pro: boolean | string; family: boolean | string; clinic: boolean | string }[] = [
+const COMPARISON: {
+  capability: string;
+  free: boolean | string;
+  pro: boolean | string;
+  family: boolean | string;
+  clinic: boolean | string;
+}[] = [
   { capability: "Record uploads & parsing", free: true, pro: true, family: true, clinic: true },
-  { capability: "Wearable connections", free: "1", pro: "Unlimited", family: "Unlimited", clinic: "Unlimited" },
-  { capability: "AI Copilot questions", free: "5/mo", pro: "Unlimited", family: "Unlimited", clinic: "Unlimited" },
-  { capability: "Lab trend analysis", free: "Basic", pro: "Advanced", family: "Advanced", clinic: "Advanced" },
+  {
+    capability: "Wearable connections",
+    free: "1",
+    pro: "Unlimited",
+    family: "Unlimited",
+    clinic: "Unlimited",
+  },
+  {
+    capability: "AI Copilot questions",
+    free: "5/mo",
+    pro: "Unlimited",
+    family: "Unlimited",
+    clinic: "Unlimited",
+  },
+  {
+    capability: "Lab trend analysis",
+    free: "Basic",
+    pro: "Advanced",
+    family: "Advanced",
+    clinic: "Advanced",
+  },
   { capability: "Custom report export", free: false, pro: true, family: true, clinic: true },
   { capability: "Family member seats", free: false, pro: false, family: "5", clinic: "Unlimited" },
   { capability: "Care team sharing", free: false, pro: true, family: true, clinic: true },
@@ -134,7 +161,7 @@ const COMPARISON: { capability: string; free: boolean | string; pro: boolean | s
 const FAQS = [
   {
     q: "Who owns my health data?",
-    a: "You do — fully and always. Raag never sells your data or uses it to train third-party models. You can export or permanently delete everything at any time from Settings.",
+    a: "You do - fully and always. Raag never sells your data or uses it to train third-party models. You can export or permanently delete everything at any time from Settings.",
   },
   {
     q: "Are you HIPAA compliant? Will you sign a BAA?",
@@ -142,7 +169,7 @@ const FAQS = [
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Plans are month-to-month (or annual with a discount) and you can cancel anytime from Settings — no phone calls required. You keep access until the end of your billing period.",
+    a: "Yes. Plans are month-to-month (or annual with a discount) and you can cancel anytime from Settings - no phone calls required. You keep access until the end of your billing period.",
   },
   {
     q: "Which wearables and apps are supported?",
@@ -150,7 +177,7 @@ const FAQS = [
   },
   {
     q: "How accurate is the AI Copilot?",
-    a: "Copilot answers are grounded in your own records with inline citations, but it provides informational insights only — not diagnoses. Always confirm significant decisions with a licensed clinician.",
+    a: "Copilot answers are grounded in your own records with inline citations, but it provides informational insights only - not diagnoses. Always confirm significant decisions with a licensed clinician.",
   },
   {
     q: "How do family seats work?",
@@ -190,7 +217,7 @@ function PricingPage() {
     setCheckingOut(plan.key);
     try {
       await startCheckout(plan.planKey, yearly ? "yearly" : "monthly", () => {
-        toast.success("Payment received — your plan will update in a moment.");
+        toast.success("Payment received - your plan will update in a moment.");
       });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't start checkout.");
@@ -212,14 +239,22 @@ function PricingPage() {
             <span className="font-semibold tracking-tight">Raag</span>
           </Link>
           <div className="flex items-center gap-2">
-            <button onClick={toggle} className="text-xs px-3 py-1.5 rounded-full border border-border/60">
+            <button
+              onClick={toggle}
+              className="text-xs px-3 py-1.5 rounded-full border border-border/60"
+            >
               {theme === "dark" ? "Light" : "Dark"}
             </button>
-            <Link to="/dashboard" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">
+            <Link
+              to="/dashboard"
+              className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground"
+            >
               Sign in
             </Link>
             <Link to="/signup">
-              <Button className="rounded-full gradient-primary text-white shadow-soft border-0">Get started</Button>
+              <Button className="rounded-full gradient-primary text-white shadow-soft border-0">
+                Get started
+              </Button>
             </Link>
           </div>
         </div>
@@ -234,14 +269,25 @@ function PricingPage() {
             Plans for every <span className="text-gradient italic">stage of care.</span>
           </h1>
           <p className="mt-5 text-muted-foreground max-w-xl mx-auto">
-            Start free. Upgrade when you want the full AI copilot, unlimited devices, or a plan for the whole family.
+            Start free. Upgrade when you want the full AI copilot, unlimited devices, or a plan for
+            the whole family.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <span className={`text-sm ${!yearly ? "font-medium" : "text-muted-foreground"}`}>Monthly</span>
-            <Switch checked={yearly} onCheckedChange={setYearly} aria-label="Toggle yearly billing" />
-            <span className={`text-sm ${yearly ? "font-medium" : "text-muted-foreground"}`}>Yearly</span>
+            <span className={`text-sm ${!yearly ? "font-medium" : "text-muted-foreground"}`}>
+              Monthly
+            </span>
+            <Switch
+              checked={yearly}
+              onCheckedChange={setYearly}
+              aria-label="Toggle yearly billing"
+            />
+            <span className={`text-sm ${yearly ? "font-medium" : "text-muted-foreground"}`}>
+              Yearly
+            </span>
             {yearly && (
-              <Badge className="rounded-full bg-success/20 text-success-foreground text-[10px]">2 months free</Badge>
+              <Badge className="rounded-full bg-success/20 text-success-foreground text-[10px]">
+                2 months free
+              </Badge>
             )}
           </div>
         </section>
@@ -267,7 +313,9 @@ function PricingPage() {
                       <span className="font-display text-4xl">{priceFor(plan)}</span>
                       <span className="text-sm text-muted-foreground">{periodFor(plan)}</span>
                     </div>
-                    {plan.key === "family" && <div className="text-xs text-muted-foreground mt-1">5 seats included</div>}
+                    {plan.key === "family" && (
+                      <div className="text-xs text-muted-foreground mt-1">5 seats included</div>
+                    )}
                     <ul className="mt-6 space-y-2.5 text-sm flex-1">
                       {plan.features.map((f) => (
                         <li key={f.label} className="flex items-start gap-2">
@@ -276,7 +324,9 @@ function PricingPage() {
                           ) : (
                             <X className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
                           )}
-                          <span className={f.included ? "" : "text-muted-foreground/70"}>{f.label}</span>
+                          <span className={f.included ? "" : "text-muted-foreground/70"}>
+                            {f.label}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -297,11 +347,15 @@ function PricingPage() {
                       </Button>
                     ) : plan.key === "clinic" ? (
                       <a href="mailto:support@raag.app?subject=Clinic%20plan" className="mt-6">
-                        <Button className="w-full rounded-full h-11" variant="outline">{plan.cta}</Button>
+                        <Button className="w-full rounded-full h-11" variant="outline">
+                          {plan.cta}
+                        </Button>
                       </a>
                     ) : (
                       <Link to="/signup" className="mt-6">
-                        <Button className="w-full rounded-full h-11" variant="outline">{plan.cta}</Button>
+                        <Button className="w-full rounded-full h-11" variant="outline">
+                          {plan.cta}
+                        </Button>
                       </Link>
                     )}
                   </div>
@@ -343,12 +397,22 @@ function PricingPage() {
 
         <section className="max-w-3xl mx-auto px-6 pb-24">
           <Reveal>
-            <h2 className="font-display text-3xl md:text-4xl text-center mb-8">Frequently asked questions</h2>
-            <Accordion type="single" collapsible className="rounded-3xl border border-border/60 bg-card px-2">
+            <h2 className="font-display text-3xl md:text-4xl text-center mb-8">
+              Frequently asked questions
+            </h2>
+            <Accordion
+              type="single"
+              collapsible
+              className="rounded-3xl border border-border/60 bg-card px-2"
+            >
               {FAQS.map((faq) => (
                 <AccordionItem key={faq.q} value={faq.q}>
-                  <AccordionTrigger className="text-left text-sm font-medium px-3">{faq.q}</AccordionTrigger>
-                  <AccordionContent className="px-3 text-sm text-muted-foreground">{faq.a}</AccordionContent>
+                  <AccordionTrigger className="text-left text-sm font-medium px-3">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="px-3 text-sm text-muted-foreground">
+                    {faq.a}
+                  </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
@@ -358,10 +422,15 @@ function PricingPage() {
         <section className="max-w-4xl mx-auto px-6 pb-24 text-center">
           <div className="rounded-3xl glass p-10 md:p-14">
             <h2 className="font-display text-3xl md:text-5xl">Ready to understand your health?</h2>
-            <p className="mt-4 text-muted-foreground">Start free in under a minute. Upgrade whenever you're ready.</p>
+            <p className="mt-4 text-muted-foreground">
+              Start free in under a minute. Upgrade whenever you're ready.
+            </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to="/signup">
-                <Button size="lg" className="rounded-full gradient-primary text-white h-12 px-8 border-0 shadow-soft">
+                <Button
+                  size="lg"
+                  className="rounded-full gradient-primary text-white h-12 px-8 border-0 shadow-soft"
+                >
                   Create your Raag <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
               </Link>
@@ -379,10 +448,18 @@ function PricingPage() {
             © 2026 Raag, Inc.
           </div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">Privacy</a>
-            <a href="#" className="hover:text-foreground">Terms</a>
-            <a href="#" className="hover:text-foreground">HIPAA</a>
-            <a href="#" className="hover:text-foreground">Contact</a>
+            <a href="#" className="hover:text-foreground">
+              Privacy
+            </a>
+            <a href="#" className="hover:text-foreground">
+              Terms
+            </a>
+            <a href="#" className="hover:text-foreground">
+              HIPAA
+            </a>
+            <a href="#" className="hover:text-foreground">
+              Contact
+            </a>
           </div>
         </div>
       </footer>

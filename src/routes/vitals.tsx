@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Activity,
   ArrowDown,
@@ -58,15 +58,24 @@ export const Route = createFileRoute("/vitals")({
   head: () => ({
     meta: [
       { title: "Vitals & Biometrics · Raag" },
-      { name: "description", content: "Track weight, blood pressure, resting heart rate, SpO2 and more." },
+      {
+        name: "description",
+        content: "Track weight, blood pressure, resting heart rate, SpO2 and more.",
+      },
       { property: "og:title", content: "Vitals & Biometrics · Raag" },
-      { property: "og:description", content: "Track weight, blood pressure, resting heart rate, SpO2 and more." },
+      {
+        property: "og:description",
+        content: "Track weight, blood pressure, resting heart rate, SpO2 and more.",
+      },
     ],
   }),
   component: VitalsPage,
 });
 
-const KIND_META: Record<VitalKind, { label: string; unit: string; icon: React.ComponentType<{ className?: string }> }> = {
+const KIND_META: Record<
+  VitalKind,
+  { label: string; unit: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   weight: { label: "Weight", unit: "kg", icon: Scale },
   bloodPressure: { label: "Blood pressure", unit: "mmHg", icon: HeartPulse },
   restingHr: { label: "Resting HR", unit: "bpm", icon: Activity },
@@ -80,7 +89,9 @@ const TILE_KINDS: VitalKind[] = ["weight", "bloodPressure", "restingHr", "spo2"]
 const CHART_KINDS: VitalKind[] = ["weight", "bloodPressure", "restingHr", "spo2"];
 
 function sortByDate(entries: VitalEntry[]) {
-  return [...entries].sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+  return [...entries].sort(
+    (a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime(),
+  );
 }
 
 function formatValue(kind: VitalKind, entry: VitalEntry) {
@@ -137,7 +148,9 @@ function StatTile({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] })
               <Icon className="h-4 w-4" /> {meta.label}
             </div>
             {prev && !isBp && (
-              <span className={`flex items-center gap-0.5 text-xs ${up ? "text-destructive" : "text-success"}`}>
+              <span
+                className={`flex items-center gap-0.5 text-xs ${up ? "text-destructive" : "text-success"}`}
+              >
                 {up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
                 {Math.abs(delta).toFixed(1)}
               </span>
@@ -146,7 +159,8 @@ function StatTile({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] })
           <div className="mt-2 font-display text-2xl">
             {isBp ? (
               <span>
-                {formatValue(kind, latest)} <span className="text-sm text-muted-foreground">{meta.unit}</span>
+                {formatValue(kind, latest)}{" "}
+                <span className="text-sm text-muted-foreground">{meta.unit}</span>
               </span>
             ) : (
               <>
@@ -164,7 +178,13 @@ function StatTile({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] })
                     <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="v" stroke="var(--chart-1)" fill={`url(#spark-${kind})`} strokeWidth={2} />
+                <Area
+                  type="monotone"
+                  dataKey="v"
+                  stroke="var(--chart-1)"
+                  fill={`url(#spark-${kind})`}
+                  strokeWidth={2}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -183,7 +203,9 @@ function MainChart({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] }
   }));
 
   if (data.length === 0) {
-    return <EmptyState title="No readings yet" body="Log your first reading to see the trend here." />;
+    return (
+      <EmptyState title="No readings yet" body="Log your first reading to see the trend here." />
+    );
   }
 
   return (
@@ -191,8 +213,18 @@ function MainChart({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] }
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ left: -20, right: 10, top: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-          <XAxis dataKey="x" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} width={40} />
+          <XAxis
+            dataKey="x"
+            tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+            axisLine={false}
+            tickLine={false}
+            width={40}
+          />
           <Tooltip
             contentStyle={{
               background: "var(--card)",
@@ -202,9 +234,23 @@ function MainChart({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] }
               color: "var(--foreground)",
             }}
           />
-          <Line type="monotone" dataKey="v" name={kind === "bloodPressure" ? "Systolic" : KIND_META[kind].label} stroke="var(--chart-1)" strokeWidth={2.5} dot={false} />
+          <Line
+            type="monotone"
+            dataKey="v"
+            name={kind === "bloodPressure" ? "Systolic" : KIND_META[kind].label}
+            stroke="var(--chart-1)"
+            strokeWidth={2.5}
+            dot={false}
+          />
           {kind === "bloodPressure" && (
-            <Line type="monotone" dataKey="secondary" name="Diastolic" stroke="var(--chart-2)" strokeWidth={2.5} dot={false} />
+            <Line
+              type="monotone"
+              dataKey="secondary"
+              name="Diastolic"
+              stroke="var(--chart-2)"
+              strokeWidth={2.5}
+              dot={false}
+            />
           )}
         </LineChart>
       </ResponsiveContainer>
@@ -212,7 +258,13 @@ function MainChart({ kind, entries }: { kind: VitalKind; entries: VitalEntry[] }
   );
 }
 
-function LogReadingDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+function LogReadingDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const addVital = useAddVital();
   const [kind, setKind] = useState<VitalKind>("weight");
   const [value, setValue] = useState("");
@@ -254,7 +306,13 @@ function LogReadingDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        if (!v) reset();
+      }}
+    >
       <DialogContent className="rounded-3xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Log a reading</DialogTitle>
@@ -285,13 +343,27 @@ function LogReadingDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           ) : (
             <div className="flex gap-3">
               <div className="flex-1 space-y-1.5">
-                <Label htmlFor="vital-value">{kind === "bloodPressure" ? "Systolic" : "Value"} ({KIND_META[kind].unit})</Label>
-                <Input id="vital-value" type="number" inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} />
+                <Label htmlFor="vital-value">
+                  {kind === "bloodPressure" ? "Systolic" : "Value"} ({KIND_META[kind].unit})
+                </Label>
+                <Input
+                  id="vital-value"
+                  type="number"
+                  inputMode="decimal"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                />
               </div>
               {kind === "bloodPressure" && (
                 <div className="flex-1 space-y-1.5">
                   <Label htmlFor="vital-secondary">Diastolic</Label>
-                  <Input id="vital-secondary" type="number" inputMode="decimal" value={secondary} onChange={(e) => setSecondary(e.target.value)} />
+                  <Input
+                    id="vital-secondary"
+                    type="number"
+                    inputMode="decimal"
+                    value={secondary}
+                    onChange={(e) => setSecondary(e.target.value)}
+                  />
                 </div>
               )}
             </div>
@@ -299,14 +371,23 @@ function LogReadingDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 
           <div className="space-y-1.5">
             <Label htmlFor="vital-note">Note (optional)</Label>
-            <Textarea id="vital-note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anything worth remembering about this reading" />
+            <Textarea
+              id="vital-note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Anything worth remembering about this reading"
+            />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" className="rounded-full" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button className="rounded-full gradient-primary text-white border-0" disabled={addVital.isPending} onClick={handleSubmit}>
+          <Button
+            className="rounded-full gradient-primary text-white border-0"
+            disabled={addVital.isPending}
+            onClick={handleSubmit}
+          >
             {addVital.isPending ? "Saving…" : "Save reading"}
           </Button>
         </DialogFooter>
@@ -332,9 +413,12 @@ function ReadingRow({ entry }: { entry: VitalEntry }) {
         </div>
         <div>
           <div className="text-sm font-medium">
-            {formatValue(entry.kind, entry)} <span className="text-xs text-muted-foreground">{meta.unit}</span>
+            {formatValue(entry.kind, entry)}{" "}
+            <span className="text-xs text-muted-foreground">{meta.unit}</span>
           </div>
-          <div className="text-xs text-muted-foreground">{meta.label} · {relativeDate(entry.recordedAt)}</div>
+          <div className="text-xs text-muted-foreground">
+            {meta.label} · {relativeDate(entry.recordedAt)}
+          </div>
         </div>
       </div>
       <Badge variant="outline" className="rounded-full text-[10px] capitalize">
@@ -354,7 +438,10 @@ function VitalsPage() {
       title="Vitals & Biometrics"
       subtitle="Track your readings and spot trends early."
       actions={
-        <Button className="rounded-full gradient-primary text-white border-0" onClick={() => setDialogOpen(true)}>
+        <Button
+          className="rounded-full gradient-primary text-white border-0"
+          onClick={() => setDialogOpen(true)}
+        >
           <Plus className="mr-1.5 h-4 w-4" /> Log a reading
         </Button>
       }
@@ -370,7 +457,10 @@ function VitalsPage() {
             title="No vitals logged yet"
             body="Start tracking weight, blood pressure and more."
             action={
-              <Button className="rounded-full gradient-primary text-white border-0" onClick={() => setDialogOpen(true)}>
+              <Button
+                className="rounded-full gradient-primary text-white border-0"
+                onClick={() => setDialogOpen(true)}
+              >
                 <Plus className="mr-1.5 h-4 w-4" /> Log a reading
               </Button>
             }
@@ -378,17 +468,22 @@ function VitalsPage() {
         }
       >
         {(entries) => {
-          const byKind = useMemo(() => {
-            const map = new Map<VitalKind, VitalEntry[]>();
-            for (const e of entries) {
-              const list = map.get(e.kind) ?? [];
-              list.push(e);
-              map.set(e.kind, list);
-            }
-            return map;
-          }, [entries]);
+          // Plain computation, not useMemo - this render-prop callback
+          // isn't a component or hook by React's own rules, so a hook
+          // called here has no guaranteed stable call order across
+          // renders (a real react-hooks/rules-of-hooks violation found
+          // while doing an unrelated pass over this file). Building this
+          // Map is cheap enough that recomputing it every render is fine.
+          const byKind = new Map<VitalKind, VitalEntry[]>();
+          for (const e of entries) {
+            const list = byKind.get(e.kind) ?? [];
+            list.push(e);
+            byKind.set(e.kind, list);
+          }
 
-          const sortedAll = [...entries].sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime());
+          const sortedAll = [...entries].sort(
+            (a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
+          );
 
           return (
             <div className="space-y-6">
@@ -411,7 +506,9 @@ function VitalsPage() {
                             key={k}
                             onClick={() => setActiveKind(k)}
                             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                              activeKind === k ? "gradient-primary text-white" : "bg-muted text-muted-foreground hover:bg-accent"
+                              activeKind === k
+                                ? "gradient-primary text-white"
+                                : "bg-muted text-muted-foreground hover:bg-accent"
                             }`}
                           >
                             {KIND_META[k].label}
@@ -441,7 +538,9 @@ function VitalsPage() {
                 </Card>
               </Reveal>
 
-              <p className="text-xs text-muted-foreground">Informational only — not medical advice.</p>
+              <p className="text-xs text-muted-foreground">
+                Informational only - not medical advice.
+              </p>
             </div>
           );
         }}

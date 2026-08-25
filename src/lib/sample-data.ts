@@ -9,9 +9,24 @@ export const user = {
 };
 
 export const insights = [
-  { id: 1, title: "Vitamin D trending low", body: "Your last 3 panels show a downward trend. Consider 15 min of morning sun or ask your PCP about supplementation.", severity: "warning" as const },
-  { id: 2, title: "Excellent recovery streak", body: "HRV averaged 68ms this week — 12% above your 90-day baseline.", severity: "success" as const },
-  { id: 3, title: "Sleep debt building", body: "You're ~3h 20m short vs. your 8h goal over the last 5 nights.", severity: "info" as const },
+  {
+    id: 1,
+    title: "Vitamin D trending low",
+    body: "Your last 3 panels show a downward trend. Consider 15 min of morning sun or ask your PCP about supplementation.",
+    severity: "warning" as const,
+  },
+  {
+    id: 2,
+    title: "Excellent recovery streak",
+    body: "HRV averaged 68ms this week - 12% above your 90-day baseline.",
+    severity: "success" as const,
+  },
+  {
+    id: 3,
+    title: "Sleep debt building",
+    body: "You're ~3h 20m short vs. your 8h goal over the last 5 nights.",
+    severity: "info" as const,
+  },
 ];
 
 export const sleepData = [
@@ -35,47 +50,186 @@ export const activityData = [
 ];
 
 export const labMarkers = [
-  { name: "Vitamin D", value: 24, unit: "ng/mL", range: "30–100", status: "low" as const, delta: -6 },
+  {
+    name: "Vitamin D",
+    value: 24,
+    unit: "ng/mL",
+    range: "30–100",
+    status: "low" as const,
+    delta: -6,
+  },
   { name: "HbA1c", value: 5.2, unit: "%", range: "<5.7", status: "normal" as const, delta: -0.1 },
-  { name: "LDL Cholesterol", value: 118, unit: "mg/dL", range: "<100", status: "high" as const, delta: +4 },
+  {
+    name: "LDL Cholesterol",
+    value: 118,
+    unit: "mg/dL",
+    range: "<100",
+    status: "high" as const,
+    delta: +4,
+  },
   { name: "HDL", value: 62, unit: "mg/dL", range: ">40", status: "normal" as const, delta: +2 },
   { name: "TSH", value: 2.1, unit: "mIU/L", range: "0.4–4.0", status: "normal" as const, delta: 0 },
-  { name: "Ferritin", value: 45, unit: "ng/mL", range: "15–150", status: "normal" as const, delta: -8 },
+  {
+    name: "Ferritin",
+    value: 45,
+    unit: "ng/mL",
+    range: "15–150",
+    status: "normal" as const,
+    delta: -8,
+  },
 ];
 
 export const labTrend = [
-  { month: "Jan", value: 32 }, { month: "Mar", value: 29 }, { month: "May", value: 28 },
-  { month: "Jul", value: 26 }, { month: "Sep", value: 25 }, { month: "Nov", value: 24 },
+  { month: "Jan", value: 32 },
+  { month: "Mar", value: 29 },
+  { month: "May", value: 28 },
+  { month: "Jul", value: 26 },
+  { month: "Sep", value: 25 },
+  { month: "Nov", value: 24 },
 ];
 
 export const ldlTrend = [
-  { month: "Jan", value: 128 }, { month: "Mar", value: 124 }, { month: "May", value: 122 },
-  { month: "Jul", value: 120 }, { month: "Sep", value: 119 }, { month: "Nov", value: 118 },
+  { month: "Jan", value: 128 },
+  { month: "Mar", value: 124 },
+  { month: "May", value: 122 },
+  { month: "Jul", value: 120 },
+  { month: "Sep", value: 119 },
+  { month: "Nov", value: 118 },
 ];
 
 export const records = [
-  { id: "r1", type: "Lab Report", title: "Complete Blood Panel", provider: "Quest Diagnostics", date: "Nov 12, 2026", tag: "Labs" },
-  { id: "r2", type: "Imaging", title: "Chest X-Ray", provider: "Mercy Radiology", date: "Oct 04, 2026", tag: "Imaging" },
-  { id: "r3", type: "Prescription", title: "Vitamin D3 5000 IU", provider: "Dr. Patel", date: "Sep 28, 2026", tag: "Rx" },
-  { id: "r4", type: "Visit Summary", title: "Annual Physical", provider: "One Medical", date: "Sep 21, 2026", tag: "Visit" },
-  { id: "r5", type: "Lab Report", title: "Lipid Panel", provider: "LabCorp", date: "Aug 15, 2026", tag: "Labs" },
-  { id: "r6", type: "Vaccination", title: "Influenza Vaccine", provider: "CVS Pharmacy", date: "Aug 02, 2026", tag: "Vax" },
+  {
+    id: "r1",
+    type: "Lab Report",
+    title: "Complete Blood Panel",
+    provider: "Quest Diagnostics",
+    date: "Nov 12, 2026",
+    tag: "Labs",
+  },
+  {
+    id: "r2",
+    type: "Imaging",
+    title: "Chest X-Ray",
+    provider: "Mercy Radiology",
+    date: "Oct 04, 2026",
+    tag: "Imaging",
+  },
+  {
+    id: "r3",
+    type: "Prescription",
+    title: "Vitamin D3 5000 IU",
+    provider: "Dr. Patel",
+    date: "Sep 28, 2026",
+    tag: "Rx",
+  },
+  {
+    id: "r4",
+    type: "Visit Summary",
+    title: "Annual Physical",
+    provider: "One Medical",
+    date: "Sep 21, 2026",
+    tag: "Visit",
+  },
+  {
+    id: "r5",
+    type: "Lab Report",
+    title: "Lipid Panel",
+    provider: "LabCorp",
+    date: "Aug 15, 2026",
+    tag: "Labs",
+  },
+  {
+    id: "r6",
+    type: "Vaccination",
+    title: "Influenza Vaccine",
+    provider: "CVS Pharmacy",
+    date: "Aug 02, 2026",
+    tag: "Vax",
+  },
 ];
 
 export const wearables = [
-  { name: "Apple Health", desc: "iPhone + Apple Watch Series 10", connected: true, last: "2 min ago", color: "from-slate-500 to-slate-700" },
-  { name: "Google Health Connect", desc: "Pixel Watch, Fitbit sync", connected: true, last: "18 min ago", color: "from-blue-500 to-teal-500" },
-  { name: "Garmin", desc: "Fenix 8, cycling + sleep", connected: false, last: "—", color: "from-cyan-600 to-blue-700" },
-  { name: "Fitbit", desc: "Charge 6", connected: true, last: "1 hr ago", color: "from-teal-500 to-emerald-600" },
-  { name: "WHOOP", desc: "Strain, recovery, HRV", connected: false, last: "—", color: "from-zinc-700 to-zinc-900" },
-  { name: "Oura Ring", desc: "Sleep & readiness", connected: false, last: "—", color: "from-indigo-500 to-purple-600" },
+  {
+    name: "Apple Health",
+    desc: "iPhone + Apple Watch Series 10",
+    connected: true,
+    last: "2 min ago",
+    color: "from-slate-500 to-slate-700",
+  },
+  {
+    name: "Google Health Connect",
+    desc: "Pixel Watch, Fitbit sync",
+    connected: true,
+    last: "18 min ago",
+    color: "from-blue-500 to-teal-500",
+  },
+  {
+    name: "Garmin",
+    desc: "Fenix 8, cycling + sleep",
+    connected: false,
+    last: "-",
+    color: "from-cyan-600 to-blue-700",
+  },
+  {
+    name: "Fitbit",
+    desc: "Charge 6",
+    connected: true,
+    last: "1 hr ago",
+    color: "from-teal-500 to-emerald-600",
+  },
+  {
+    name: "WHOOP",
+    desc: "Strain, recovery, HRV",
+    connected: false,
+    last: "-",
+    color: "from-zinc-700 to-zinc-900",
+  },
+  {
+    name: "Oura Ring",
+    desc: "Sleep & readiness",
+    connected: false,
+    last: "-",
+    color: "from-indigo-500 to-purple-600",
+  },
 ];
 
 export const medications = [
-  { id: "m1", name: "Vitamin D3", dose: "5000 IU", schedule: "Daily · 8:00 AM", adherence: 94, next: "Tomorrow, 8:00 AM", type: "Supplement" },
-  { id: "m2", name: "Omega-3", dose: "1000 mg", schedule: "Daily · 8:00 AM", adherence: 88, next: "Tomorrow, 8:00 AM", type: "Supplement" },
-  { id: "m3", name: "Magnesium Glycinate", dose: "400 mg", schedule: "Nightly · 10:00 PM", adherence: 91, next: "Tonight, 10:00 PM", type: "Supplement" },
-  { id: "m4", name: "Levothyroxine", dose: "50 mcg", schedule: "Daily · 7:00 AM", adherence: 97, next: "Tomorrow, 7:00 AM", type: "Prescription" },
+  {
+    id: "m1",
+    name: "Vitamin D3",
+    dose: "5000 IU",
+    schedule: "Daily · 8:00 AM",
+    adherence: 94,
+    next: "Tomorrow, 8:00 AM",
+    type: "Supplement",
+  },
+  {
+    id: "m2",
+    name: "Omega-3",
+    dose: "1000 mg",
+    schedule: "Daily · 8:00 AM",
+    adherence: 88,
+    next: "Tomorrow, 8:00 AM",
+    type: "Supplement",
+  },
+  {
+    id: "m3",
+    name: "Magnesium Glycinate",
+    dose: "400 mg",
+    schedule: "Nightly · 10:00 PM",
+    adherence: 91,
+    next: "Tonight, 10:00 PM",
+    type: "Supplement",
+  },
+  {
+    id: "m4",
+    name: "Levothyroxine",
+    dose: "50 mcg",
+    schedule: "Daily · 7:00 AM",
+    adherence: 97,
+    next: "Tomorrow, 7:00 AM",
+    type: "Prescription",
+  },
 ];
 
 export const goals = [
@@ -96,10 +250,34 @@ export const familyHistory = [
 ];
 
 export const risks = [
-  { name: "Cardiovascular disease", level: "Moderate", pct: 42, note: "LDL trending high + paternal CAD history", action: "Discuss lipid panel with PCP; Mediterranean-style diet." },
-  { name: "Type 2 Diabetes", level: "Low", pct: 18, note: "Normal HbA1c, but paternal T2D warrants annual screening.", action: "Continue annual A1c; maintain fiber intake." },
-  { name: "Hypothyroidism", level: "Moderate", pct: 38, note: "Maternal history + you already take levothyroxine.", action: "Continue TSH monitoring every 6 months." },
-  { name: "Breast cancer", level: "Elevated", pct: 24, note: "Maternal grandmother diagnosis at 74.", action: "Discuss earlier baseline mammography with your PCP." },
+  {
+    name: "Cardiovascular disease",
+    level: "Moderate",
+    pct: 42,
+    note: "LDL trending high + paternal CAD history",
+    action: "Discuss lipid panel with PCP; Mediterranean-style diet.",
+  },
+  {
+    name: "Type 2 Diabetes",
+    level: "Low",
+    pct: 18,
+    note: "Normal HbA1c, but paternal T2D warrants annual screening.",
+    action: "Continue annual A1c; maintain fiber intake.",
+  },
+  {
+    name: "Hypothyroidism",
+    level: "Moderate",
+    pct: 38,
+    note: "Maternal history + you already take levothyroxine.",
+    action: "Continue TSH monitoring every 6 months.",
+  },
+  {
+    name: "Breast cancer",
+    level: "Elevated",
+    pct: 24,
+    note: "Maternal grandmother diagnosis at 74.",
+    action: "Discuss earlier baseline mammography with your PCP.",
+  },
 ];
 
 export type ChatMessage = {
@@ -110,16 +288,22 @@ export type ChatMessage = {
 };
 
 export const seedChat: ChatMessage[] = [
-  { id: "c1", role: "assistant", content: "Hi Alex — I've reviewed your latest records. Ask me anything about your labs, medications, or trends. I'll cite the exact reports I'm drawing from." },
+  {
+    id: "c1",
+    role: "assistant",
+    content:
+      "Hi Alex - I've reviewed your latest records. Ask me anything about your labs, medications, or trends. I'll cite the exact reports I'm drawing from.",
+  },
   { id: "c2", role: "user", content: "Why did my LDL go up this year?" },
   {
     id: "c3",
     role: "assistant",
-    content: "Your LDL rose from 108 mg/dL (Jan) to 118 mg/dL (Nov) — a ~9% increase. Two signals in your data align with that shift: your average weekly cardio dropped from 4.1 to 2.8 sessions between Q2 and Q3, and your logged saturated fat intake ticked up during a 6-week travel period in July–August. Genetics likely play a role too given your paternal history of coronary artery disease.\n\nThis is informational, not medical advice — please review with your PCP.",
+    content:
+      "Your LDL rose from 108 mg/dL (Jan) to 118 mg/dL (Nov) - a ~9% increase. Two signals in your data align with that shift: your average weekly cardio dropped from 4.1 to 2.8 sessions between Q2 and Q3, and your logged saturated fat intake ticked up during a 6-week travel period in July–August. Genetics likely play a role too given your paternal history of coronary artery disease.\n\nThis is informational, not medical advice - please review with your PCP.",
     citations: [
-      { title: "Lipid Panel — LabCorp", date: "Aug 15, 2026" },
-      { title: "Complete Blood Panel — Quest", date: "Nov 12, 2026" },
-      { title: "Family History — Paternal", date: "Onboarding" },
+      { title: "Lipid Panel - LabCorp", date: "Aug 15, 2026" },
+      { title: "Complete Blood Panel - Quest", date: "Nov 12, 2026" },
+      { title: "Family History - Paternal", date: "Onboarding" },
     ],
   },
 ];

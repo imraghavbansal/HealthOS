@@ -1,5 +1,5 @@
 /**
- * TanStack Query layer. Components use these hooks — never `api` directly —
+ * TanStack Query layer. Components use these hooks - never `api` directly -
  * so caching, invalidation, loading and error states are consistent app-wide.
  */
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -461,7 +461,7 @@ export function useExportAllData() {
 export function useDeleteAccount() {
   return useMutation({
     mutationFn: () => api.deleteAccount(),
-    onError: () => toast.error("Couldn't delete your account — try again or contact support"),
+    onError: () => toast.error("Couldn't delete your account - try again or contact support"),
   });
 }
 

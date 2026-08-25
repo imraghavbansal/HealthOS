@@ -1,18 +1,18 @@
-// Raag — get-shared-record
+// Raag - get-shared-record
 //
 // The public, unauthenticated side of the share-links feature (see
 // 0010_share_links.sql). The viewer (a doctor, a family member) has no
-// Raag account and no Supabase session — this function is the only way
+// Raag account and no Supabase session - this function is the only way
 // they ever touch the data, and it never uses the caller's identity for
 // authorization, only the token itself. Service-role throughout, because
 // RLS has nothing to authorize an anonymous viewer against.
 //
-// Every access — success or failure — that reaches a real token lookup is
+// Every access - success or failure - that reaches a real token lookup is
 // logged (share_link_access_log), and last_accessed_at/access_count are
 // updated, so the owner's management UI shows genuine access history, not
 // a static "created" timestamp.
 //
-// Deliberately excludes uploaded documents/files at every scope level —
+// Deliberately excludes uploaded documents/files at every scope level -
 // only structured, already-reviewed data (labs, meds, vitals, conditions)
 // is ever shared this way. Raw source documents can contain more than the
 // owner intended to hand out via a link; that's a decision for a future
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     if (new Date(link.expires_at).getTime() < Date.now())
       return json({ error: "This link has expired." }, 410);
 
-    // Log + counters first — record the attempt even if data assembly
+    // Log + counters first - record the attempt even if data assembly
     // below somehow fails, so the owner's access history is honest.
     await admin
       .from("share_link_access_log")

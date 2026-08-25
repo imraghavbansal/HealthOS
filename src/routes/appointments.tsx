@@ -31,7 +31,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   useAddAppointment,
   useAppointments,
@@ -56,10 +62,13 @@ export const Route = createFileRoute("/appointments")({
   component: AppointmentsPage,
   head: () => ({
     meta: [
-      { title: "Appointments & Care — Raag" },
+      { title: "Appointments & Care - Raag" },
       { name: "description", content: "Manage upcoming visits, past care, and your care team." },
-      { property: "og:title", content: "Appointments & Care — Raag" },
-      { property: "og:description", content: "Manage upcoming visits, past care, and your care team." },
+      { property: "og:title", content: "Appointments & Care - Raag" },
+      {
+        property: "og:description",
+        content: "Manage upcoming visits, past care, and your care team.",
+      },
     ],
   }),
 });
@@ -89,14 +98,22 @@ function AppointmentsPage() {
       <div className="space-y-6">
         <Tabs defaultValue="upcoming">
           <TabsList className="rounded-full">
-            <TabsTrigger value="upcoming" className="rounded-full">Upcoming</TabsTrigger>
-            <TabsTrigger value="past" className="rounded-full">Past</TabsTrigger>
-            <TabsTrigger value="care" className="rounded-full">Care team</TabsTrigger>
+            <TabsTrigger value="upcoming" className="rounded-full">
+              Upcoming
+            </TabsTrigger>
+            <TabsTrigger value="past" className="rounded-full">
+              Past
+            </TabsTrigger>
+            <TabsTrigger value="care" className="rounded-full">
+              Care team
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="upcoming" className="mt-5">
             <AsyncBoundary query={appointments} skeleton={<LoadingCards count={3} />}>
-              {(data) => <UpcomingList appointments={data.filter((a) => a.status === "upcoming")} />}
+              {(data) => (
+                <UpcomingList appointments={data.filter((a) => a.status === "upcoming")} />
+              )}
             </AsyncBoundary>
           </TabsContent>
 
@@ -113,7 +130,7 @@ function AppointmentsPage() {
           </TabsContent>
         </Tabs>
 
-        <p className="text-xs text-muted-foreground">Informational only — not medical advice.</p>
+        <p className="text-xs text-muted-foreground">Informational only - not medical advice.</p>
       </div>
     </AppShell>
   );
@@ -151,10 +168,18 @@ function buildIcs(a: Appointment) {
 
 function UpcomingList({ appointments }: { appointments: Appointment[] }) {
   if (appointments.length === 0) {
-    return <EmptyState icon={CalendarDays} title="No upcoming appointments" body="Use “Schedule” to book your next visit." />;
+    return (
+      <EmptyState
+        icon={CalendarDays}
+        title="No upcoming appointments"
+        body="Use “Schedule” to book your next visit."
+      />
+    );
   }
 
-  const sorted = [...appointments].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  const sorted = [...appointments].sort(
+    (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+  );
 
   return (
     <Stagger className="grid gap-4 lg:grid-cols-2">
@@ -201,7 +226,9 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="font-semibold truncate">{appointment.title}</div>
-                <Badge variant="secondary" className="rounded-full text-[10px] shrink-0">{daysUntil(appointment.start)}</Badge>
+                <Badge variant="secondary" className="rounded-full text-[10px] shrink-0">
+                  {daysUntil(appointment.start)}
+                </Badge>
               </div>
               <div className="text-xs text-muted-foreground mt-0.5">
                 {appointment.provider} · {appointment.specialty}
@@ -210,9 +237,13 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
                 <Badge className="rounded-full text-[10px] bg-muted text-muted-foreground gap-1">
                   <ModeIcon className="h-3 w-3" /> {MODE_LABEL[appointment.mode]}
                 </Badge>
-                <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {appointment.durationMin} min</span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {appointment.durationMin} min
+                </span>
                 {appointment.mode !== "phone" && (
-                  <span className="flex items-center gap-1 truncate"><MapPin className="h-3 w-3" /> {appointment.location}</span>
+                  <span className="flex items-center gap-1 truncate">
+                    <MapPin className="h-3 w-3" /> {appointment.location}
+                  </span>
                 )}
               </div>
             </div>
@@ -226,7 +257,9 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
                   className="flex w-full items-center justify-between text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <span>Prep notes ({appointment.prepNotes.length})</span>
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${notesOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${notesOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2 space-y-2">
@@ -236,7 +269,9 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
                       checked={!!checked[i]}
                       onCheckedChange={(v) => setChecked((c) => ({ ...c, [i]: !!v }))}
                     />
-                    <span className={checked[i] ? "line-through text-muted-foreground" : ""}>{note}</span>
+                    <span className={checked[i] ? "line-through text-muted-foreground" : ""}>
+                      {note}
+                    </span>
                   </label>
                 ))}
               </CollapsibleContent>
@@ -249,7 +284,11 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button size="sm" variant="ghost" className="rounded-full text-destructive hover:text-destructive">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="rounded-full text-destructive hover:text-destructive"
+                >
                   Cancel
                 </Button>
               </AlertDialogTrigger>
@@ -281,9 +320,17 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
 
 function PastList({ appointments }: { appointments: Appointment[] }) {
   if (appointments.length === 0) {
-    return <EmptyState icon={CalendarDays} title="No past appointments" body="Your appointment history will show up here." />;
+    return (
+      <EmptyState
+        icon={CalendarDays}
+        title="No past appointments"
+        body="Your appointment history will show up here."
+      />
+    );
   }
-  const sorted = [...appointments].sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
+  const sorted = [...appointments].sort(
+    (a, b) => new Date(b.start).getTime() - new Date(a.start).getTime(),
+  );
   return (
     <div className="space-y-2">
       {sorted.map((a) => (
@@ -310,7 +357,13 @@ function PastList({ appointments }: { appointments: Appointment[] }) {
 
 function CareTeamList({ members }: { members: CareTeamMember[] }) {
   if (members.length === 0) {
-    return <EmptyState icon={Stethoscope} title="No care team members" body="Providers you connect with will appear here." />;
+    return (
+      <EmptyState
+        icon={Stethoscope}
+        title="No care team members"
+        body="Providers you connect with will appear here."
+      />
+    );
   }
   return (
     <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -332,13 +385,18 @@ function CareTeamCard({ member }: { member: CareTeamMember }) {
           <div className="flex items-start justify-between">
             <div>
               <div className="font-semibold">{member.name}</div>
-              <div className="text-xs text-muted-foreground">{member.role} · {member.org}</div>
+              <div className="text-xs text-muted-foreground">
+                {member.role} · {member.org}
+              </div>
             </div>
             <div className="h-9 w-9 rounded-xl gradient-primary grid place-items-center text-white shrink-0">
               <Stethoscope className="h-4 w-4" />
             </div>
           </div>
-          <a href={`tel:${member.phone}`} className="text-xs text-primary hover:underline flex items-center gap-1.5">
+          <a
+            href={`tel:${member.phone}`}
+            className="text-xs text-primary hover:underline flex items-center gap-1.5"
+          >
             <Phone className="h-3.5 w-3.5" /> {member.phone}
           </a>
           <div className="flex items-center justify-between pt-2 border-t border-border/60">
@@ -422,26 +480,52 @@ function ScheduleDialog() {
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="appt-title">Title</Label>
-            <Input id="appt-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Annual physical" />
+            <Input
+              id="appt-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Annual physical"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
               <Label htmlFor="appt-provider">Provider</Label>
-              <Input id="appt-provider" value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Dr. Chen" />
+              <Input
+                id="appt-provider"
+                value={provider}
+                onChange={(e) => setProvider(e.target.value)}
+                placeholder="Dr. Chen"
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="appt-specialty">Specialty</Label>
-              <Input id="appt-specialty" value={specialty} onChange={(e) => setSpecialty(e.target.value)} placeholder="Cardiology" />
+              <Input
+                id="appt-specialty"
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                placeholder="Cardiology"
+              />
             </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="appt-datetime">Date & time</Label>
-            <Input id="appt-datetime" type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} />
+            <Input
+              id="appt-datetime"
+              type="datetime-local"
+              value={datetime}
+              onChange={(e) => setDatetime(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
               <Label htmlFor="appt-duration">Duration (min)</Label>
-              <Input id="appt-duration" type="number" min={5} value={durationMin} onChange={(e) => setDurationMin(e.target.value)} />
+              <Input
+                id="appt-duration"
+                type="number"
+                min={5}
+                value={durationMin}
+                onChange={(e) => setDurationMin(e.target.value)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="appt-mode">Mode</Label>
@@ -459,7 +543,12 @@ function ScheduleDialog() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="appt-location">Location</Label>
-            <Input id="appt-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Raag Clinic, Suite 200" />
+            <Input
+              id="appt-location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Raag Clinic, Suite 200"
+            />
           </div>
         </div>
         <DialogFooter>

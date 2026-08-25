@@ -3,7 +3,7 @@ import { IS_DEMO } from "./api";
 
 declare global {
   interface Window {
-    // Razorpay's checkout.js is a third-party untyped script — narrow
+    // Razorpay's checkout.js is a third-party untyped script - narrow
     // `any` usage confined to this one file rather than adding a types dep.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Razorpay: any;
@@ -13,14 +13,18 @@ declare global {
 let razorpayScriptPromise: Promise<void> | undefined;
 
 function loadRazorpayScript(): Promise<void> {
-  if (typeof window === "undefined") return Promise.reject(new Error("Checkout requires a browser."));
+  if (typeof window === "undefined")
+    return Promise.reject(new Error("Checkout requires a browser."));
   if (window.Razorpay) return Promise.resolve();
   if (!razorpayScriptPromise) {
     razorpayScriptPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Couldn't load the payment provider — check your connection and try again."));
+      script.onerror = () =>
+        reject(
+          new Error("Couldn't load the payment provider - check your connection and try again."),
+        );
       document.body.appendChild(script);
     });
   }
@@ -30,8 +34,13 @@ function loadRazorpayScript(): Promise<void> {
 export type PlanKey = "pro" | "family";
 export type BillingCycle = "monthly" | "yearly";
 
-export async function startCheckout(planKey: PlanKey, cycle: BillingCycle, onSuccess: () => void): Promise<void> {
-  if (IS_DEMO) throw new Error("Billing isn't available in demo mode — sign up for a real account first.");
+export async function startCheckout(
+  planKey: PlanKey,
+  cycle: BillingCycle,
+  onSuccess: () => void,
+): Promise<void> {
+  if (IS_DEMO)
+    throw new Error("Billing isn't available in demo mode - sign up for a real account first.");
 
   const sb = getSupabaseBrowserClient();
   const { data: sessionData } = await sb.auth.getSession();
@@ -43,7 +52,11 @@ export async function startCheckout(planKey: PlanKey, cycle: BillingCycle, onSuc
 
   const res = await fetch(`${url}/functions/v1/razorpay-create-subscription`, {
     method: "POST",
-    headers: { "content-type": "application/json", apikey: anonKey, Authorization: `Bearer ${accessToken}` },
+    headers: {
+      "content-type": "application/json",
+      apikey: anonKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
     body: JSON.stringify({ planKey, cycle }),
   });
   if (!res.ok) {
@@ -77,7 +90,11 @@ export async function cancelSubscription(): Promise<void> {
   const anonKey = import.meta.env["VITE_SUPABASE_ANON_KEY"];
   const res = await fetch(`${url}/functions/v1/razorpay-cancel-subscription`, {
     method: "POST",
-    headers: { "content-type": "application/json", apikey: anonKey, Authorization: `Bearer ${accessToken}` },
+    headers: {
+      "content-type": "application/json",
+      apikey: anonKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
   if (!res.ok) {
     const detail = await res.text().catch(() => undefined);

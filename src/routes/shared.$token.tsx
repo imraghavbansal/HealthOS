@@ -10,7 +10,7 @@ export const Route = createFileRoute("/shared/$token")({
   component: SharedRecordPage,
   head: () => ({
     meta: [
-      { title: "Shared Health Record — Raag" },
+      { title: "Shared Health Record - Raag" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -100,7 +100,7 @@ function SharedRecordPage() {
                   {data.currentMedications.map((m) => (
                     <li key={m.id} className="text-sm">
                       <span className="font-medium">{m.name}</span>
-                      {m.dose ? <span className="text-muted-foreground"> — {m.dose}</span> : null}
+                      {m.dose ? <span className="text-muted-foreground"> - {m.dose}</span> : null}
                       {m.schedule ? (
                         <span className="text-muted-foreground"> · {m.schedule}</span>
                       ) : null}
@@ -178,7 +178,7 @@ function SharedRecordPage() {
                         {f.conditions && f.conditions.length > 0 ? (
                           <span className="text-muted-foreground">
                             {" "}
-                            — {f.conditions.join(", ")}
+                            - {f.conditions.join(", ")}
                           </span>
                         ) : null}
                       </li>

@@ -37,7 +37,7 @@ const EXTENSION_MIME_TYPES: Record<string, string> = {
 /**
  * The browser's `File.type` is empty for some extensions/OSes. Without a
  * real content-type, Storage serves the object as octet-stream, and every
- * browser force-downloads octet-stream instead of previewing it — "View"
+ * browser force-downloads octet-stream instead of previewing it - "View"
  * and "Download" end up looking identical. This fills the gap from the
  * filename for common medical-record formats.
  */
@@ -67,7 +67,7 @@ export type LabMarkerRow = {
 
 /**
  * The DB stores one row per result per draw (never an embedded history
- * array — see docs/raag-architecture "Data model"). This turns that
+ * array - see docs/raag-architecture "Data model"). This turns that
  * append-only log into the summarized-with-trend shape the UI renders:
  * latest value per marker, delta vs. the prior draw, and a month-bucketed
  * history series for the chart.
@@ -94,7 +94,7 @@ export function summarizeLabMarkers(rows: LabMarkerRow[]): LabMarker[] {
           ? `<${latest.range_high}`
           : latest.range_low != null
             ? `>${latest.range_low}`
-            : "—";
+            : "-";
 
     markers.push({
       id: latest.id,
@@ -118,7 +118,7 @@ export type DoseLogRow = { taken_at: string; skipped: boolean };
 
 /**
  * % of logged doses actually taken in the trailing 30 days. A medication
- * with zero logs yet reads as 100 — there's nothing to be non-adherent
+ * with zero logs yet reads as 100 - there's nothing to be non-adherent
  * about, and a brand-new med shouldn't look like a missed dose.
  */
 export function computeAdherence(logs: DoseLogRow[]): number {
@@ -167,10 +167,10 @@ export type RiskEngineInput = {
  * Additive point scoring per category, clamped to 0-100 and bucketed into
  * Low/Moderate/Elevated/High. Deliberately narrow to categories we have
  * real structured signal for (lifestyle, vitals, labs, conditions, family
- * history) — no cancer-type risk models, those need real clinical scoring
+ * history) - no cancer-type risk models, those need real clinical scoring
  * (e.g. Gail score) this data can't responsibly approximate. Framed as
  * informational throughout, matching the AI assistant's cite-don't-diagnose
- * rule (docs/PRODUCT-VISION.md) — this is a rules engine, not a diagnosis.
+ * rule (docs/PRODUCT-VISION.md) - this is a rules engine, not a diagnosis.
  */
 export function computeRiskFactors(input: RiskEngineInput): RiskFactor[] {
   const bmi = bmiOf(input.heightCm, input.weightKg);
@@ -248,7 +248,7 @@ export function computeRiskFactors(input: RiskEngineInput): RiskFactor[] {
       action:
         pct >= 50
           ? "Discuss cardiovascular screening with your doctor."
-          : "Keep logging vitals — trends matter more than single readings.",
+          : "Keep logging vitals - trends matter more than single readings.",
     });
   }
 
@@ -406,7 +406,7 @@ const SEVERITY_PREFIX: Record<InteractionRuleRow["severity"], string> = {
  * against the curated drug_interaction_rules aliases via case-insensitive
  * substring match. Returns a map of medication id -> human-readable
  * interaction strings, one per matched pair the medication is on either
- * side of. Deliberately a curated list, not a live medical database — see
+ * side of. Deliberately a curated list, not a live medical database - see
  * 0011_medication_interactions.sql for why (RxNav's interaction API was
  * discontinued by NLM in Jan 2024, no free equivalent replaced it).
  */
@@ -428,8 +428,8 @@ export function computeMedicationInteractions(
       for (const b of bMeds) {
         if (a.id === b.id) continue;
         const prefix = SEVERITY_PREFIX[rule.severity];
-        add(a.id, `${prefix} with ${b.name} — ${rule.description} ${rule.recommendation}`);
-        add(b.id, `${prefix} with ${a.name} — ${rule.description} ${rule.recommendation}`);
+        add(a.id, `${prefix} with ${b.name} - ${rule.description} ${rule.recommendation}`);
+        add(b.id, `${prefix} with ${a.name} - ${rule.description} ${rule.recommendation}`);
       }
     }
   }

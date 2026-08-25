@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { getCookies, setCookie } from "@tanstack/react-start/server";
 
 /**
- * SSR-side Supabase client — for route loaders / server functions that need
+ * SSR-side Supabase client - for route loaders / server functions that need
  * to know who's signed in during the initial render (protecting a route
  * before any client JS runs, rather than flashing content then redirecting).
  * Never share this instance across requests; call this fresh each time.

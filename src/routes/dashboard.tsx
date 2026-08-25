@@ -66,8 +66,8 @@ function Dashboard() {
   const activityQ = useActivity(range);
 
   // Derived from real medications/goals, not fabricated demo tasks. A
-  // medication task's checkmark is a session-local visual confirmation —
-  // clicking it does log a real dose via useLogDose — since "was today's
+  // medication task's checkmark is a session-local visual confirmation -
+  // clicking it does log a real dose via useLogDose - since "was today's
   // dose already logged" isn't in the medication summary shape (adherence
   // is computed over a trailing window, not per-day).
   const logDose = useLogDose();
