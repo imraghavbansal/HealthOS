@@ -1,6 +1,6 @@
 # Raag
 
-Your AI-powered personal health OS — labs, wearables, records, medications,
+Your AI-powered personal health OS - labs, wearables, records, medications,
 and family history unified into one calm, AI-guided view. Raag remembers
 your health over time and helps you understand the bigger picture, rather
 than treating every visit as a blank slate.
@@ -28,26 +28,19 @@ npm install
 npm run dev      # defaults to mock mode — in-memory demo data, no backend needed
 ```
 
-Copy `.env.example` to `.env` to configure `VITE_API_MODE=supabase` and
-your Supabase project URL/anon key for real, persisted data. Server-only
-secrets (Anthropic, Razorpay, etc.) are never in `.env` — they're set as
-Supabase Edge Function secrets, see `CLAUDE.md` for the full list.
-
 ## Scripts
 
-- `npm run dev` — start the dev server
-- `npm run build` — production build
-- `npm run preview` — preview a production build locally
-- `npm run lint` — lint
-- `npm run format` — format with Prettier
-- `npm run verify:supabase` / `verify:functions` — regression checks against
+- `npm run dev` - start the dev server
+- `npm run build` - production build
+- `npm run preview` - preview a production build locally
+- `npm run lint` - lint
+- `npm run format` - format with Prettier
+- `npm run verify:supabase` / `verify:functions` - regression checks against
   the live Supabase project (schema, RLS isolation, Edge Functions);
   re-run after any backend change. See `scripts/` for more targeted checks.
 
 ## Backend
 
-Real, not a demo — schema and RLS policies in `supabase/migrations/`
+Real, not a demo - schema and RLS policies in `supabase/migrations/`
 (numbered, applied in order via the Supabase SQL Editor), server-side logic
-in `supabase/functions/` (deployed via the Supabase dashboard). See
-`CLAUDE.md` for exactly what's deployed, what's verified, and setup
-instructions for each Edge Function.
+in `supabase/functions/` (deployed via the Supabase dashboard). 
